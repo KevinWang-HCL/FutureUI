@@ -1,0 +1,1070 @@
+<AddressBook>
+	<imagePath>assets/images/addressbook</imagePath>
+	<contact>
+		<forename>Abhinav</forename>
+		<initials></initials>
+		<surname>Sharma</surname>
+		<display>Sharma, Abhinav</display>
+		<imageName>Abhinav_Sharma</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department>Software Systems</department>
+		<e_mail>abhinav.sharma@hcl.com</e_mail>
+		<phone>+44 170 735 3152</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Alistair</forename>
+		<initials></initials>
+		<surname>McFarlane</surname>
+		<display>McFarlane, Alistair</display>
+		<imageName>Alistair_McFarlane</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>alistair.mcfarlane@hcl.com</e_mail>
+		<phone>+44 1707 352601</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Allan</forename>
+		<initials></initials>
+		<surname>McIver</surname>
+		<display>McIver, Allan</display>
+		<imageName>Allan_McIver</imageName>
+		<jobTitle></jobTitle>
+		<company></company>
+		<department></department>
+		<e_mail>allan.mciver@hcl.com</e_mail>
+		<phone>+44 170 735 3719</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Amanda</forename>
+		<initials></initials>
+		<surname>Roche</surname>
+		<display>Roche, Amanda</display>
+		<imageName>Amanda_Roche</imageName>
+		<jobTitle>System Administrator</jobTitle>
+		<company>HCL</company>
+		<department>Program Support</department>
+		<e_mail>amanda.roche@hcl.com</e_mail>
+		<phone>+44 170 735 3742</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Andy</forename>
+		<initials></initials>
+		<surname>Balm</surname>
+		<display>Balm, Andy</display>
+		<imageName>Andy_Balm</imageName>
+		<jobTitle>Software Systems Manager</jobTitle>
+		<company>HCL</company>
+		<department>ECDPG Welwyn</department>
+		<e_mail>andy.balm@hcl.com</e_mail>
+		<phone>+44 170 735 2646</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Anthony</forename>
+		<initials></initials>
+		<surname>Hodge</surname>
+		<display>Hodge, Anthony</display>
+		<imageName>Anthony_Hodge</imageName>
+		<jobTitle>Reliability Manager</jobTitle>
+		<company>HCL</company>
+		<department>EXDPG</department>
+		<e_mail>anthony.hodge@hcl.com</e_mail>
+		<phone>+44 1707 353420</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Anthony</forename>
+		<initials></initials>
+		<surname>Peters</surname>
+		<display>Peters, Anthony</display>
+		<imageName>Anthony_Peters</imageName>
+		<jobTitle>Usability / User Experience Specialist</jobTitle>
+		<company>HCL</company>
+		<department>Experience Design Europe</department>
+		<e_mail>anthony.peters@hcl.com</e_mail>
+		<phone>+44 170 735 3274</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Ben</forename>
+		<initials></initials>
+		<surname>Chaplin</surname>
+		<display>Chaplin, Ben</display>
+		<imageName>Ben_Chaplin</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>ben.chaplin@hcl.com</e_mail>
+		<phone>+44 170 735 3673 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Beverley</forename>
+		<initials></initials>
+		<surname>Redfern</surname>
+		<display>Redfern, Beverley</display>
+		<imageName>Beverley_Redfern</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department></department>
+		<e_mail>beverley.redfern@hcl.com</e_mail>
+		<phone>+44 170 735 3209 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Brian</forename>
+		<initials></initials>
+		<surname>Reid</surname>
+		<display>Reid, Brian</display>
+		<imageName>Brian_Reid</imageName>
+		<jobTitle>Imaging Group Manager</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>brian.reid@hcl.com</e_mail>
+		<phone>+44 170 735 2423</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Carol</forename>
+		<initials></initials>
+		<surname>Beech</surname>
+		<display>Beech, Carol</display>
+		<imageName>Carol_Beech</imageName>
+		<jobTitle>Senior Configuration Planner Analyst</jobTitle>
+		<company>HCL</company>
+		<department>Configuration</department>
+		<e_mail>carol.beech@hcl.com</e_mail>
+		<phone>+44 170 735 3397 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Charlotte</forename>
+		<initials></initials>
+		<surname>Przeslak</surname>
+		<display>Przeslak, Charlotte</display>
+		<imageName>Charlotte_Przeslak</imageName>
+		<jobTitle>Mechanical Engineer</jobTitle>
+		<company>HCL</company>
+		<department>Marking and Imaging</department>
+		<e_mail>charlotte.przeslak@hcl.com</e_mail>
+		<phone>+44 170 735 2744</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Cheuk</forename>
+		<initials></initials>
+		<surname>Kan</surname>
+		<display>Kan, Cheuk</display>
+		<imageName>Cheuk_Kan</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department></department>
+		<e_mail>cheuk.kan@hcl.com</e_mail>
+		<phone>+44 170 735 2801</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Chris</forename>
+		<initials></initials>
+		<surname>Hancox</surname>
+		<display>Hancox, Chris</display>
+		<imageName>Chris_Hancox</imageName>
+		<jobTitle>CNC</jobTitle>
+		<company>HCL</company>
+		<department>Model Shop</department>
+		<e_mail>chris.hancox@hcl.com</e_mail>
+		<phone>+44 170 735 2442 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Chris</forename>
+		<initials></initials>
+		<surname>Moloney</surname>
+		<display>Moloney, Chris</display>
+		<imageName>Chris_Moloney</imageName>
+		<jobTitle>Technical Specialist</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>chris.moloney@hcl.com</e_mail>
+		<phone>+44 170 735 3516</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Chris</forename>
+		<initials></initials>
+		<surname>Olliffe</surname>
+		<display>Olliffe, Chris</display>
+		<imageName>Chris_Olliffe</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department>EXPDG</department>
+		<e_mail>chris.olliffe@hcl.com</e_mail>
+		<phone>+44 170 735 2772</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Chris</forename>
+		<initials></initials>
+		<surname>Pearce</surname>
+		<display>Peace, Chris</display>
+		<imageName>Chris_Pearce</imageName>
+		<jobTitle>Designer</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit Mechanical</department>
+		<e_mail>chris.pearce@hcl.com</e_mail>
+		<phone>+44 170 735 3502</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Chris</forename>
+		<initials></initials>
+		<surname>Watts</surname>
+		<display>Watts, Chris</display>
+		<imageName>Chris_Watts</imageName>
+		<jobTitle>Environmental Systems Manager</jobTitle>
+		<company>HCL</company>
+		<department>EXPDG</department>
+		<e_mail>chris.watts2@hcl.com</e_mail>
+		<phone>+44 170 735 2473</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Colin</forename>
+		<initials></initials>
+		<surname>Hewitt</surname>
+		<display>Hewitt, Colin</display>
+		<imageName>Colin_Hewitt</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department>ODPD</department>
+		<e_mail>colin.hewitt@hcl.com</e_mail>
+		<phone>+44 170 735 3874</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Colin</forename>
+		<initials></initials>
+		<surname>Marshall</surname>
+		<display>Marshall, Colin</display>
+		<imageName>Colin_Marshall</imageName>
+		<jobTitle>Engineering and Systems Manager</jobTitle>
+		<company>HCL</company>
+		<department>XMD</department>
+		<e_mail>colin.marshall@hcl.com</e_mail>
+		<phone>+44 170 735 2349</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Craig</forename>
+		<initials></initials>
+		<surname>Phillips</surname>
+		<display>Phillips, Craig</display>
+		<imageName>Craig_Phillips</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department></department>
+		<e_mail>craig.phillips@hcl.com</e_mail>
+		<phone>+44 170 735 3811 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Daniel</forename>
+		<initials></initials>
+		<surname>Geoghegan</surname>
+		<display>Geoghegan, Daniel</display>
+		<imageName>Daniel_Geoghegan</imageName>
+		<jobTitle></jobTitle>
+		<company>hcl Corporation</company>
+		<department></department>
+		<e_mail>daniel.geoghegan@hcl.com</e_mail>
+		<phone>+44 170 735 2028 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Daniel</forename>
+		<initials></initials>
+		<surname>Vila</surname>
+		<display>Vila, Daniel</display>
+		<imageName>Daniel_Vila</imageName>
+		<jobTitle>Systems Engineer</jobTitle>
+		<company>HCL</company>
+		<department>Pro-Active Systems</department>
+		<e_mail>daniel.vila@hcl.com</e_mail>
+		<phone>+44 170 735 2866 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Darren</forename>
+		<initials></initials>
+		<surname>Lead</surname>
+		<display>Lead, Darren</display>
+		<imageName>Darren_Lead</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department></department>
+		<e_mail>darren.lead@hcl.com</e_mail>
+		<phone>+44 170 735 2401</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Darryl</forename>
+		<initials></initials>
+		<surname>Keel</surname>
+		<display>Keel, Darryl</display>
+		<imageName>Darryl_Keel</imageName>
+		<jobTitle>Apprentice Engineer</jobTitle>
+		<company>HCL</company>
+		<department>Image Quality</department>
+		<e_mail>darryl.keel@hcl.com</e_mail>
+		<phone>+44 170 735 2823 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>David</forename>
+		<initials></initials>
+		<surname>Nodwell</surname>
+		<display>Nodwell, David</display>
+		<imageName>David_Nodwell</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department></department>
+		<e_mail>david.nodwell@hcl.com</e_mail>
+		<phone>+44 170 735 3168 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>David</forename>
+		<initials></initials>
+		<surname>Halden</surname>
+		<display>Halden, David</display>
+		<imageName>David_Halden</imageName>
+		<jobTitle>Module Manager</jobTitle>
+		<company>HCL</company>
+		<department>Experience Design Europe</department>
+		<e_mail>david.halden@hcl.com</e_mail>
+		<phone>+44 170 735 3247 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>David</forename>
+		<initials></initials>
+		<surname>Stewart</surname>
+		<display>Stewart, David</display>
+		<imageName>David_Stewart</imageName>
+		<jobTitle>Systems Engineer</jobTitle>
+		<company>hcl Corporation</company>
+		<department>Software Systems</department>
+		<e_mail>david.stewart@hcl.com</e_mail>
+		<phone>+44 170 735 3578 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>David</forename>
+		<initials></initials>
+		<surname>Thomas</surname>
+		<display>Thomas, David</display>
+		<imageName>David_Thomas</imageName>
+		<jobTitle>Module Manager</jobTitle>
+		<company>hcl Corporation</company>
+		<department>OPBU</department>
+		<e_mail>david.thomas5@hcl.com</e_mail>
+		<phone>+44 170 735 2533 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>David</forename>
+		<initials></initials>
+		<surname>Thorne</surname>
+		<display>Thorne, David</display>
+		<imageName>David_Thorne</imageName>
+		<jobTitle>Electronics Manager</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>david.thorne@hcl.com</e_mail>
+		<phone>+44 170 735 3622 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Dean</forename>
+		<initials></initials>
+		<surname>Wimpory</surname>
+		<display>Wimpory, Dean</display>
+		<imageName>Dean_Wimpory</imageName>
+		<jobTitle></jobTitle>
+		<company>hcl Corporation</company>
+		<department></department>
+		<e_mail>dean.wimpory@hcl.com</e_mail>
+		<phone>+44 170 735 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Derek</forename>
+		<initials></initials>
+		<surname>Judd</surname>
+		<display>Judd, Derek</display>
+		<imageName>Derek_Judd</imageName>
+		<jobTitle>Specialist Technician</jobTitle>
+		<company>HCL</company>
+		<department>Marking and Imageing</department>
+		<e_mail>derek.judd@hcl.com</e_mail>
+		<phone>+44 170 735 3831 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Duncan</forename>
+		<initials></initials>
+		<surname>Stevenson</surname>
+		<display>Stevenson, Duncan</display>
+		<imageName>Duncan_Stevenson</imageName>
+		<jobTitle>New Starts and Business Operations Manager</jobTitle>
+		<company>HCL</company>
+		<department></department>
+		<e_mail>duncan.stevenson@hcl.com</e_mail>
+		<phone>+44 170 735 3225 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Ian</forename>
+		<initials></initials>
+		<surname>Burdon</surname>
+		<display>Burdon, Ian</display>
+		<imageName>Ian_Burdon</imageName>
+		<jobTitle>EMC Design Engineer</jobTitle>
+		<company>HCL</company>
+		<department>Electronic Design</department>
+		<e_mail>ian.burdon@hcl.com</e_mail>
+		<phone>+44 170 735 3216 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Ian</forename>
+		<initials></initials>
+		<surname>Harpur</surname>
+		<display>Harpur, Ian</display>
+		<imageName>Ian_Harpur</imageName>
+		<jobTitle>Manager Marking Integration</jobTitle>
+		<company>HCL</company>
+		<department>Engineering and Systems</department>
+		<e_mail>ian.harpur@hcl.com</e_mail>
+		<phone>+44 170 735 2052 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>James</forename>
+		<initials></initials>
+		<surname>Richardson</surname>
+		<display>Richardson, James</display>
+		<imageName>James_Richardson</imageName>
+		<jobTitle>Senior Electronics Engineer</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>james.richardson@hcl.com</e_mail>
+		<phone>+44 170 735 2873 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>James</forename>
+		<initials></initials>
+		<surname>Wood</surname>
+		<display>Wood, James</display>
+		<imageName>James_Wood</imageName>
+		<jobTitle>TPM</jobTitle>
+		<company>HCL</company>
+		<department>Programme Office</department>
+		<e_mail>james.wood@hcl.com</e_mail>
+		<phone>+44 170 735 3705 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Jamie</forename>
+		<initials></initials>
+		<surname>Tidiman</surname>
+		<display>Tidiman, Jamie</display>
+		<imageName>Jamie_Tidiman</imageName>
+		<jobTitle>Office Products Delivery Unit Configuration Analyst</jobTitle>
+		<company>hcl Corporation</company>
+		<department></department>
+		<e_mail>jamie.tidiman@hcl.com</e_mail>
+		<phone>+44 170 735 3126 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Jeff</forename>
+		<initials></initials>
+		<surname>Ellis</surname>
+		<display>Ellis, Jeff</display>
+		<imageName>Jeff_Ellis</imageName>
+		<jobTitle>Systems Engineer</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>jeff.ellis@hcl.com</e_mail>
+		<phone>+44 170 735 2724 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Jeff</forename>
+		<initials></initials>
+		<surname>Ryan</surname>
+		<display>Ryan, Jeff</display>
+		<imageName>Jeff_Ryan</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department></department>
+		<e_mail>jeff.ryan@hcl.com</e_mail>
+		<phone>+44 170 735 3213 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Jeremy</forename>
+		<initials></initials>
+		<surname>Lewis</surname>
+		<display>Lewis, Jeremy</display>
+		<imageName>Jeremy_Lewis</imageName>
+		<jobTitle></jobTitle>
+		<company>hcl Corporation</company>
+		<department></department>
+		<e_mail>jeremy.lewis@hcl.com</e_mail>
+		<phone>+44 170 735 3421 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Joby</forename>
+		<initials></initials>
+		<surname>Allen</surname>
+		<display>Allen, Joby</display>
+		<imageName>Joby_Allen</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>joby.allen@hcl.com</e_mail>
+		<phone>+44 170 735 3588 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>John</forename>
+		<initials></initials>
+		<surname>Poxon</surname>
+		<display>Poxon, John</display>
+		<imageName>John_Poxon</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department></department>
+		<e_mail>john.poxon@hcl.com</e_mail>
+		<phone>+44 170 735 3094 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>John</forename>
+		<initials></initials>
+		<surname>Washington</surname>
+		<display>Washington, John</display>
+		<imageName>John_Washington</imageName>
+		<jobTitle>Process Engineer</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>john.washington@hcl.com</e_mail>
+		<phone>+44 170 735 3041 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Jon</forename>
+		<initials></initials>
+		<surname>Dibling</surname>
+		<display>Dibling, Jon</display>
+		<imageName>Jon_Dibling</imageName>
+		<jobTitle>Senior Mechanical Engineer</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>jonathan.dibling@hcl.com</e_mail>
+		<phone>+44 170 735 3293 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Katelyn</forename>
+		<initials></initials>
+		<surname>Elders</surname>
+		<display>Elders, Katelyn</display>
+		<imageName>Katelyn_Elders</imageName>
+		<jobTitle>Process Engineer</jobTitle>
+		<company>hcl Corporation</company>
+		<department></department>
+		<e_mail>katelyn.elders@hcl.com</e_mail>
+		<phone>+44 170 735 2117 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Kenny</forename>
+		<initials></initials>
+		<surname>Dixon</surname>
+		<display>Dixon, Kenny</display>
+		<imageName>Kenny_Dixon</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>kenny.dixon@hcl.com</e_mail>
+		<phone>+44 170 735 3627 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Kevin</forename>
+		<initials></initials>
+		<surname>Kusch</surname>
+		<display>Kusch, Kevin</display>
+		<imageName>Kevin_Kusch</imageName>
+		<jobTitle>Manager - Software, Electronics and IM</jobTitle>
+		<company>HCL</company>
+		<department>XMD-EXPDU</department>
+		<e_mail>kevin.kusch@hcl.com</e_mail>
+		<phone>+44 170 735 3724 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Kevin</forename>
+		<initials></initials>
+		<surname>McNeil</surname>
+		<display>McNeil, Kevin</display>
+		<imageName>Kevin_McNeil</imageName>
+		<jobTitle>Analyst</jobTitle>
+		<company></company>
+		<department>Image Quality</department>
+		<e_mail>kevin.mcneil@hcl.com</e_mail>
+		<phone>+44 170 735 327 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Kirsty</forename>
+		<initials></initials>
+		<surname>Green</surname>
+		<display>Green, Kirsty</display>
+		<imageName>Kirsty_Green</imageName>
+		<jobTitle>Fuser Module Manager</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>kirsty.green@hcl.com</e_mail>
+		<phone>+44 170 735 3297 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Lee</forename>
+		<initials></initials>
+		<surname>O'Brien</surname>
+		<display>O'Brien, Lee</display>
+		<imageName>Lee_OBrien</imageName>
+		<jobTitle>Graphic Designer</jobTitle>
+		<company>HCL</company>
+		<department>Experience Design Europe</department>
+		<e_mail>lee.obrien@hcl.com</e_mail>
+		<phone>+44 170 735 3600 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Lennie</forename>
+		<initials></initials>
+		<surname>Tidd</surname>
+		<display>Tidd, Lennie</display>
+		<imageName>Lennie_Tidd</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department>ODP</department>
+		<e_mail>lennie.tidd@hcl.com</e_mail>
+		<phone>+44 170 735 3117 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Leslie</forename>
+		<initials></initials>
+		<surname>Wynn</surname>
+		<display>Wynn, Leslie</display>
+		<imageName>Leslie_Wynn</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department>Experience Design Europe</department>
+		<e_mail>leslie.wynn@hcl.com</e_mail>
+		<phone>+44 170 735 3512 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Mark</forename>
+		<initials></initials>
+		<surname>Gearing</surname>
+		<display>Gearing, Mark</display>
+		<imageName>Mark_Gearing</imageName>
+		<jobTitle>Consultant Feeding and Finishing</jobTitle>
+		<company>HCL</company>
+		<department>PSG</department>
+		<e_mail>mark.gearing@hcl.com</e_mail>
+		<phone>+44 170 735 3378 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Martin</forename>
+		<initials></initials>
+		<surname>Walsh</surname>
+		<display>Walsh, Martin</display>
+		<imageName>Martin_Walsh</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department></department>
+		<e_mail>martin.walsh@hcl.com</e_mail>
+		<phone>+44 170 735 3291 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Matthew</forename>
+		<initials></initials>
+		<surname>Davey</surname>
+		<display>Davey, Matthew</display>
+		<imageName>Matthew_Davey</imageName>
+		<jobTitle>User Interface Software Engineer</jobTitle>
+		<company>Xerox Corporation</company>
+		<department>Experience Design Europe</department>
+		<e_mail>matthew.davey@xerox.com</e_mail>
+		<phone>+44 170 735 2592 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Mike</forename>
+		<initials></initials>
+		<surname>Golding</surname>
+		<display>Golding, Mike</display>
+		<imageName>Mike_Golding</imageName>
+		<jobTitle>Senior User Interface Specialist</jobTitle>
+		<company>HCL</company>
+		<department>Experience Design Europe</department>
+		<e_mail>mike.golding@hcl.com</e_mail>
+		<phone>+44 170 735 2420 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Mike</forename>
+		<initials></initials>
+		<surname>Wilsher</surname>
+		<display>Wilsher, Mike</display>
+		<imageName>Mike_Wilsher</imageName>
+		<jobTitle>Technical Specialist</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>mike.wilsher@hcl.com</e_mail>
+		<phone>+44 170 735 3521 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Neelesh</forename>
+		<initials></initials>
+		<surname>Goyal</surname>
+		<display>Goyal, Neelesh</display>
+		<imageName>Neelesh_Goyal</imageName>
+		<jobTitle></jobTitle>
+		<company></company>
+		<department></department>
+		<e_mail>neelesh.goyal@hcl.com</e_mail>
+		<phone>
+		</phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Paul</forename>
+		<initials></initials>
+		<surname>Chapman</surname>
+		<display>Chapman, Paul</display>
+		<imageName>Paul_Chapman</imageName>
+		<jobTitle>Image Quality Technician</jobTitle>
+		<company></company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>paul.chapman@hcl.com</e_mail>
+		<phone>+44 170 735 327 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Paul</forename>
+		<initials></initials>
+		<surname>Golding</surname>
+		<display>Golding, Paul</display>
+		<imageName>Paul_Golding</imageName>
+		<jobTitle>Module Manager ROS and LCCS</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>paul.golding@hcl.com</e_mail>
+		<phone>+44 170 735 2784 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Paul</forename>
+		<initials></initials>
+		<surname>Siddle</surname>
+		<display>Siddle, Paul</display>
+		<imageName>Paul_Siddle</imageName>
+		<jobTitle>Programme Manager</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>paul.siddle@hcl.com</e_mail>
+		<phone>+44 170 735 3832 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Pete</forename>
+		<initials></initials>
+		<surname>Cresswell</surname>
+		<display>Cresswell, Pete</display>
+		<imageName>Pete_Cresswell</imageName>
+		<jobTitle></jobTitle>
+		<company></company>
+		<department></department>
+		<e_mail>peter.cresswell@hcl.com</e_mail>
+		<phone>+44 170 735 2825 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Peter</forename>
+		<initials></initials>
+		<surname>Kemsley</surname>
+		<display>Kemsley, Peter</display>
+		<imageName>Peter_Kemsley</imageName>
+		<jobTitle>Image Quality Technician</jobTitle>
+		<company></company>
+		<department>ODP</department>
+		<e_mail>peter.kemsley@hcl.com</e_mail>
+		<phone>8*668.0 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Richard</forename>
+		<initials></initials>
+		<surname>Bridges</surname>
+		<display>Bridges, Richard</display>
+		<imageName>Richard_Bridges</imageName>
+		<jobTitle>Module Manager</jobTitle>
+		<company>HCL</company>
+		<department>ODPG</department>
+		<e_mail>richard.bridges@hcl.com</e_mail>
+		<phone>+44 170 735 3815 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Richie</forename>
+		<initials></initials>
+		<surname>Emms</surname>
+		<display>Emms, Richie</display>
+		<imageName>Richie_Emms</imageName>
+		<jobTitle></jobTitle>
+		<company>HCL</company>
+		<department></department>
+		<e_mail>richard.emms@hcl.com</e_mail>
+		<phone>+44 170 735 3457 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Rob</forename>
+		<initials></initials>
+		<surname>Gunther</surname>
+		<display>Gunther, Rob</display>
+		<imageName>Rob_Gunther</imageName>
+		<jobTitle>CAD/CAE Support Engineer</jobTitle>
+		<company>HCL</company>
+		<department>EXPDG</department>
+		<e_mail>rob.gunther@hcl.com</e_mail>
+		<phone>+44 170 735 2395 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Rob</forename>
+		<initials></initials>
+		<surname>Webb</surname>
+		<display>Webb, Rob</display>
+		<imageName>Rob_Webb</imageName>
+		<jobTitle>Test Interface Data Quality and Media Manager</jobTitle>
+		<company>HCL</company>
+		<department>Programme Support</department>
+		<e_mail>robert.webb@hcl.com</e_mail>
+		<phone>+44 170 735 3922 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Robin</forename>
+		<initials></initials>
+		<surname>Garratt</surname>
+		<display>Garratt, Robin</display>
+		<imageName>Robin_Garratt</imageName>
+		<jobTitle>CommServ Manager</jobTitle>
+		<company>HCL</company>
+		<department>CommServ</department>
+		<e_mail>robin.garratt@hcl.com</e_mail>
+		<phone>+44 170 735 3685 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Roy</forename>
+		<initials></initials>
+		<surname>Gladwin</surname>
+		<display>Gladwin, Roy</display>
+		<imageName>Roy_Gladwin</imageName>
+		<jobTitle>Specialist Designer</jobTitle>
+		<company>HCL</company>
+		<department>ODP</department>
+		<e_mail>roy.gladwin@hcl.com</e_mail>
+		<phone>+44 170 735 3817 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Sam</forename>
+		<initials></initials>
+		<surname>Hagos</surname>
+		<display>Hagos, Sam</display>
+		<imageName>Sam_Hagos</imageName>
+		<jobTitle>Senior Mechanical Engineer</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>samuel.hagos@hcl.com</e_mail>
+		<phone>+44 170 735 2532 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Scott</forename>
+		<initials></initials>
+		<surname>Potter</surname>
+		<display>Potter, Scott</display>
+		<imageName>Scott_Potter</imageName>
+		<jobTitle>GUI Platform Element Manager</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>scott.potter@hcl.com</e_mail>
+		<phone>+44 170 735 3408 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Sean</forename>
+		<initials></initials>
+		<surname>Brady</surname>
+		<display>Brady, Sean</display>
+		<imageName>Sean_Brady</imageName>
+		<jobTitle>Imaging and Marking Technician</jobTitle>
+		<company>HCL</company>
+		<department>ION Fuser</department>
+		<e_mail>sean.brady@hcl.com</e_mail>
+		<phone>+44 170 735 3876 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Sheilagh</forename>
+		<initials></initials>
+		<surname>Greenman</surname>
+		<display>Greenman, Sheilagh</display>
+		<imageName>Sheilagh_Greenman</imageName>
+		<jobTitle>Senior Secretary</jobTitle>
+		<company>hcl Corporration</company>
+		<department>Systems and Engineering</department>
+		<e_mail>sheilagh.greenman@hcl.com</e_mail>
+		<phone>+44 170 735 3869 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Shelagh</forename>
+		<initials></initials>
+		<surname>Lewins</surname>
+		<display>Lewins, Shelagh</display>
+		<imageName>Shelagh_Lewins</imageName>
+		<jobTitle>User Interface Engineer</jobTitle>
+		<company>hcl Corporation</company>
+		<department>Experience Design Europe</department>
+		<e_mail>shelagh.lewins@hcl.com</e_mail>
+		<phone>+44 170 735 3432 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Simon</forename>
+		<initials></initials>
+		<surname>Briscoe</surname>
+		<display>Briscoe, Simon</display>
+		<imageName>Simon_Briscoe</imageName>
+		<jobTitle>GPDG Welwyn Site Manager</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>simon.briscoe@hcl.com</e_mail>
+		<phone>+44 170 735 2693 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Simon</forename>
+		<initials></initials>
+		<surname>Jowett</surname>
+		<display>Jowett, Simon</display>
+		<imageName>Simon_Jowett</imageName>
+		<jobTitle>Technical Specialist</jobTitle>
+		<company>HCL</company>
+		<department>EXPDG</department>
+		<e_mail>simon.jowett@hcl.com</e_mail>
+		<phone>+44 170 735 2598 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Steve</forename>
+		<initials></initials>
+		<surname>Canning</surname>
+		<display>Canning, Steve</display>
+		<imageName>Steve_Canning</imageName>
+		<jobTitle>Sustaining TPL</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>steve.canning@hcl.com</e_mail>
+		<phone>+44 170 735 2660 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Steve</forename>
+		<initials></initials>
+		<surname>French</surname>
+		<display>French, Steve</display>
+		<imageName>Steve_French</imageName>
+		<jobTitle>Supervisor</jobTitle>
+		<company>HCL</company>
+		<department>Office Products Delivery Unit</department>
+		<e_mail>steve.french@hcl.com</e_mail>
+		<phone>+44 170 735 3616 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Steve</forename>
+		<initials></initials>
+		<surname>Pitson</surname>
+		<display>Pitson, Steve</display>
+		<imageName>Steve_Pitson</imageName>
+		<jobTitle></jobTitle>
+		<company>hcl Corporation</company>
+		<department></department>
+		<e_mail>stephen.pitson@hcl.com</e_mail>
+		<phone>+44 170 735 3818 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Steve</forename>
+		<initials></initials>
+		<surname>Wood</surname>
+		<display>Wood, Steve</display>
+		<imageName>Steve_Wood</imageName>
+		<jobTitle>Mechanical Designer</jobTitle>
+		<company>hcl Corporation</company>
+		<department>DPG</department>
+		<e_mail>steve.wood@hcl.com</e_mail>
+		<phone>+44 170 735 3875 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+	<contact>
+		<forename>Tim</forename>
+		<initials></initials>
+		<surname>Spink</surname>
+		<display>Spink, Tim</display>
+		<imageName>Tim_Spink</imageName>
+		<jobTitle>Systems Requirement Engineer</jobTitle>
+		<company>hcl Ltd</company>
+		<department>ODP</department>
+		<e_mail>tim.spink@hcl.com</e_mail>
+		<phone>+44 170 735 2636 </phone>
+		<fax>+44 170 735 3424</fax>
+	</contact>
+</AddressBook>

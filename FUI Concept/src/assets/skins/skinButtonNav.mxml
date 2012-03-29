@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fb="http://ns.adobe.com/flashbuilder/2009" >
+	<!-- host component -->
+	<fx:Metadata>
+		[HostComponent("spark.components.Button")]
+	</fx:Metadata>
+	
+	<fx:Script fb:purpose="styling">
+		<![CDATA[
+			import spark.filters.*;
+			
+			[Bindable]
+			private var dsfLabel:spark.filters.DropShadowFilter = new spark.filters.DropShadowFilter(0, 90, 0, 1, 2, 2);			
+			
+			
+			/**
+			 *  @private
+			 */
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void
+			{
+				// Need to postion from the stage left, to get the shadded overlap
+				//var componentLeft:String = String('-' + hostComponent.left);
+				var componentLeft:String = "-" + hostComponent.x;
+				// Constructs the arrow shape
+				var shortWidth:String = String(unscaledWidth - (unscaledHeight / 2));
+				var longWidth:String = String(unscaledWidth);
+				var halfHeight:String = String(unscaledHeight / 2);
+				var fullHeight:String = String(unscaledHeight);
+				pathArrow.data = 'M ' + componentLeft + ' 0 ' + shortWidth + ' 0 ' + longWidth + ' ' +
+								halfHeight + ' ' + shortWidth + ' ' + fullHeight + ' ' + componentLeft + ' ' + fullHeight + 'Z';
+				
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}		
+		]]>        
+	</fx:Script>
+	
+	<!-- states -->
+	<s:states> 
+		<s:State name="disabled" />
+		<s:State name="down" />
+		<s:State name="over" />
+		<s:State name="up" />
+	</s:states>
+	
+	<s:Path id="pathArrow" alpha="0.2" alpha.down="1">
+		<s:fill>
+			<s:SolidColor color="0x000000" color.down="0x3793D0" />
+		</s:fill>
+	</s:Path>
+	
+	<!-- SkinParts
+	name=iconDisplay, type=spark.primitives.BitmapImage, required=false
+	name=labelDisplay, type=spark.core.IDisplayText, required=false
+	-->
+	<s:BitmapImage id="iconDisplay" scaleMode="letterbox" verticalCenter="-3" horizontalCenter="-8" />
+	
+	<s:Label id="labelDisplay" left="{iconDisplay.width + 10}" right="39" top="2" bottom="2" filters="{dsfLabel}"
+			 color="0xFFFFFF" fontWeight="bold" fontSize="26"
+			 maxDisplayedLines="1" styleName="buttonNav" verticalCenter="1"/>	
+	
+</s:Skin>

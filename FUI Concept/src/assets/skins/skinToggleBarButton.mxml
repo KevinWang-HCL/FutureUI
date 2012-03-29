@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkButtonSkin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark">
+	<!-- host component -->
+	<fx:Metadata>
+		<![CDATA[ 
+			[HostComponent("widgets.wToggleButton")]
+		]]>
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import widgets.wToggleButton;
+			
+			protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				rectButtonArea.bottomLeftRadiusX = (hostComponent as wToggleButton).bottomLeftRadius;
+				rectButtonArea.bottomRightRadiusX=(hostComponent as wToggleButton).bottomRightRadius;
+				rectButtonArea.topLeftRadiusX=(hostComponent as wToggleButton).topLeftRadius;
+				rectButtonArea.topRightRadiusX=(hostComponent as wToggleButton).topRightRadius;
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+		]]>
+	</fx:Script>
+	
+	<!-- SkinParts
+	name=iconDisplay, type=spark.primitives.BitmapImage, required=false
+	name=labelDisplay, type=spark.core.IDisplayText, required=false
+	-->
+	<!-- states -->
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="selected"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled" />
+	</s:states>
+	
+	<!--*** Transitions ***-->
+	<s:transitions>
+		<s:Transition autoReverse="true" fromState="*" toState="selected">
+			<s:Parallel duration="250" hideFocusRing="true">
+				<s:AnimateColor target="{gradientStatus0}" />
+				<s:AnimateColor target="{gradientStatus1}" />
+			</s:Parallel>			
+		</s:Transition>
+	</s:transitions>
+	
+	<!-- Toggle Button -->
+	<!--- @private -->
+	<!-- background -->
+	<s:Group left="0" right="0" top="0" bottom="0" top.selected="-1">
+		<s:Rect id="rectButtonArea" 
+				left="0" right="0" top="0" bottom="0">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+<!--					<s:GradientEntry id="gradientStatus0" color="0xD5D5D5" color.selected="0x3793D0" ratio="0"/>
+					<s:GradientEntry id="gradientStatus1" color="0xB5B5B5" color.selected="0x3DA6EA" ratio="1"/>-->
+					<s:GradientEntry id="gradientStatus0" color="0XD0D7DC" color.selected="0x3793D0" ratio="0"/>
+					<s:GradientEntry id="gradientStatus1" color="0xB0B7BD" color.selected="0x3DA6EA" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:BevelFilter angle="90" blurX="1" blurY="1" distance="1" highlightAlpha="0.8"
+							   highlightColor="0xFFFFFF" knockout="false" quality="1"
+							   shadowAlpha="0.2" shadowColor="0x000000" strength="1" type="inner"
+							   angle.selected="-90" distance.selected="0"
+							   highlightColor.selected="0x97DEFF" shadowAlpha.selected="0.3"/>
+				<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="0x000000"
+									distance="1" quality="2" strength=".7"
+									/>
+				<s:DropShadowFilter includeIn="selected" alpha="1" angle="90" blurX="2" blurY="2"
+									color="0x000000" distance="1" inner="true" quality="2"
+									strength=".5"/>
+			</s:filters>
+		</s:Rect>
+		
+		<!-- label -->
+		<!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay  -->
+		<s:Label id="labelDisplay" left="10" right="10" top="2" bottom="2"
+				 maxDisplayedLines="2" styleName="toggleButton"
+				 horizontalCenter="0" verticalCenter="1">
+		</s:Label>	
+		
+	</s:Group>
+	
+</s:SparkButtonSkin>

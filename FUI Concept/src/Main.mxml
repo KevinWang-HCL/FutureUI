@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:x="components.*"
+			   xmlns:widgets="widgets.*"
+			   splashScreenImage="@Embed('assets/images/SplashScreen.png')"
+			   splashScreenMinimumDisplayTime="500" splashScreenScaleMode="none"
+			   width="100%" height="100%" 
+			   initialize="application1_initializeHandler(event)"
+			   currentState="MachineSync">
+	
+	<fx:Style source="Main.css"/>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.General_Icons;
+			import assets.embedded.Videos;
+			
+			import integration.ApplicationSettings;
+			import integration.CopySettings;
+			
+			import mimicViewComponent.MimicViewer;
+			
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			
+			import xerox.XRX_DataEvent;
+			
+			private static const TOP_SOURCE_PANEL_PADDING:int = 15;
+			
+			protected function panelNavigation_homePressEventHandler(event:Event):void
+			{
+				if(!ApplicationSettings.get().get(ApplicationSettings.LOCAL_MODE_ENABLED))
+					this.currentState = "LoadHandler";
+			}
+			
+			protected function panelNavigation_scanDocBtnEventHandler(event:MouseEvent):void
+			{
+				panelSourceSettings.mimicView.invalidateMimicTexture();
+				panelSourceSettings.mimicView.invalidateMimicView();
+				if(this.currentState == "panelEdit" && panelEditSettings.currentState == "pluginSelected")
+				{
+					panelEditSettings.returnToPluginSelection();
+				}
+				panelSourceSettings.currentState = panelSource.MIMIC_VIEW_STATE;
+				panelOutputSettings.currentState = "StartMenu";
+				//panelSourceSettings.height = 542 - panelOutputSettings.height;
+				panelSourceSettings.height = 600 - TOP_SOURCE_PANEL_PADDING - panelOutputSettings.height;
+			}
+			
+			private function application1_initializeHandler(event:Event):void
+			{
+				navBar.pushNavStage({id:"scanDocBtn", label:"Scan", icon:null, clickHandler:panelNavigation_scanDocBtnEventHandler});
+				xds_init();
+				if(!ApplicationSettings.get().get(ApplicationSettings.LOCAL_MODE_ENABLED))
+				{
+					this.currentState = "MachineSync";
+					/* this.currentState = "LoadGlass"; */
+				}
+				else
+				{
+					ApplicationSettings.get().set(ApplicationSettings.USE_LOCAL_MIMIC, true);
+					this.currentState = "panelOutput";
+				}
+				
+				this.addEventListener(MouseEvent.CLICK, application1_clickHandler, true);
+			}
+			
+			protected function panelSourceSettings_stateChangeCompleteHandler(event:Event):void
+			{
+				if(panelSourceSettings.currentState == panelSource.MIMIC_VIEW_STATE)
+				{
+					//Hack - stops the nav bar being popped when the application is switching
+					//from sync state to panelOutput state.
+					if(this.currentState != "panelOutput")
+					{
+						navBar.popNavStage();
+						this.currentState = "panelOutput";
+					}
+					//panelSourceSettings.height = 600 - 58 - panelOutputSettings.height;
+					panelSourceSettings.height = 600 - TOP_SOURCE_PANEL_PADDING - panelOutputSettings.height;
+				}
+				else if(panelSourceSettings.currentState == panelSource.EDIT_VIEW_STATE)
+				{
+					navBar.pushNavStage({id:"editNavBtn", label:"Edit", icon:null, clickHandler:function(evt:MouseEvent):void{
+						//TODO return from current plugin to plugin selection screen.
+						panelEditSettings.returnToPluginSelection();
+					}});
+					this.currentState = "panelEdit";
+					//We need to initialise the current plugin's ui so that is displayed on state switch.
+					//panelEditSettings.initialiseCurrentPluginUI();
+					//Set the source panel's height to be screen height - nav bar height - panelEdit's ui height
+					//panelSourceSettings.height = 600 - 58 - panelEditSettings.requiredPluginUIHeight;
+					panelSourceSettings.height = 600 - TOP_SOURCE_PANEL_PADDING - panelEditSettings.requiredPluginUIHeight;
+					panelEditSettings.y = 600 - panelEditSettings.requiredPluginUIHeight;
+				}
+				
+			}
+			
+			protected function panelOutputSettings_creationCompleteHandler(event:FlexEvent):void
+			{
+				if(ApplicationSettings.get().get(ApplicationSettings.LOCAL_MODE_ENABLED))
+				{
+					panelSourceSettings.mimicViewComponent.imageSource = ApplicationSettings.get().get(ApplicationSettings.LOCAL_MIMIC);
+					lblHelpHint.visible = false;
+				}
+			}
+			
+			protected function panelEditSettings_pluginUIHeightChangedHandler(event:Event):void
+			{
+				//panelSourceSettings.height = 600 - 58 - panelEditSettings.requiredPluginUIHeight;
+				panelSourceSettings.height = 600 - TOP_SOURCE_PANEL_PADDING - panelEditSettings.requiredPluginUIHeight;
+			}
+			
+			protected function panelEditSettings_backBtnClickedHandler(event:Event):void
+			{
+				//panelSourceSettings.height = 247;
+				panelSourceSettings.mimicView.invalidateMimicTexture();
+				panelSourceSettings.mimicView.invalidateMimicView();
+				panelSourceSettings.currentState = panelSource.MIMIC_VIEW_STATE;
+				//panelSourceSettings.height = 542 - panelOutputSettings.height;
+				panelSourceSettings.height = 600 - TOP_SOURCE_PANEL_PADDING - panelOutputSettings.height;
+				//this.currentState = 'panelOutput';
+			}
+			
+			// ================================ Begin of XDS CODE LAYER ============================== //
+			import xerox.XDS_Main;
+			
+			[Bindable]
+			public var xdsMain:XDS_Main = null;
+			private var _prevDocOnHandler:Boolean = false;
+			private var _prevDADFRaised:Boolean = false;
+			[Bindable]
+			public var prescanStatus:String = "Scanning";
+			
+			protected function xds_init():void {
+				//init xdsmain
+				if( xdsMain == null )
+				{
+					xdsMain = new XDS_Main;
+					if(!ApplicationSettings.get().get(ApplicationSettings.LOCAL_MODE_ENABLED)){
+						xdsMain.addEventListener(XDS_Main.MACHINE_CONNECTED_EVENT, onMachineConnected);
+						xdsMain.addEventListener(XDS_Main.DOC_HANDLER_CHANGE_EVENT, onDocumentHandlerChange);
+						xdsMain.addEventListener(XDS_Main.PRESCAN_PROGRESS_EVENT, onPrescanUpdated);
+						xdsMain.requestConnection();
+					}
+				}
+			}
+			
+			private function onPrescanUpdated(evt:XRX_DataEvent):void	
+			{
+				switch(evt.data.status)
+				{
+					case XDS_Main.PRESCAN_SCANNING_EVENT:
+						prescanStatus = "Scanning";
+						break;
+					case XDS_Main.PRESCAN_FORMATTING_EVENT:
+						prescanStatus = "Formatting";
+						break;
+					case XDS_Main.PRESCAN_TRANSFERRING_EVENT:
+						prescanStatus = "Transferring";
+						break;
+					case XDS_Main.PRESCAN_COMPLETED:
+						ApplicationSettings.get().set(ApplicationSettings.MIMIC_SOURCE, "file://" + File.userDirectory.nativePath + "/shared/photos/scans/preview.XSM/00000001.jpg");
+						ApplicationSettings.get().set(ApplicationSettings.USE_LOCAL_MIMIC, false);
+						CopySettings.get().set(CopySettings.INPUT_SIDES, 1);
+						this.currentState = "panelOutput";
+						panelOutputSettings.currentState = "StartMenu";
+						panelSourceSettings.mimicView.imageSource = ApplicationSettings.get().get(ApplicationSettings.MIMIC_SOURCE);
+						panelSourceSettings.mimicView.addEventListener("mimicEditViewReady", onMimicImageChanged);
+						//Reset the status text
+						prescanStatus = "Scanning";
+						break;
+					case XDS_Main.PRESCAN_FAILED:
+						//ApplicationSettings.get().set(ApplicationSettings.USE_LOCAL_MIMIC, true);
+						//this.currentState = "panelOutput";
+						this.currentState = "LoadHandler";
+						break;
+				};
+			}
+			
+			/*
+			* This is fired when the DADF changes state in some way (i.e.
+			* a document is placed on the handler, or the handler itself is
+			* raised or lowered).
+			* evt will contain a data object that has two properties:
+			* docOnHandler: Boolean. True if there's a document loaded.
+			* dadfRaised: Boolean. True is DADF is raised, false is lowered.
+			*/
+			private function onDocumentHandlerChange(evt:XRX_DataEvent):void
+			{
+				//				trace("DOC HANDLER CHANGE: " + evt.data.dadfRaised + ", " + evt.data.docOnHandler);
+				//If the document handler has been raised then return to the load state...
+				if(evt.data.dadfRaised)
+				{
+					trace("DADF RAISED, RESETTING");
+					if(panelSourceSettings)
+					{
+						/* panelSourceSettings.mimicView.imageSource = null;
+						CopySettings.get().set(CopySettings.FOLD_TYPE, CopySettings.FOLD_NONE);
+						CopySettings.get().set(CopySettings.PAPER_TYPE, CopySettings.PAPER_TYPE_DEFAULT);
+						panelSourceSettings.mimicView.validateMimicView(); */
+						panelSourceSettings.mimicView.finishingView.visible = false;
+					}
+					CopySettings.setDefaults();
+					if(panelOutputSettings)
+						panelOutputSettings.resetToDefault();
+					if(panelEditSettings)
+						panelEditSettings.resetUIState();
+					if(panelSourceSettings)
+					{
+						panelSourceSettings.mimicView.reset();
+						panelSourceSettings.mimicView.invalidatePaperState();
+						panelSourceSettings.mimicView.invalidateFoldState();
+					}
+					
+					//CopySettings.get().set(CopySettings.PAPER_TYPE, 0); //Reset paper type to auto.
+					//Note: should make a function somewhere to reset all copy setting states
+					//to machine defaults.
+					this.currentState = "LoadGlass";
+				}
+					//Else if the dadf is lowered and there's no document in the handler (and it's not the
+					//document in handler state that's changed) then initiate a prescan.
+				else if(!evt.data.dadfRaised && !evt.data.docOnHandler && (evt.data.docOnHandler == _prevDocOnHandler))
+				{
+					xdsMain.Perform_ScanToFileJob();
+					this.currentState = "ScanningDocument";
+				}
+				else if(evt.data.docOnHandler)
+				{
+					ApplicationSettings.get().set(ApplicationSettings.USE_LOCAL_MIMIC, true);
+					CopySettings.setDefaults();
+					if(panelOutputSettings)
+					{
+						panelOutputSettings.resetToDefault();
+						panelOutputSettings.selectPaperTypeForDocument(0, 0);
+					}
+					if(panelEditSettings)
+						panelEditSettings.resetUIState();
+					if(panelSourceSettings)
+					{
+						panelSourceSettings.mimicView.reset();
+						panelSourceSettings.mimicView.invalidatePaperState();
+						panelSourceSettings.mimicView.invalidateFoldState();
+						panelSourceSettings.mimicView.addEventListener("mimicEditViewReady", onMimicImageChanged);
+						panelSourceSettings.mimicView.imageSource = "local";
+					}
+					CopySettings.get().set(CopySettings.INPUT_SIDES, 2);
+					//Document is not on platen so need to inform
+					//somewhere that we should use the default
+					//mimics as a prescan is not available.
+					this.currentState = "panelOutput";
+					if(panelOutputSettings) //Why would this be needed?
+						panelOutputSettings.currentState = "StartMenu";
+				}
+				else if(!xdsMain.isCopying)
+				{
+					this.currentState = "LoadHandler";
+				}
+				
+				_prevDADFRaised = evt.data.dadfRaised;
+				_prevDocOnHandler = evt.data.docOnHandler;
+			}
+			
+			private function onMimicImageChanged(evt:Event):void
+			{
+				if(panelSourceSettings.mimicView.imageSource != "local")
+				{
+					panelOutputSettings.selectPaperTypeForDocument(panelSourceSettings.mimicView.mimicSettings.originalImageDimensions[0],
+																	panelSourceSettings.mimicView.mimicSettings.originalImageDimensions[1]);
+				}
+				else
+				{
+					panelOutputSettings.selectPaperTypeForDocument(0,0);
+				}
+				
+				panelSourceSettings.mimicView.invalidateFoldState();
+				panelSourceSettings.mimicView.validateMimicView();
+				panelSourceSettings.mimicView.removeEventListener("mimicEditViewReady", onMimicImageChanged);
+			}
+			
+			private function onMachineConnected(evt:Event):void
+			{
+				if( xdsMain.DADFRaised )
+					this.currentState = "LoadGlass";
+				else
+				{
+					if( !xdsMain.DocOnHandler )
+						this.currentState = "LoadHandler";
+					else
+						this.currentState = "panelOutput";
+				}
+			}
+			// ================================ End of XDS CODE LAYER ============================== //
+			
+			protected function panelOutputSettings_resizeHandler(event:ResizeEvent):void
+			{
+				//panelSourceSettings.height = 542 - panelOutputSettings.height;
+				panelSourceSettings.height = 600 - TOP_SOURCE_PANEL_PADDING - panelOutputSettings.height;
+			}
+			
+			protected function application1_clickHandler(event:MouseEvent):void
+			{
+				var clickCoords:Point = softKeyboard.globalToLocal(new Point(event.stageX, event.stageY));
+				//If the user has clicked outside of the keyboard, the keyboard is already visible, and
+				//the new click target ISN'T a text input of some kind as well, then hide the keyboard.
+				if(clickCoords.y < 0 && softKeyboard.keyboardVisible && event.eventPhase == EventPhase.CAPTURING_PHASE
+					&& event.target.toString().search("textDisplay") == -1)
+				{
+					softKeyboard.showKeyboardWindow(false);
+					this.stage.focus = null;
+				}
+			}
+			
+			protected function fuiEmailOption_backBtnClickedHandler(event:Event):void
+			{
+				this.currentState = "panelOutput";
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	
+	<s:states>
+		<s:State name="MachineSync" />
+		<s:State name="LoadHandler" />
+		<s:State name="LoadGlass" />
+		<s:State name="ScanningDocument" />
+		<s:State name="panelOutput" />
+		<s:State name="panelEdit" />
+		<s:State name="emailoption"/>
+	</s:states>
+	
+	<!--*** Transitions ***-->
+	<s:transitions>
+		<s:Transition autoReverse="true" fromState="*" toState="*">
+			<s:Parallel duration="300" hideFocusRing="true">
+				<s:Move target="{imgBackground}" />
+				<s:Move target="{panelOutputSettings}" />
+				<s:Move target="{lblHelpHint}" />
+				<s:Fade target="{vidDocumentHander}" />
+			</s:Parallel>
+		</s:Transition>
+		
+		<s:Transition autoReverse="true" fromState="ScanningDocument" toState="*">
+			<s:Fade target="{compScanningDocument}" alphaFrom="1" alphaTo="0" duration="300" />
+		</s:Transition>
+	</s:transitions>
+	
+	
+	<!-- *** Main Application Window ***
+	Note: everything contained in here will move up when the keyboard is displayed-->
+	<s:Group id="mainApplication" width="100%" height="100%">
+		<!-- *** Background *** -->
+		<s:Group id="imgBackground" top="0" top.panelOutput="-60" width="1024" height="660"
+				 cacheAsBitmap="true" excludeFrom="panelEdit">
+			<s:Rect top="0" bottom="0" left="0" right="0">
+				<s:fill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry ratio="0" color="0x445157"/>
+						<s:GradientEntry ratio="0.47" color="0xA4ACAE"/>
+						<s:GradientEntry ratio="0.50" color="0xC6CBCE"/>
+						<s:GradientEntry ratio="1" color="0x0C0C1C3"/>
+					</s:LinearGradient>
+				</s:fill>
+			</s:Rect>
+			<s:Rect width="150%" height="150%" >
+				<s:fill>
+					<s:RadialGradient y="400">
+						<s:GradientEntry ratio="0" color="0xFFFFFF" alpha="0.7"/>
+						<s:GradientEntry ratio="1" color="0xADBDCC" alpha="0.3"/>
+					</s:RadialGradient>
+				</s:fill>
+			</s:Rect>
+		</s:Group>
+		
+		<s:Group id="imgBackgroundEdit" top="0" bottom="0" left="0" right="0" includeIn="panelEdit">
+			<s:Rect top="0" bottom="0" left="0" right="0">
+				<s:fill>
+					<s:SolidColor color="0x979EA4"/>
+				</s:fill>
+			</s:Rect>
+		</s:Group>
+		
+		<x:panelSource id="panelSourceSettings" includeIn="panelOutput, panelEdit"
+					   top="{TOP_SOURCE_PANEL_PADDING}" left="0" right="0"
+					   mimicStateChanged="panelSourceSettings_stateChangeCompleteHandler(event)"/>
+		
+		<x:panelOutput id="panelOutputSettings" includeIn="panelOutput"
+					   bottom="0" left="0" right="0" height="290" 
+					   mimicViewReference="{panelSourceSettings.mimicViewComponent}"
+					   xdsMainReference="{xdsMain}"
+					   resize="panelOutputSettings_resizeHandler(event)"
+					   creationComplete="panelOutputSettings_creationCompleteHandler(event)"/>
+		
+		<x:panelEdit id="panelEditSettings" includeIn="panelEdit"
+					 left="0" right="0" bottom="0"
+					 mimicViewReference="{panelSourceSettings.mimicViewComponent}"
+					 navBarReference="{navBar}"
+					 backBtnClicked="panelEditSettings_backBtnClickedHandler(event)"
+					 pluginUIHeightChanged="panelEditSettings_pluginUIHeightChangedHandler(event)"/>
+		
+		<!-- *** Content *** -->
+		<widgets:wNavigationBar id="navBar" top="0" left="0" right="0" height="58"
+								rootStage="{{id:'root', label:'', icon: new General_Icons.homeClass, clickHandler:panelNavigation_homePressEventHandler}}"/>
+		
+		<s:HGroup height="58" top="0" right="0" gap="-1">
+			<widgets:wButton id="btnSettings" icon="{General_Icons.settingsClass}" height="58" skinClass="assets.skins.skinButtonTransparent"/>
+			<widgets:wButton id="btnHelp" icon="{General_Icons.helpClass}" height="58" skinClass="assets.skins.skinButtonTransparent"/>
+		</s:HGroup>
+		
+		<!--<x:FUIEmailOption id="fuiEmailOption" includeIn="emailoption" top="0" bottom="0" left="0" right="0" />-->	
+		<x:panelSendOptions id="fuiEmailOption" includeIn="emailoption" top="0" bottom="0" left="0" right="0" 
+							backBtnClicked="fuiEmailOption_backBtnClickedHandler(event)"/>
+	</s:Group>
+	
+	
+	<x:SoftKeyboard id="softKeyboard" x="0" y="600" height="326" width="100%"
+					xmlKeyboard="assets/data/KeyboardUS.xml"
+					hostScrollViewport="{mainApplication}">
+	</x:SoftKeyboard>	
+	
+	
+	<!-- *** Load document animations *** -->
+	<s:MovieClipSWFLoader id="vidDocumentHander" includeIn="LoadHandler, LoadGlass" cacheAsBitmap="false"
+						  autoLoad="true" autoStop="false"
+						  alpha="1" alpha.panelOutput="0" 
+						  alpha.panelEdit="0"
+						  right="0" bottom.LoadHandler="100" bottom.LoadGlass="77"
+						  source.LoadGlass="{Videos.DocumentHandlerGlassClass}"
+						  source.LoadHandler="{Videos.DocumentHandlerClass}"/>
+	
+	<!-- *** Scanning image animation *** -->
+	<x:panelScanningDocument id="compScanningDocument" includeIn="ScanningDocument" horizontalCenter="0" verticalCenter="50" />
+	
+	
+	<s:Label id="lblHelpHint" left="90" right="90" textAlign="center" top="140"
+			 text.LoadHandler="Place document in handler face up and move guides to document edge, or lift handler to scan from glass." 
+			 text.LoadGlass="Align document to back-left and face down on glass, then lower document handler."
+			 text.ScanningDocument="{prescanStatus} document preview, please wait ..."/>	
+	
+	<s:Group id="fxgLoading" includeIn="MachineSync" top="0" width="1024" height="600"
+			 cacheAsBitmap="true" color="#000000" textAlign="center" 
+			 top.panelOutput="-95">
+		<s:TextArea id="txtSync" y="196" width="386" height="152" color="#000000" enabled="true"
+					fontFamily="Arial" horizontalCenter="7" text="Loading Machine Settings..."
+					textAlign="center"
+					skinClass="spark.skins.mobile.TextAreaSkin"/>
+		<s:BusyIndicator id="biSync"  x="493" y="257" width="69" height="63" symbolColor="red" rotationInterval="50"/>
+		<s:Button id="btnGoOffline" y="276" label="Offline Mode" fontFamily="Arial" visible="false"
+				  horizontalCenter="0" click="xdsMain.syncButtonGoOffline()"/>
+	</s:Group>
+
+	<s:Group id="addressContactSync" top="0" width="1024" height="200" visible="false"
+			 cacheAsBitmap="true" color="#000000" textAlign="center"  
+			 top.panelOutput="-95">
+		<s:TextArea id="txtAddContactSync" y="196" width="386" height="152" color="#000000" enabled="true"
+					fontFamily="Arial" horizontalCenter="7" text="Client in being Connected...."
+					textAlign="center" />
+		<s:BusyIndicator id="biAddContactSync"  x="493" y="257" width="69" height="63" symbolColor="red" rotationInterval="50"/>
+	</s:Group>
+	
+</s:Application>
+

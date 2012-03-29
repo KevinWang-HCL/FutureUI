@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:x="components.*"
+		 xmlns:w="widgets.*"
+		 currentState="OptionsOff" xmlns:itemRenderers="itemRenderers.*" >
+	
+	<fx:Metadata>
+		[Event(name="finishingScrollEndEvent", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.General_Icons;
+			import assets.embedded.Sounds;
+			
+			import integration.CopySettings;
+			
+			import mimicViewComponent.MimicViewer;
+			
+			import mx.core.FlexGlobals;
+			
+			import spark.events.IndexChangeEvent;
+			
+			
+			/* private var _oldFoldType:int = 0;
+			private var _oldHoleType:int = 0;
+			private var _oldStapleType:int = 0; */
+			private var _validateMimicOnButtonBarChanged:Boolean = true;
+			private var _previousWheelItem:String;
+			private var _currentWheelItem:String = "";
+			
+			private var _mimicViewRef:MimicViewer;
+			
+			public function set mimicViewReference(value:MimicViewer):void
+			{
+				_mimicViewRef = value;
+			}
+			
+			
+//			protected function wheelFinishing_scrollItemSelectedHandler(event:ScrollItemSelectedEvent):void
+//			{
+//				_previousWheelItem = _currentWheelItem;
+//				//_currentWheelItem = wheelFinishing.contents[event.itemIndex].itemName;
+//				_currentWheelItem = wheelFinishing.selectedItem.itemName;
+//				/* Index value is dispatched with the event */
+//				SetFinishWheelState(event.itemIndex);
+//			}
+			
+			protected function wheelFinishing_selectedIndexChangedHandler(event:Event):void
+			{
+				_previousWheelItem = _currentWheelItem;
+				//_currentWheelItem = wheelFinishing.contents[wheelFinishing.selectedIndex].itemName;
+				_currentWheelItem = wheelFinishing.selectedItem.itemName;
+				SetFinishWheelState(wheelFinishing.selectedIndex);
+			}
+			
+			public function SetFinishWheelState(index:int):void
+			{
+				//switch (wheelFinishing.contents[index].itemName)
+				switch(wheelFinishing.selectedItem.itemName)
+				{							
+					case 'Collated':
+					{
+						setFinishingOptions(CopySettings.FOLD_NONE, CopySettings.HOLEPUNCH_NONE, CopySettings.STAPLE_NONE);
+						break;
+					}
+					case 'Stapled':
+					{
+						if(currentState == "OptionsOff")
+							currentState='OptionsClosed';
+						compFinishingOptions.currentState = 'Stapled';
+						setFinishingOptions(CopySettings.FOLD_NONE, CopySettings.HOLEPUNCH_NONE, CopySettings.STAPLE_1_LEFT);
+						break;
+					}
+					case 'Punched': 
+					{
+						if(currentState == "OptionsOff")
+							currentState='OptionsClosed';
+						compFinishingOptions.currentState = 'Punched';
+						setFinishingOptions(CopySettings.FOLD_NONE, CopySettings.HOLEPUNCH_2_HOLES, CopySettings.STAPLE_NONE);
+						break;
+					}
+					case 'Stapled & Punched': 
+					{
+						if(currentState == "OptionsOff")
+							currentState='OptionsClosed';
+						compFinishingOptions.currentState = 'StapledPunched';	
+						setFinishingOptions(CopySettings.FOLD_NONE, CopySettings.HOLEPUNCH_2_HOLES, CopySettings.STAPLE_1_LEFT);
+						break;
+					}	
+					case 'Folded':
+					{
+						if(currentState == "OptionsOff")
+							currentState='OptionsClosed';
+						compFinishingOptions.currentState = 'Folded' + compFinishingOptions.foldOption;
+						setFinishingOptions(CopySettings.FOLD_SINGLE, CopySettings.HOLEPUNCH_NONE, CopySettings.STAPLE_NONE);
+						break;
+					}
+					case 'Creased':
+					{
+						if(currentState == "OptionsOff")
+							currentState='OptionsClosed';
+						compFinishingOptions.currentState = 'Creased';
+						setFinishingOptions(CopySettings.FOLD_NONE, CopySettings.HOLEPUNCH_NONE, CopySettings.STAPLE_NONE);
+						break;
+					}
+					default: // 'Off'
+					{
+						setFinishingOptions(CopySettings.FOLD_NONE, CopySettings.HOLEPUNCH_NONE, CopySettings.STAPLE_NONE);
+						break;
+					}
+				}				
+			}
+			
+			public function setFinishingOptions(foldType:int, punchType:int, stapleType:int):void
+			{
+				_validateMimicOnButtonBarChanged = false;
+				
+				if(foldType != CopySettings.FOLD_NONE && compFinishingOptions.bbFoldOption)
+					compFinishingOptions.bbFoldOption.selectedIndex = foldType - 1;
+				
+				
+				if(punchType == CopySettings.HOLEPUNCH_NONE && compFinishingOptions.bbHolesWithNone)
+					compFinishingOptions.bbHolesWithNone.selectedIndex = 0;
+				else if(punchType != CopySettings.HOLEPUNCH_NONE)
+				{
+					if(compFinishingOptions.bbHolesWithNone)
+						compFinishingOptions.bbHolesWithNone.selectedIndex = punchType;
+					if(compFinishingOptions.bbHoles)
+						compFinishingOptions.bbHoles.selectedIndex = punchType - 1;
+				}
+			
+				if(stapleType == CopySettings.STAPLE_NONE && compFinishingOptions.bbStapleOptionWithNone)
+					compFinishingOptions.bbStapleOptionWithNone.selectedIndex = 0;
+				else if(stapleType != CopySettings.STAPLE_NONE)
+				{
+					if(compFinishingOptions.bbStapleOptionWithNone)
+						compFinishingOptions.bbStapleOptionWithNone.selectedIndex = stapleType;
+					if(compFinishingOptions.bbStapleOption)
+						compFinishingOptions.bbStapleOption.selectedIndex = stapleType - 1;
+				}
+				
+				
+				CopySettings.get().set(CopySettings.FOLD_TYPE, foldType);
+				CopySettings.get().set(CopySettings.HOLEPUNCH_TYPE, punchType);
+				CopySettings.get().set(CopySettings.STAPLE_TYPE, stapleType);
+				
+				_validateMimicOnButtonBarChanged = true;
+			}
+			
+			protected function btnFinishingOptions_clickHandler(event:Event):void
+			{				
+				if(currentState == 'OptionsClosed') {
+					currentState = 'OptionsExpanded';
+					FlexGlobals.topLevelApplication.panelOutputSettings.currentState='CopySettingsFinishingExpanded'
+						
+				} else {
+					currentState = 'OptionsClosed';
+					FlexGlobals.topLevelApplication.panelOutputSettings.currentState='CopySettings'
+				}
+				
+				
+				
+				//this.dispatchEvent(new Event("finishingExpandedEvent"));
+			}
+			
+			private var StapleOption:String = '1 Staple - Left';
+			private var PunchOption:String = '2 Holes';
+			private var FoldOption:String = 'FoldedSingle';
+			private var ExpandedState:String = 'StapledExpanded';
+			
+			protected function bbStaples_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			protected function bbHoles_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			protected function wheelFinishing_scrollEndEventHandler(event:Event):void
+			{
+				_mimicViewRef.validateMimicView();
+				this.dispatchEvent(new Event("finishingScrollEndEvent"));
+			}
+			
+			protected function compFinishingOptions_foldOptionChangedEventHandler(event:Event):void
+			{
+				if(_validateMimicOnButtonBarChanged)
+					_mimicViewRef.validateMimicView();
+			}
+			
+			public function get currentSelectedItem():Object
+			{
+				//return wheelFinishing.contents[wheelFinishing.selectedIndex];	
+				return wheelFinishing.selectedItem;
+			}
+			
+			public function set selectedIndex(value:int):void
+			{
+				//wheelFinishing.moveToIndex(value);
+				wheelFinishing.selectedIndex = 0;
+			}
+			
+			public function setToIndex(value:int):void
+			{
+				//wheelFinishing.setToIndex(0);
+				wheelFinishing.selectedIndex = 0;
+			}
+			
+			protected function wheelFinishing_changeHandler(event:IndexChangeEvent):void
+			{
+				_previousWheelItem = _currentWheelItem;
+				_currentWheelItem = wheelFinishing.selectedItem.itemName;
+				SetFinishWheelState(wheelFinishing.selectedIndex);
+				_mimicViewRef.validateMimicView();
+				this.dispatchEvent(new Event("finishingScrollEndEvent"));
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<!-- Each finishing option is a view state.--> 
+	<s:states>
+		<s:State name="OptionsOff" />
+		<s:State name="OptionsClosed" />
+		<s:State name="OptionsExpanded" />
+	</s:states>	
+	
+	<s:HGroup id="hboxFinishOptions" top="0" left="260" height="240" verticalAlign="middle" gap="1">
+		<x:FinishingOptions id="compFinishingOptions" width.OptionsOff="0" width.OptionsClosed="0" width.OptionsExpanded="710" height="240" 
+							foldOptionChangedEvent="compFinishingOptions_foldOptionChangedEventHandler(event)"
+							stapleOptionChangedEvent="compFinishingOptions_foldOptionChangedEventHandler(event)"
+							punchOptionChangedEvent="compFinishingOptions_foldOptionChangedEventHandler(event)"/>
+		
+		<w:wButton id="btnFinishingOptions" width="46" height="150"
+				   alpha="1" alpha.OptionsOff="0"
+				   enabled="true" enabled.OptionsOff="false"
+				   icon.OptionsClosed="{General_Icons.moreClass}" icon.OptionsExpanded="{General_Icons.lessClass}" iconPlacement="right"
+				   mouseDown="Sounds.soundClick();" click="btnFinishingOptions_clickHandler(event)"
+				   topRightRadius="29" bottomRightRadius="29"
+				   skinClass="assets.skins.skinButton"/>
+	</s:HGroup>
+	
+	<w:SpinnerListContainerWithOffset top="0" width="260" height="240" skinClass="widgets.SkinSpinnerListContainer">
+		<w:layout>
+			<s:HorizontalLayout gap="0"/>
+		</w:layout>
+		<s:SpinnerList id="wheelFinishing" itemRenderer="itemRenderers.LblItemRenderer" selectedIndex="0"
+					   change="wheelFinishing_changeHandler(event)" width="100%" height="100%">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<itemRenderers:LblRendererData index="0"
+												   itemName="Collated"/>
+					<itemRenderers:LblRendererData index="1"
+												   itemName="Stapled"/>
+					<itemRenderers:LblRendererData index="2"
+												   itemName="Punched"/>
+					<itemRenderers:LblRendererData index="3"
+												   itemName="Stapled &#38; Punched"/>
+					<itemRenderers:LblRendererData index="4"
+												   itemName="Folded"/>
+					<itemRenderers:LblRendererData index="5"
+												   itemName="Creased"/>
+					<itemRenderers:LblRendererData index="6"
+												   itemName="Off"/>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:SpinnerList>
+	</w:SpinnerListContainerWithOffset>
+</s:Group>
+

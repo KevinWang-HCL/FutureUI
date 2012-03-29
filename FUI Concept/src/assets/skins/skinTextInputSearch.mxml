@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		alpha.disabledStates="0.5"
+		stateChangeComplete="trace(this.currentState);">
+	
+	<!-- host component -->
+	<fx:Metadata>[HostComponent("spark.components.TextInput")]</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import flashx.textLayout.conversion.TextConverter;
+		]]>
+	</fx:Script>
+	
+	<!-- states -->
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="disabled" stateGroups="disabledStates"/>
+		<s:State name="normalWithPrompt"/>
+		<s:State name="disabledWithPrompt" stateGroups="disabledStates"/>
+	</s:states>
+		<fx:Script>
+			<![CDATA[
+				import assets.embedded.General_Icons;
+				
+				private function preventActivate(event:SoftKeyboardEvent):void {
+					event.preventDefault();
+				}
+				
+				protected function delete_clickHandler(event:MouseEvent):void
+				{
+					textDisplay.text = "";
+					event.stopImmediatePropagation();
+					event.preventDefault();		
+					
+					if(!inKeyboardMode)
+					{
+						this.currentState = "normalWithPrompt";
+						this.stage.focus = null;
+					}
+				}
+				
+				private var inKeyboardMode:Boolean = false;
+			]]>
+		</fx:Script>
+	
+	<!-- SkinParts
+	name=promptDisplay, type=spark.core.IDisplayText, required=false
+	name=textDisplay, type=spark.core.IEditableText, required=false
+	-->
+	
+	<s:Rect top="0" bottom="0" left="0" right="0">
+		<s:fill>
+			<s:SolidColor color="0xF8F8F8" color.normal="0xc3e1ec" />
+		</s:fill>
+	</s:Rect>
+	
+	<s:Image source="{General_Icons.searchClass}" left="5" top="8"/>
+	
+	<!-- text -->
+	<!--- @copy spark.components.supportClasses.SkinnableTextBase#textDisplay -->
+	<s:RichEditableText id="textDisplay" text="" valueCommit="imgClearText.visible = (textDisplay.text.length != 0)"
+						softKeyboardActivating="preventActivate(event)"
+						verticalAlign="middle" color="0x222222"
+						left="50" right="45" top="0" bottom="0"
+						click="if(currentState != 'normal') { currentState = 'normal'; inKeyboardMode = true; }"
+						focusOut="textDisplay.text == '' ? currentState = 'normalWithPrompt' : currentState = 'normal'; inKeyboardMode = false;" />
+	
+	<s:Label id="promptDisplay" visible="false" includeInLayout="false"
+			 updateComplete="rtPromptDisplay.textFlow = TextConverter.importToFlow(promptDisplay.text, TextConverter.TEXT_FIELD_HTML_FORMAT)" />
+	
+	<!--- Defines the Label that is used for prompt text. The includeInLayout property is false so the prompt text does not affect measurement. -->
+	<s:RichText id="rtPromptDisplay" maxDisplayedLines="1"
+				verticalAlign="middle" color="0x666666"
+				mouseEnabled="false" mouseChildren="false"
+				includeIn="normalWithPrompt,disabledWithPrompt" 
+				left="50" right="68" top="0" bottom="0" />
+	
+	<s:Image id="imgClearText" source="{General_Icons.clearClass}" top="8" right="0" focusEnabled="false" click="delete_clickHandler(event)" visible="false"/>
+</s:Skin>

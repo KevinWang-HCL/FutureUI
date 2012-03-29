@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:x="components.*"
+		 xmlns:xw="widgets.*"
+		 clipAndEnableScrolling="true"
+		 cacheAsBitmap="true">
+	<!-- Cache as bitmap is - for some reason - essential for the finishing options
+		 group to be displayed correctly. If it is removed then the top right and bottom right
+		 corners of the group are 'clipped'. Should find out why at some point.-->
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.Fold_Icons;
+			
+			import integration.CopySettings;
+			
+			import spark.filters.*;
+			
+			/*  *** Fold Options ***  */
+			private var _foldOption:String = 'Single';
+			
+			[Bindable]
+			 public function get foldOption():String
+			{
+				return _foldOption;
+			}
+			
+			public function set foldOption(value:String):void
+			{
+				if(_foldOption != value)
+				{
+					_foldOption = value;
+				}
+			} 
+			
+			protected function bbFoldOption_changeHandler(event:Event):void
+			{
+				switch (bbFoldOption.selectedIndex)
+				{
+					case 0:
+					{
+						CopySettings.get().set(CopySettings.FOLD_TYPE, CopySettings.FOLD_SINGLE);
+						foldOption = 'Single';
+						break;
+					}
+					case 1:
+					{
+						CopySettings.get().set(CopySettings.FOLD_TYPE, CopySettings.FOLD_C);
+						foldOption = 'C';
+						break;
+					}
+					case 2:
+					{
+						if(foldOption == "ZHalf")
+							bbHolesWithNone.selectedIndex = 0;	
+						
+						CopySettings.get().set(CopySettings.FOLD_TYPE, CopySettings.FOLD_Z);
+						foldOption = 'Z';
+						break;
+					}
+					case 3:
+					{
+						CopySettings.get().set(CopySettings.FOLD_TYPE, CopySettings.FOLD_HALF_Z);
+						foldOption = 'ZHalf';
+						break;
+					}
+				}
+				
+				currentState = 'Folded' + foldOption;
+				this.dispatchEvent(new Event("foldOptionChangedEvent"));
+			}
+			
+			protected function bbStapleOption_changeHandler(event:Event):void
+			{
+				switch (bbStapleOption.selectedIndex)
+				{
+					case 0:
+						CopySettings.get().set(CopySettings.STAPLE_TYPE, CopySettings.STAPLE_1_LEFT);
+						break;
+					case 1:
+						CopySettings.get().set(CopySettings.STAPLE_TYPE, CopySettings.STAPLE_2); 
+						break;
+					case 2:
+						CopySettings.get().set(CopySettings.STAPLE_TYPE, CopySettings.STAPLE_3);
+						break;
+					case 3:
+						CopySettings.get().set(CopySettings.STAPLE_TYPE, CopySettings.STAPLE_4);
+						break;
+				}
+				this.dispatchEvent(new Event("stapleOptionChangedEvent"));
+			}
+			
+			protected function bbStapleOptionWithNone_selectedIndexChangedEventHandler(event:Event):void
+			{
+				switch (bbStapleOptionWithNone.selectedIndex)
+				{
+					case 0:
+						CopySettings.get().set(CopySettings.STAPLE_TYPE, CopySettings.STAPLE_NONE);
+						break;
+					case 1:
+						CopySettings.get().set(CopySettings.STAPLE_TYPE, CopySettings.STAPLE_1_LEFT);
+						break;
+					case 2:
+						CopySettings.get().set(CopySettings.STAPLE_TYPE, CopySettings.STAPLE_2); 
+						break;
+					case 3:
+						CopySettings.get().set(CopySettings.STAPLE_TYPE, CopySettings.STAPLE_3);
+						break;
+					case 4:
+						CopySettings.get().set(CopySettings.STAPLE_TYPE, CopySettings.STAPLE_4);
+						break;
+				}
+				this.dispatchEvent(new Event("stapleOptionChangedEvent"));
+			}
+			
+			protected function bbHoles_changeHandler(event:Event):void
+			{
+				switch(bbHoles.selectedIndex)
+				{
+					case 0:
+						CopySettings.get().set(CopySettings.HOLEPUNCH_TYPE, CopySettings.HOLEPUNCH_2_HOLES);
+						break;
+					case 1:
+						CopySettings.get().set(CopySettings.HOLEPUNCH_TYPE, CopySettings.HOLEPUNCH_3_HOLES);
+						break;
+					case 2:
+						CopySettings.get().set(CopySettings.HOLEPUNCH_TYPE, CopySettings.HOLEPUNCH_4_HOLES);
+						break;
+					case 3:
+						CopySettings.get().set(CopySettings.HOLEPUNCH_TYPE, CopySettings.HOLEPUNCH_4_SWEDISH);
+						break;
+				}
+				this.dispatchEvent(new Event("punchOptionChangedEvent"));
+				
+			}
+			
+			protected function bbHolesWithNone_selectedIndexChangedEventHandler(event:Event):void
+			{
+				switch(bbHolesWithNone.selectedIndex)
+				{
+					case 0:
+						CopySettings.get().set(CopySettings.HOLEPUNCH_TYPE, CopySettings.HOLEPUNCH_NONE);
+						break;
+					case 1:
+						CopySettings.get().set(CopySettings.HOLEPUNCH_TYPE, CopySettings.HOLEPUNCH_2_HOLES);
+						break;
+					case 2:
+						CopySettings.get().set(CopySettings.HOLEPUNCH_TYPE, CopySettings.HOLEPUNCH_3_HOLES);
+						break;
+					case 3:
+						CopySettings.get().set(CopySettings.HOLEPUNCH_TYPE, CopySettings.HOLEPUNCH_4_HOLES);
+						break;
+					case 4:
+						CopySettings.get().set(CopySettings.HOLEPUNCH_TYPE, CopySettings.HOLEPUNCH_4_SWEDISH);
+						break;
+				}
+				this.dispatchEvent(new Event("punchOptionChangedEvent"));
+			}
+			
+			protected function bbFold_selectedIndexChangedEventHandler(event:Event):void
+			{
+				if(bbFold.selectedIndex == 0)
+					CopySettings.get().set(CopySettings.FOLD_GROUPING, CopySettings.FOLD_AS_SET);
+				else
+					CopySettings.get().set(CopySettings.FOLD_GROUPING, CopySettings.FOLD_INDIVIDUALLY);
+			}
+			
+			protected function bbPrintImage_selectedIndexChangedEventHandler(event:Event):void
+			{
+				if(bbPrintImage.selectedIndex == 0)
+					CopySettings.get().set(CopySettings.IMAGE_SIDE, CopySettings.IMAGE_INSIDE_CREASE);
+				else
+					CopySettings.get().set(CopySettings.IMAGE_SIDE, CopySettings.IMAGE_OUTSIDE_CREASE);
+			}
+			
+			protected function tbCollated_clickHandler(event:MouseEvent):void
+			{
+				CopySettings.get().set(CopySettings.COLLATED, tbCollated.selected);
+			}
+			
+			protected function tbBookletStaple_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			protected function tbBookletLayout_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Metadata>
+		[Event(name="foldOptionChangedEvent", type="flash.events.Event")]
+		[Event(name="stapleOptionChangedEvent", type="flash.events.Event")]
+		[Event(name="punchOptionChangedEvent", type="flash.events.Event")]
+	</fx:Metadata>
+
+	
+	<!-- Each finishing option is a view state.--> 
+	<s:states>		
+		<s:State name="Stapled"/>
+		<s:State name="Punched"/>    
+		<s:State name="StapledPunched"/>
+		<s:State name="FoldedSingle"/>
+		<s:State name="FoldedC"/>    
+		<s:State name="FoldedZ"/>
+		<s:State name="FoldedZHalf"/>
+		<s:State name="Creased"/>
+	</s:states>
+
+	<s:SkinnableContainer id="contFinisherOptions" skinClass="assets.skins.skinContainerSub" width="710" height="100%">
+		<s:layout>
+			<s:HorizontalLayout/>
+		</s:layout>
+		
+		<s:VGroup id="grpFoldingOptionsCol1" width="500" height="100%" gap="10" paddingRight="8" >
+			<s:HGroup width="100%" height="65" includeIn="FoldedSingle, FoldedC, FoldedZ, FoldedZHalf">
+				<s:Label id="lblFoldOption" text="Type" styleName="settings" width="100" height="100%"/>
+
+				<xw:wToggleButtonBar id="bbFoldOption" selectedIndexChangedEvent="bbFoldOption_changeHandler(event)"
+											   width="100%" height="100%" selectedIndex="0" cornerRadius="3">
+					<xw:Buttons>
+							<fx:Object label="" icon="{Fold_Icons.fold_singleClass}" />
+							<fx:Object label="" icon="{Fold_Icons.fold_cClass}" />
+							<fx:Object label="" icon="{Fold_Icons.fold_zClass}" />
+							<fx:Object label="" icon="{Fold_Icons.fold_z_halfClass}" />									
+					</xw:Buttons>
+				</xw:wToggleButtonBar>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" height="65" includeIn="Stapled, StapledPunched, FoldedZ, FoldedZHalf">
+				<s:Label id="lblStaples" text="Staples" styleName="settings" width="100" height="100%"/>
+				
+				<xw:wToggleButtonBar id="bbStapleOptionWithNone" 
+									 selectedIndexChangedEvent="bbStapleOptionWithNone_selectedIndexChangedEventHandler(event)"
+									 width="100%" height="100%" selectedIndex="0" cornerRadius="3"
+									 includeIn="FoldedZ, FoldedZHalf">
+					<xw:Buttons>
+						<fx:Object label="" icon="{Fold_Icons.staple_noneClass}" />
+						<fx:Object label="" icon="{Fold_Icons.staple_1Class}" />
+						<fx:Object label="" icon="{Fold_Icons.staple_2Class}" />
+						<fx:Object label="" icon="{Fold_Icons.staple_3Class}" />
+						<fx:Object label="" icon="{Fold_Icons.staple_4Class}" />
+					</xw:Buttons>
+				</xw:wToggleButtonBar>
+				
+				<xw:wToggleButtonBar id="bbStapleOption" 
+									 selectedIndexChangedEvent="bbStapleOption_changeHandler(event)"
+									 width="100%" height="100%" selectedIndex="0" cornerRadius="3"
+									 includeIn="Stapled, StapledPunched">
+					<xw:Buttons>
+						<fx:Object label="" icon="{Fold_Icons.staple_1Class}" />
+						<fx:Object label="" icon="{Fold_Icons.staple_2Class}" />
+						<fx:Object label="" icon="{Fold_Icons.staple_3Class}" />
+						<fx:Object label="" icon="{Fold_Icons.staple_4Class}" />									
+					</xw:Buttons>
+				</xw:wToggleButtonBar>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" height="65" includeIn="Punched, StapledPunched, FoldedZHalf">
+				<s:Label id="lblHoles" text="Holes" styleName="settings" width="100" height="100%"/>
+
+				<xw:wToggleButtonBar id="bbHolesWithNone" 
+									 selectedIndexChangedEvent="bbHolesWithNone_selectedIndexChangedEventHandler(event)"
+									 width="100%" height="100%" selectedIndex="0" cornerRadius="3"
+									 includeIn="FoldedZHalf">
+					<xw:Buttons>
+						<fx:Object label="" icon="{Fold_Icons.holes_noneClass}" />
+						<fx:Object label="" icon="{Fold_Icons.holes_2Class}" />
+						<fx:Object label="" icon="{Fold_Icons.holes_3Class}" />
+						<fx:Object label="" icon="{Fold_Icons.holes_4Class}" />
+						<fx:Object label="" icon="{Fold_Icons.holes_4_swedishClass}" />									
+					</xw:Buttons>
+				</xw:wToggleButtonBar>
+				
+				<xw:wToggleButtonBar id="bbHoles" 
+									 selectedIndexChangedEvent="bbHoles_changeHandler(event)"
+									 width="100%" height="100%" selectedIndex="0" cornerRadius="3"
+									 includeIn="Punched, StapledPunched">
+					<xw:Buttons>
+						<fx:Object label="" icon="{Fold_Icons.holes_2Class}" />
+						<fx:Object label="" icon="{Fold_Icons.holes_3Class}" />
+						<fx:Object label="" icon="{Fold_Icons.holes_4Class}" />
+						<fx:Object label="" icon="{Fold_Icons.holes_4_swedishClass}" />									
+					</xw:Buttons>
+				</xw:wToggleButtonBar>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" height="65" includeIn="FoldedSingle, Creased">
+				<s:Label id="lblFold" text="Fold" text.Creased="Crease" styleName="settings" width="100" height="100%"/>
+				
+				<xw:wToggleButtonBar id="bbFold" 
+									 width="100%" height="100%" selectedIndex="0" cornerRadius="3"
+									 selectedIndexChangedEvent="bbFold_selectedIndexChangedEventHandler(event)">
+					<xw:Buttons>
+						<fx:Object label="As a Set" icon="{Fold_Icons.fold_as_setClass}" />
+						<fx:Object label="Individually" icon="{Fold_Icons.fold_individuallyClass}" />									
+					</xw:Buttons>
+				</xw:wToggleButtonBar>						
+			</s:HGroup>
+			
+			
+			<s:HGroup width="100%" height="65" includeIn="FoldedSingle, FoldedC, Creased">
+				<s:Label id="lblPrintImage" text="Image" styleName="settings" width="100" height="100%"/>
+
+				<xw:wToggleButtonBar id="bbPrintImage"
+									  width="100%" height="100%" selectedIndex="0" cornerRadius="3"
+									  selectedIndexChangedEvent="bbPrintImage_selectedIndexChangedEventHandler(event)">
+					<xw:Buttons>
+						<fx:Object label="Inside" icon="{Fold_Icons.fold_image_insideClass}" />
+						<fx:Object label="Outside" icon="{Fold_Icons.fold_image_outsideClass}" />									
+					</xw:Buttons>
+				</xw:wToggleButtonBar>							
+			</s:HGroup>		
+		</s:VGroup>
+		
+		<s:VGroup id="grpFoldingOptionsCol2" width="178" height="100%" gap="10">
+			<xw:wToggleButton id="tbCollated"
+								   label="Collated"
+								   width="100%" height="65"
+								   selected="true"
+								   cornerRadius="3" textAlignment="left"
+								   click="tbCollated_clickHandler(event)"/>
+			
+			<xw:wToggleButton id="tbBookletStaple" includeIn="FoldedSingle, Creased"
+								   label="Booklet Staple"
+								   width="100%" height="65"
+								   cornerRadius="3" textAlignment="left"
+								   click="tbBookletStaple_clickHandler(event)"/>
+			
+			<xw:wToggleButton id="tbBookletLayout" includeIn="FoldedSingle, Creased"
+								   label="Booklet Layout"
+								   width="100%" height="65"
+								   cornerRadius="3" textAlignment="left"
+								   click="tbBookletLayout_clickHandler(event)"/>				
+		</s:VGroup>
+	</s:SkinnableContainer>
+
+</s:Group>
+

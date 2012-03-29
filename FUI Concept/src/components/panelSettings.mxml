@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:itemRenderers="itemRenderers.*"
+		title="SettingsPanel" 
+		xmlns:components="components.*"
+		currentState="Connection" xmlns:widgets="widgets.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import integration.ApplicationSettings;
+			
+			private var onBackCallback:Function = null;
+			
+			protected function toggleConnectionBtn_clickHandler(event:MouseEvent):void
+			{
+				ApplicationSettings.get().set(ApplicationSettings.LOCAL_MODE_ENABLED, toggleConnectionBtn.selected);
+			}
+			
+			public function set backBtnCallback(value:Function):void
+			{
+				onBackCallback = value;
+			}
+			
+			protected function backBtn_clickHandler(event:MouseEvent):void
+			{
+				if(onBackCallback != null)
+					onBackCallback(event);
+			}
+			
+			protected function scrollItemClicked(oldIndex:int, newIndex:int):void
+			{
+				trace(newIndex);
+				switch(newIndex)
+				{
+					case 0:
+						currentState = "General";
+						break;
+					case 1:
+						currentState = "Connection";
+						break;
+					case 2:
+						currentState = "Local";
+						break;
+					default:
+						break;
+				}
+			}
+			
+			protected function listTitleFormatter(obj:Object):String
+			{
+				if(!obj)
+					return "";
+				
+				return obj.itemData.title;
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:ArrayCollection id="sectionListData">
+			<itemRenderers:ScrollerLabelRendererData title="General"/>
+			<itemRenderers:ScrollerLabelRendererData title="Connection"/>
+			<itemRenderers:ScrollerLabelRendererData title="Local"/>
+		</s:ArrayCollection>
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="General"/>
+		<s:State name="Connection"/>
+		<s:State name="Local"/>
+	</s:states>
+	
+	<s:layout>
+		<s:HorizontalLayout/>
+	</s:layout>
+	
+	<s:Group width="25%" height="100%">
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+		
+		<widgets:BounceScroller id="subsectionList"
+								   width="100%" height="93%"
+								   scrollList="{sectionListData}"
+								   labelFieldFunction="listTitleFormatter"
+								   itemRenderer="itemRenderers.ScrollerLabelRenderer"
+								   itemActivated="scrollItemClicked"/>
+		
+		<s:Button id="backBtn"
+				  label="Back"
+				  width="100%" height="7%"
+				  click="backBtn_clickHandler(event)"/>
+	</s:Group>
+	
+	<s:Group width="75%" height="100%">
+		
+		<s:Group id="generalGroup"
+				 includeIn="General">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			<s:Label text="General Settings"/>	
+		</s:Group>
+		
+		<s:Group id="connectionGroup"
+				 includeIn="Connection">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>	
+			<widgets:wToggleButton id="toggleConnectionBtn"
+								   label="Use Remote Connection"
+								   height="60"
+								   selected="{ApplicationSettings.get().get(ApplicationSettings.LOCAL_MODE_ENABLED)}"
+								   click="toggleConnectionBtn_clickHandler(event)"/>
+		</s:Group>
+		
+		<s:Group id="localGroup"
+				 includeIn="Local">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			<s:Label text="Local Mode Settings"/>
+		</s:Group>
+		
+	</s:Group>
+	
+</s:View>

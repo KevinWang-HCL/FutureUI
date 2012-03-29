@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		left="0" right="0" top="0" bottom="0">
+	<!-- host component -->
+	<fx:Metadata>
+		[HostComponent("spark.components.SkinnableContainer")]
+	</fx:Metadata>
+	
+	<!-- states -->
+	<s:states>
+		<s:State name="disabled" />
+		<s:State name="normal" />
+	</s:states>
+	
+	<!--- Defines the appearance of the SkinnableContainer class's background. -->	
+	<!-- Page Shadow -->
+	<s:Rect id="rectShadow" top="0" bottom="-2" left="-2" right="0"
+			topLeftRadiusX="10" bottomLeftRadiusX="10"
+			topRightRadiusX="20" topRightRadiusY="5"
+			bottomRightRadiusX="20" bottomRightRadiusY="5">
+		<s:fill>
+			<s:SolidColor color="0x000000" alpha="0.5"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Rect top="0" bottom="0" left="0" right="0"
+			topLeftRadiusX="10" bottomLeftRadiusX="10"
+			topRightRadiusX="20" topRightRadiusY="5"
+			bottomRightRadiusX="20" bottomRightRadiusY="5">
+		<s:fill>			
+			<s:SolidColor color="0xB1BAC0" />
+		</s:fill>
+	</s:Rect>
+	
+	<!-- SkinParts name=contentGroup, type=spark.components.Group, required=false -->
+	<s:Group id="contentGroup" top="0" bottom="-1" left="0" right="0" maskType="clip">
+		<s:mask>
+			<s:Group>
+				<s:Rect width="{this.width}" height="{this.height}"
+						topLeftRadiusX="10" bottomLeftRadiusX="10"
+						topRightRadiusX="20" topRightRadiusY="5"
+						bottomRightRadiusX="20" bottomRightRadiusY="5">
+					<s:fill>
+						<s:SolidColor color="0x000000" />
+					</s:fill>			
+				</s:Rect>
+			</s:Group>
+		</s:mask>
+	</s:Group>
+</s:Skin>

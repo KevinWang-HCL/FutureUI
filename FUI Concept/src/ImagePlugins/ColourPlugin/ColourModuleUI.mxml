@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MimicPlugin:ImageEditModuleUI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							   xmlns:s="library://ns.adobe.com/flex/spark" 
+							   xmlns:MimicPlugin="MimicPlugin.*" 
+							   xmlns:itemRenderers="itemRenderers.*"
+							   xmlns:widgets="widgets.*"
+							   width="100%"
+							   currentState="customCMYK"
+							   creationComplete="(imageEditModule as ColourModule).setActiveEffect(ColourModule.CMYK_EFFECT);">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import spark.events.IndexChangeEvent;
+			import spark.events.TrackBaseEvent;
+			import spark.filters.DropShadowFilter;
+			
+			[Bindable]
+			private var dsfLabel:DropShadowFilter = new DropShadowFilter(0, 90, 0, 1, 2, 2);
+			
+			public override function get requiredHeight():Number
+			{
+				return 297;
+			}
+			
+			public override function reset():void
+			{
+				this.currentState = "noEffect";
+				if(colourSelectorWheel)
+					colourSelectorWheel.selectedIndex = 0;
+				
+				if(cyanSlider) //If the cyan sliders have been 'initialised' (i.e. the state has been set before)
+				{
+					cyanSlider.value = 0;
+					magentaSlider.value = 0;
+					yellowSlider.value = 0;
+					blackSlider.value = 0;
+				}
+				
+				if(levelSlider)
+					levelSlider.value = 0;
+			}
+			
+			protected function colourSelectorWheel_changeHandler(event:IndexChangeEvent):void
+			{
+				switch(event.newIndex)
+				{
+					case 0: //None
+						(imageEditModule as ColourModule).setActiveEffect(ColourModule.NO_EFFECT);
+						this.currentState = "noEffect";
+						break;
+					case 1: //Custom CMYK
+						(imageEditModule as ColourModule).setActiveEffect(ColourModule.CMYK_EFFECT);
+						this.currentState = "customCMYK";
+						break;
+					case 2: //Warm
+						(imageEditModule as ColourModule).setActiveEffect(ColourModule.CMYK_EFFECT);
+						this.currentState = "warmCMYK";
+						var warmEffect:CMYKColourEffect = (imageEditModule as ColourModule).getActiveEffect() as CMYKColourEffect;
+						warmEffect.setProperty(CMYKColourEffect.CYAN_OFFSET_PROP, -0.375);
+						warmEffect.setProperty(CMYKColourEffect.MAGENTA_OFFSET_PROP, 0.375);
+						imageEditHost.updateCachedImage([warmEffect.filter]);
+						//TODO calc 'difference' between C/M/Y/K channels to give a warm effect.
+						break;
+					case 3: //Cool
+						(imageEditModule as ColourModule).setActiveEffect(ColourModule.CMYK_EFFECT);
+						this.currentState = "coolCMYK";
+						var coolEffect:CMYKColourEffect = (imageEditModule as ColourModule).getActiveEffect() as CMYKColourEffect;
+						coolEffect.setProperty(CMYKColourEffect.CYAN_OFFSET_PROP, 0.375);
+						coolEffect.setProperty(CMYKColourEffect.MAGENTA_OFFSET_PROP, -0.375);
+						imageEditHost.updateCachedImage([coolEffect.filter]);
+						//TODO calc 'difference' between C/M/Y/K channels to give a cool effect.
+						break;
+					case 4: //Sepia
+						(imageEditModule as ColourModule).setActiveEffect(ColourModule.SEPIA_EFFECT);
+						this.currentState = "sepia";
+						break;
+					case 5: //Greyscale
+						(imageEditModule as ColourModule).setActiveEffect(ColourModule.GRAYSCALE_EFFECT);
+						this.currentState = "grayscale";
+						break;
+				}
+			}
+			
+			protected function cyanSlider_thumbReleaseHandler(event:TrackBaseEvent):void
+			{
+				var effect:CMYKColourEffect = (imageEditModule as ColourModule).getActiveEffect() as CMYKColourEffect;
+				effect.setProperty(CMYKColourEffect.CYAN_OFFSET_PROP, cyanSlider.value / 100.0);
+				imageEditHost.updateCachedImage([effect.filter]);
+			}
+			
+			protected function yellowSlider_thumbReleaseHandler(event:TrackBaseEvent):void
+			{
+				var effect:CMYKColourEffect = (imageEditModule as ColourModule).getActiveEffect() as CMYKColourEffect;
+				effect.setProperty(CMYKColourEffect.YELLOW_OFFSET_PROP, yellowSlider.value / 100.0);
+				imageEditHost.updateCachedImage([effect.filter]);
+			}
+			
+			protected function magentaSlider_thumbReleaseHandler(event:TrackBaseEvent):void
+			{
+				var effect:CMYKColourEffect = (imageEditModule as ColourModule).getActiveEffect() as CMYKColourEffect;
+				effect.setProperty(CMYKColourEffect.MAGENTA_OFFSET_PROP, magentaSlider.value / 100.0);
+				imageEditHost.updateCachedImage([effect.filter]);
+			}
+			
+			protected function blackSlider_thumbReleaseHandler(event:TrackBaseEvent):void
+			{
+				var effect:CMYKColourEffect = (imageEditModule as ColourModule).getActiveEffect() as CMYKColourEffect;
+				effect.setProperty(CMYKColourEffect.KEY_OFFSET_PROP, blackSlider.value / 100.0);
+				imageEditHost.updateCachedImage([effect.filter]);
+			}
+			
+			protected function levelSlider_thumbReleaseHandler(event:TrackBaseEvent):void
+			{
+				switch(this.currentState)
+				{
+					case "warmCMYK":
+						var warmEffect:CMYKColourEffect = (imageEditModule as ColourModule).getActiveEffect() as CMYKColourEffect;
+						warmEffect.setProperty(CMYKColourEffect.CYAN_OFFSET_PROP, -0.375 - (0.125 * (levelSlider.value/10.0)));
+						warmEffect.setProperty(CMYKColourEffect.MAGENTA_OFFSET_PROP, 0.375 + (0.125 * (levelSlider.value/10.0)));
+						imageEditHost.updateCachedImage([warmEffect.filter]);
+						break;
+					case "coolCMYK":
+						var coolEffect:CMYKColourEffect = (imageEditModule as ColourModule).getActiveEffect() as CMYKColourEffect;
+						coolEffect.setProperty(CMYKColourEffect.CYAN_OFFSET_PROP, 0.375 + (0.125 * (levelSlider.value/10.0)));
+						coolEffect.setProperty(CMYKColourEffect.MAGENTA_OFFSET_PROP, -0.375 - (0.125 * (levelSlider.value/10.0)));
+						imageEditHost.updateCachedImage([coolEffect.filter]);
+						break;
+					case "sepia":
+						var sepEffect:SepiaColourEffect = (imageEditModule as ColourModule).getActiveEffect() as SepiaColourEffect;
+						sepEffect.setProperty(SepiaColourEffect.BRIGHTNESS, levelSlider.value);
+						imageEditHost.updateCachedImage([sepEffect.filter]);
+						break;
+					case "grayscale":
+						var gsEffect:GrayscaleColourEffect = (imageEditModule as ColourModule).getActiveEffect() as GrayscaleColourEffect;
+						gsEffect.setProperty(GrayscaleColourEffect.BRIGHTNESS, levelSlider.value);
+						imageEditHost.updateCachedImage([gsEffect.filter]);
+						break;
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<MimicPlugin:states>
+		<s:State name="noEffect"/>
+		<s:State name="customCMYK"/>
+		<s:State name="warmCMYK"/>
+		<s:State name="coolCMYK"/>
+		<s:State name="sepia"/>
+		<s:State name="grayscale"/>
+	</MimicPlugin:states>
+	
+	<s:BorderContainer skinClass="assets.skins.skinScrollWheelContainerVertical" 
+					   width="217" height="202"
+					   top="78" right="10">
+		<widgets:SpinnerListContainerWithOffset width="213" top="0" bottom="0"
+										  skinClass="widgets.SkinSpinnerListContainer">
+			<s:SpinnerList id="colourSelectorWheel"
+						   width="213"
+						   selectedIndex="1"
+						   itemRenderer="itemRenderers.LblItemRenderer" 
+						   change="colourSelectorWheel_changeHandler(event)">
+				<s:dataProvider>
+					<s:ArrayCollection>
+						<itemRenderers:LblRendererData index="0" itemName="None"/>
+						<itemRenderers:LblRendererData index="1" itemName="Custom CMYK"/>
+						<itemRenderers:LblRendererData index="2" itemName="Warm"/>
+						<itemRenderers:LblRendererData index="3" itemName="Cool"/>
+						<itemRenderers:LblRendererData index="4" itemName="Sepia"/>
+						<itemRenderers:LblRendererData index="5" itemName="Grayscale"/>
+					</s:ArrayCollection>
+				</s:dataProvider>
+			</s:SpinnerList>
+		</widgets:SpinnerListContainerWithOffset>
+	</s:BorderContainer>
+	
+	<!--<s:HGroup top="15" bottom="10" left="237" right="10"
+			  includeIn="customCMYK">
+		<s:VGroup width="100%">
+			
+			<s:Label text="Cyan {cyanSlider.value > 0 ? '+' + cyanSlider.value : cyanSlider.value}" width="100%" styleName="widgetTitle" filters="{[dsfLabel]}"/>
+			<widgets:wStylableHSlider id="cyanSlider" skinClass="assets.skins.skinHSlider"
+								styleName="cmykSlider"
+								width="100%" maximum="100" minimum="-100" stepSize="1" value="0"
+								thumbRelease="cyanSlider_thumbReleaseHandler(event)"
+								showDataTip="false"
+								trackStartColor="0x000000"
+								trackEndColor="0x00AEEF"/>
+			
+			<s:Spacer height="10" />
+			
+			<s:Label text="Yellow {yellowSlider.value > 0 ? '+' + yellowSlider.value : yellowSlider.value}" width="100%" styleName="widgetTitle" filters="{[dsfLabel]}"/>
+			<widgets:wStylableHSlider id="yellowSlider" skinClass="assets.skins.skinHSlider"
+								styleName="cmykSlider"
+								width="100%" maximum="100" minimum="-100" stepSize="1" value="0"
+								thumbRelease="yellowSlider_thumbReleaseHandler(event)"
+								showDataTip="false"
+								trackStartColor="0x000000"
+								trackEndColor="0xFFF200"/>	
+		</s:VGroup>
+		
+		<s:VGroup width="100%">
+			
+			<s:Label text="Magenta {magentaSlider.value > 0 ? '+' + magentaSlider.value : magentaSlider.value}" width="100%" styleName="widgetTitle" filters="{[dsfLabel]}"/>
+			<widgets:wStylableHSlider id="magentaSlider" skinClass="assets.skins.skinHSlider"
+								styleName="cmykSlider" 
+								width="100%" maximum="100" minimum="-100" stepSize="1" value="0"
+								thumbRelease="magentaSlider_thumbReleaseHandler(event)"
+								showDataTip="false"
+								trackStartColor="0x000000"
+								trackEndColor="0xEC008C"/>
+			
+			<s:Spacer height="10" />
+			
+			<s:Label text="Black {blackSlider.value > 0 ? '+' + blackSlider.value : blackSlider.value}" width="100%" styleName="widgetTitle" filters="{[dsfLabel]}"/>
+			<widgets:wStylableHSlider id="blackSlider" skinClass="assets.skins.skinHSlider"
+								styleName="cmykSlider"
+								width="100%" maximum="100" minimum="-100" stepSize="1" value="0"
+								thumbRelease="blackSlider_thumbReleaseHandler(event)"
+								showDataTip="false"
+								trackStartColor="0x000000"
+								trackEndColor="0x231F20"/>
+		</s:VGroup>
+	</s:HGroup>-->
+	
+	<s:VGroup top="10" bottom="10" left="10" right="10" gap="5"
+			  includeIn="customCMYK">
+		<s:HGroup width="100%" 
+				  height="66" 
+				  gap="0">
+			<s:Label text="Cyan" 
+					 styleName="widgetTitle" 
+					 filters="{[dsfLabel]}"
+					 width="15%" height="100%"
+					 verticalAlign="middle"
+					 textAlign="right"/>
+			<s:Label text=" {cyanSlider.value > 0 ? '+' + cyanSlider.value : cyanSlider.value}"
+					 styleName="widgetTitle" 
+					 filters="{[dsfLabel]}"
+					 width="6%" height="100%"
+					 verticalAlign="middle"
+					 textAlign="right"/>
+			<s:Spacer width="5"/>
+			<widgets:wStylableHSlider id="cyanSlider" skinClass="assets.skins.skinHSlider"
+									  styleName="cmykSlider"
+									  maximum="100" minimum="-100" stepSize="1" value="0"
+									  thumbRelease="cyanSlider_thumbReleaseHandler(event)"
+									  showDataTip="false"
+									  trackStartColor="0x000000"
+									  trackEndColor="0x00AEEF"
+									  width="55%"/>
+		</s:HGroup>
+		
+		<s:HGroup width="100%" 
+				  height="66" 
+				  gap="0">
+			<s:Label text="Magenta" 
+					 styleName="widgetTitle" 
+					 filters="{[dsfLabel]}"
+					 width="15%" height="100%"
+					 verticalAlign="middle"
+					 textAlign="right"/>
+			<s:Label text=" {magentaSlider.value > 0 ? '+' + magentaSlider.value : magentaSlider.value}"
+					 styleName="widgetTitle" 
+					 filters="{[dsfLabel]}"
+					 width="6%" height="100%"
+					 verticalAlign="middle"
+					 textAlign="right"/>
+			<s:Spacer width="5"/>
+			<widgets:wStylableHSlider id="magentaSlider" skinClass="assets.skins.skinHSlider"
+									  styleName="cmykSlider" 
+									  maximum="100" minimum="-100" stepSize="1" value="0"
+									  thumbRelease="magentaSlider_thumbReleaseHandler(event)"
+									  showDataTip="false"
+									  trackStartColor="0x000000"
+									  trackEndColor="0xEC008C"
+									  width="55%"/>
+					   
+		</s:HGroup>
+		
+		
+		<s:HGroup width="100%" 
+				  height="66" 
+				  gap="0">
+			<s:Label text="Yellow"
+					 styleName="widgetTitle" 
+					 filters="{[dsfLabel]}"
+					 width="15%" height="100%"
+					 verticalAlign="middle"
+					 textAlign="right"/>
+			<s:Label text=" {yellowSlider.value > 0 ? '+' + yellowSlider.value : yellowSlider.value}"
+					 styleName="widgetTitle" 
+					 filters="{[dsfLabel]}"
+					 width="6%" height="100%"
+					 verticalAlign="middle"
+					 textAlign="right"/>
+			<s:Spacer width="5"/>
+			<widgets:wStylableHSlider id="yellowSlider" skinClass="assets.skins.skinHSlider"
+									  styleName="cmykSlider"
+									  maximum="100" minimum="-100" stepSize="1" value="0"
+									  thumbRelease="yellowSlider_thumbReleaseHandler(event)"
+									  showDataTip="false"
+									  trackStartColor="0x000000"
+									  trackEndColor="0xFFF200"
+									  width="55%"/>	
+		</s:HGroup>
+		
+		
+		<s:HGroup width="100%" 
+				  height="66" 
+				  gap="0">
+			<s:Label text="Black" 
+					 styleName="widgetTitle" 
+					 filters="{[dsfLabel]}"
+					 width="15%" height="100%"
+					 verticalAlign="middle"
+					 textAlign="right"/>
+			<s:Label text=" {blackSlider.value > 0 ? '+' + blackSlider.value : blackSlider.value}"
+					 styleName="widgetTitle" 
+					 filters="{[dsfLabel]}"
+					 width="6%" height="100%"
+					 verticalAlign="middle"
+					 textAlign="right"/>
+			<s:Spacer width="5"/>
+			<widgets:wStylableHSlider id="blackSlider" skinClass="assets.skins.skinHSlider"
+									  styleName="cmykSlider"
+									  maximum="100" minimum="-100" stepSize="1" value="0"
+									  thumbRelease="blackSlider_thumbReleaseHandler(event)"
+									  showDataTip="false"
+									  trackStartColor="0x000000"
+									  trackEndColor="0x231F20"
+									  width="55%"/>
+		</s:HGroup>
+	</s:VGroup>
+	
+	<s:HGroup id="singleSliderGroup" 
+			  width="100%"
+			  left="10"
+			  verticalCenter="0"
+			  excludeFrom="noEffect, customCMYK"
+			  gap="10">
+		<s:Label text.warmCMYK="Warm Tone"
+				 text.coolCMYK="Cool Tone"
+				 text.grayscale="Grayscale Tone"
+				 text.sepia="Sepia Tone"
+				 width="20%"
+				 textAlign="right"
+				 height="66"
+				 verticalAlign="middle"
+				 styleName="widgetTitle" 
+				 filters="{[dsfLabel]}"/>
+		<s:Spacer height="5"/>
+		<widgets:wStylableHSlider id="levelSlider" 
+								  skinClass="assets.skins.skinHSlider"
+								  width="55%" maximum="10" minimum="-10" stepSize="1" value="0"
+								  thumbRelease="levelSlider_thumbReleaseHandler(event)"/>
+	</s:HGroup>
+</MimicPlugin:ImageEditModuleUI>

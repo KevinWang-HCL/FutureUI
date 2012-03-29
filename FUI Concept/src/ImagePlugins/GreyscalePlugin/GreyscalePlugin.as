@@ -1,0 +1,51 @@
+package ImagePlugins.GreyscalePlugin
+{
+	import MimicPlugin.ImageEditModule;
+	import MimicPlugin.ImageEditModuleUI;
+	import MimicPlugin.ImageEditPlugin;
+	import MimicPlugin.ImageModuleHost;
+	
+	public class GreyscalePlugin implements ImageEditPlugin
+	{
+		private var module:GreyscaleModule;
+		private var ui:GreyscaleModuleUI;
+		
+		public function GreyscalePlugin(moduleHost:ImageModuleHost)
+		{
+			ui = new GreyscaleModuleUI();
+			module = new GreyscaleModule(ui);
+			ui.imageEditHost = moduleHost;
+			ui.imageEditModule = module;
+		}
+		
+		public function getName():String
+		{
+			return "Greyscale";
+		}
+		
+		public function getAuthor():String
+		{
+			return "Me";
+		}
+		
+		public function getVersion():String
+		{
+			return "v1.0.0";
+		}
+		
+		public function getEditModule():ImageEditModule
+		{
+			return module;
+		}
+		
+		public function hasUI():Boolean
+		{
+			return false;
+		}
+		
+		public function getEditModuleUI():ImageEditModuleUI
+		{
+			return ui;
+		}
+	}
+}

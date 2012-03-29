@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:fb="http://ns.adobe.com/flashbuilder/2009" alpha.disabled="0.5">
+	<fx:Metadata>[HostComponent("menu.CustomMenu")]</fx:Metadata>
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<!-- *** Defines the menu surround skin *** -->
+	
+	<!--- Defines the appearance of the SkinnableContainer class's background. -->
+	<s:Rect left="0" right="0" top="0" bottom="0" radiusX="3">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0x3DA6EA" ratio="0"/>
+				<s:GradientEntry color="0x3793D0" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		
+		<s:filters>
+			<s:DropShadowFilter angle="90" alpha="0.8" blurX="2" blurY="2"
+								color="0x000000" distance="1" quality="2" strength="1" />			
+		</s:filters>
+		
+	</s:Rect>
+	
+	<!--
+	Note: setting the minimum size to 0 here so that changes to the host component's
+	size will not be thwarted by this skin part's minimum size.   This is a compromise,
+	more about it here: http://bugs.adobe.com/jira/browse/SDK-21143
+	-->
+	<!--- @copy spark.components.SkinnableContainer#contentGroup -->
+	<s:Group id="contentGroup" left="3" right="3" top="3" bottom="3" minWidth="58" minHeight="58"/>
+</s:Skin>

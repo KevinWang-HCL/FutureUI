@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<apps>
+	<app name="Flickr" installed="true" image="assets/images/apps/flickr_yahoo_logo_png.png" style="Flickr">
+		<setting consumerKey="2ac3ff9cd7e76e7a60661a42ff8cc0d9" 
+		    consumerSecret="4dd91bfc714f831e"
+		    authToken="72157628998345971-c52ee85a9b0ed68e" />
+		    <!-- authToken="72157628403680171-a3a4dfba1811cd9c"/> -->
+	</app>
+	<app name="Twitter" installed="true" image="assets/images/apps/twitter_newbird_blue.png" style="Twitter">
+		<setting consumerKey="9AYRbgeqdSI7khrfP8SdQ" 
+		    consumerSecret="Qy72lZhgaza7HDkc5Ur32ljdJ1iSC7ysNHhy1XPrh50" 
+		    oauthToken="440730271-KtEq2FmXIvZz3kYQfyqrxeoG99ADYIYd3jHHs" 
+		    oauthTokenSecret="tIbbyCMWt6uUoILTBxIuOCNe3y7WHJJ7JYk1cUjB0"
+		    twitterUserName="FUI_User"
+		    twitterPassword="371148"/>
+	</app>
+</apps>
+

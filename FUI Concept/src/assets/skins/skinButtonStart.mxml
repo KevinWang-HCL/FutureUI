@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkButtonSkin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+				   minWidth="58" minHeight="58">
+	
+	<fx:Metadata>
+		<![CDATA[ 
+		/** 
+		* @copy spark.skins.spark.ApplicationSkin#hostComponent
+		*/
+		[HostComponent("spark.components.Button")]
+		]]>
+	</fx:Metadata>
+	
+	<!-- states -->
+	<s:states>
+		<s:State name="up" />
+		<s:State name="over" />
+		<s:State name="down" />
+		<s:State name="disabled" />
+		<fx:Script>
+			<![CDATA[
+				import assets.embedded.Widget_Images;
+			]]>
+		</fx:Script>
+	</s:states>
+	
+	
+	<!--*** Round Start button and mask ***-->
+	<s:Group id="maskArea" width="198" height="200" maskType="clip" top="0" top.down="1">
+		<s:BitmapImage source="{Widget_Images.startButtonClass}" width="198" height="200" />
+		<s:mask>			
+			<s:Group>
+				<s:Ellipse id="hitRoundArea" width="194" height="196" top="1" left="2">
+					<s:fill>
+						<s:SolidColor color="0x000000"/>
+					</s:fill>
+				</s:Ellipse>				
+			</s:Group>
+			
+		</s:mask>
+	</s:Group>
+	
+	<!--*** State shading ***-->
+	<s:Ellipse width="194" height="196" top="1" top.down="2" left="2">
+		<s:fill>
+			<s:SolidColor color="0x000000" alpha="0" alpha.disabled="0.3"
+						  color.down="0xFFFFFF" alpha.down="0.1"/>
+		</s:fill>
+	</s:Ellipse>
+</s:SparkButtonSkin>

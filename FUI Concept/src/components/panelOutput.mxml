@@ -1,0 +1,1450 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:d="http://ns.adobe.com/fxg/2008/dt"
+		 xmlns:graphics="assets.graphics.*"
+		 xmlns:x="components.*"
+		 xmlns:w="widgets.*"
+		 left="0" right="0" height="290" height.StartMenu="218" currentState="StartMenu"
+		 implements="integration.ISettingsObserver" xmlns:itemRenderers="itemRenderers.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.Color_Icons;
+			import assets.embedded.General_Icons;
+			import assets.embedded.Info_Graphics;
+			import assets.embedded.SendStore_Icons;
+			import assets.embedded.Side_Icons;
+			import assets.embedded.Sounds;
+			import assets.embedded.Textures;
+			
+			import com.google.zxing.BarcodeFormat;
+			import com.google.zxing.MultiFormatWriter;
+			import com.google.zxing.common.ByteMatrix;
+			
+			import events.KeypadEvent;
+			
+			import flashx.textLayout.conversion.TextConverter;
+			
+			import integration.ApplicationSettings;
+			import integration.CopySettings;
+			
+			import itemRenderers.AppDetailItemRenderer;
+			import itemRenderers.AppListItemRenderer;
+			import itemRenderers.AppTwitterItemRenderer;
+			import itemRenderers.ScrollListEmailFaxItemRenderer;
+			import itemRenderers.ScrollListItemRenderer;
+			
+			import mimicViewComponent.MimicViewer;
+			import mimicViewComponent.PaperType;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.rpc.events.ResultEvent;
+			
+			import spark.filters.*;
+			
+			import widgets.AppBase;
+			import widgets.AppHelper;
+			import widgets.ScrollListItemBaseRenderer;
+			
+			import xerox.XDS_Main;
+			
+			private var _mimicViewRef:MimicViewer;
+			private var _xdsMainRef:XDS_Main;
+			private var appHelper:AppHelper = new AppHelper;
+			
+			[Bindable]
+			public function get mimicViewReference():MimicViewer
+			{
+				return _mimicViewRef;
+			}
+			
+			public function set mimicViewReference(value:MimicViewer):void
+			{
+				_mimicViewRef = value;
+			}
+			
+			public function set xdsMainReference(value:XDS_Main):void
+			{
+				_xdsMainRef = value;
+			}
+			
+			[Bindable]
+			private var dsfLabel:spark.filters.DropShadowFilter = new spark.filters.DropShadowFilter(0, 90, 0, 1, 2, 2);			
+			
+			protected function wheelFinishing_FinishingExpandedEventHandler(event:Event):void
+			{
+				if (wheelFinishing.currentState == 'OptionsExpanded') {
+					currentState = 'CopySettingsFinishingExpanded';
+				} else {
+					currentState = 'CopySettings';
+				}
+			}
+			
+			
+			[Bindable]
+			private var sendToItemsData : ArrayCollection = new ArrayCollection;
+			
+			
+			/* *** Numeric Keypad handlers for the copies count spinner *** */
+			private var keyPadFirstOpen:Boolean = true;
+			
+			protected function numpadCopies_KeyPadPressHandler(event:KeypadEvent):void
+			{
+				var strValue:String = String(spinCopies.value);
+				
+				if (keyPadFirstOpen) {
+					strValue = event.KeyPressed;
+					keyPadFirstOpen = false;
+				} else {
+					strValue = strValue + event.KeyPressed;
+					if (strValue.length > 4) strValue = strValue.substring(1, 5);
+				}
+				
+				spinCopies.value = Number(strValue);
+			}
+			
+			protected function numpadCopies_KeyPadDeleteHandler(event:KeypadEvent):void
+			{
+				var strValue:String = String(spinCopies.value);
+				var newValue:Number = Number(strValue.substring(0, strValue.length-1));
+				
+				if (newValue == 0) newValue = 1;
+				spinCopies.value = newValue;
+			}
+			
+			protected function numpadCopies_KeyPadCloseHandler(event:KeypadEvent):void
+			{
+				closeKeypad();
+			}
+			
+			private function closeKeypad():void {
+				keyPadFirstOpen = true;
+				currentState='CopySettings';
+			}
+			
+			public function notifySettingChanged(name:String, value:*):void
+			{
+				
+			}
+			
+			protected function wheelPaper_selectedIndexChangedHandler(event:Event):void
+			{
+				var currPaperOrientation:int = CopySettings.get().get(CopySettings.MIMIC_FORMATTED_PAPER_TYPES)[CopySettings.get().get(CopySettings.PAPER_TYPE)].orientation;
+				var newOrientation:int = CopySettings.get().get(CopySettings.MIMIC_FORMATTED_PAPER_TYPES)[wheelPaper.selectedIndex].orientation;
+				var sameOrientation:Boolean = currPaperOrientation == newOrientation;
+				
+				CopySettings.get().set(CopySettings.PAPER_TYPE, wheelPaper.selectedIndex);
+				//If the image source of the mimic isn't changing, the just validate, else we'll need to wait for
+				//the image to change source before we can validate successfully.
+				if(!ApplicationSettings.get().get(ApplicationSettings.USE_LOCAL_MIMIC) || sameOrientation)
+					_mimicViewRef.validateMimicView();
+				else
+					_mimicViewRef.addEventListener("localMimicChangedEvent", onLocalMimicChangedEvent);
+				copySettingsChanged = true;
+			}
+			
+			protected function onLocalMimicChangedEvent(evt:Event):void
+			{
+				_mimicViewRef.validateMimicView();
+				_mimicViewRef.removeEventListener("localMimicChangedEvent", onLocalMimicChangedEvent);
+			}
+			
+			/* protected function wheelPaper_scrollItemSelectedHandler(event:ScrollItemSelectedEvent):void
+			{
+			CopySettings.get().set(CopySettings.PAPER_TYPE, event.itemIndex);
+			copySettingsChanged = true;
+			} */
+			
+			protected function wheelPaper_scrollEndEventHandler(event:Event):void
+			{
+				_mimicViewRef.validateMimicView();
+			}
+			
+			protected function wheelColor_scrollEndEventHandler(event:Event):void
+			{
+				var newType:String = (CopySettings.get().get(CopySettings.AVAILABLE_COLOUR_TYPES) as Array)[wheelColor.selectedIndex];
+				CopySettings.get().set(CopySettings.COLOUR_TYPE, newType);
+				_mimicViewRef.validateMimicView();
+				copySettingsChanged = true;
+			}
+			
+			protected function wheelColor_selectedIndexChangedHandler(event:Event):void
+			{
+				var type:String = CopySettings.get().get(CopySettings.AVAILABLE_COLOUR_TYPES)[wheelColor.selectedIndex];
+				CopySettings.get().set(CopySettings.COLOUR_TYPE, type);
+				_mimicViewRef.validateMimicView();
+				copySettingsChanged = true;
+			}
+			
+			/* protected function wheelColor_scrollItemSelectedHandler(event:ScrollItemSelectedEvent):void
+			{
+			var type:String = CopySettings.get().get(CopySettings.AVAILABLE_COLOUR_TYPES)[event.itemIndex];
+			CopySettings.get().set(CopySettings.COLOUR_TYPE, type);	
+			copySettingsChanged = true;
+			} */
+			
+			protected function wheelSides_selectedIndexChangedHandler(event:Event):void
+			{
+				//CopySettings.get().set(CopySettings.OUTPUT_SIDES, getCopySidesString(wheelSides.selectedIndex));	
+				CopySettings.get().set(CopySettings.OUTPUT_SIDES, wheelSides.selectedIndex+1);
+				_mimicViewRef.validateMimicView();
+				copySettingsChanged = true;
+			}
+			
+			/* protected function wheelSides_scrollItemSelectedHandler(event:ScrollItemSelectedEvent):void
+			{
+			CopySettings.get().set(CopySettings.OUTPUT_SIDES, event.itemIndex+1);
+			copySettingsChanged = true;
+			} */
+			
+			protected function btnStart_clickHandler(event:MouseEvent):void
+			{
+				if(!ApplicationSettings.get().get(ApplicationSettings.LOCAL_MODE_ENABLED) && copySettingsInfoPanel.active)
+				{
+					_xdsMainRef.Perform_CopyJob();
+				}
+				
+				appHelper.onStart();
+			}
+			
+			protected function spinCopies_valueChangedEventHandler(event:Event):void
+			{
+				CopySettings.get().set(CopySettings.NUM_COPIES, spinCopies.value);
+				copySettingsChanged = true;
+			}
+			
+			/*
+			* This would be unnecessary if settings maps (i.e. CopySettings)
+			* were able to be bound to.
+			*/
+			public function resetToDefault():void
+			{
+				//If the copy settings panel has been visited before, these will
+				//not be null...
+				if(wheelSides && wheelColor && wheelPaper)
+				{
+					spinCopies.value = 1;
+					wheelSides.selectedIndex = 1;
+					wheelColor.selectedIndex = 1;
+					wheelPaper.selectedIndex = 0;
+					wheelFinishing.setToIndex(0);
+					wheelFinishing.SetFinishWheelState(0);
+					CopySettings.setDefaults();
+				}
+			}
+			
+			/**
+			 * Function that selects the nearest matching paper type for a given document size.
+			 * widthMm and heightMm are the width and the height of the new document in millimeters.
+			 * If either of them are 0 then the function will assume that the document size is unknown
+			 * and default to using the autopaper setting.
+			 */
+			public function selectPaperTypeForDocument(widthMm:Number, heightMm:Number):void
+			{
+				var formattedPaperTypes:Array = (CopySettings.get().get(CopySettings.MIMIC_FORMATTED_PAPER_TYPES) as Array);
+				//trace("Selecting paper type for document with dimensions: " + widthMm + ", " + heightMm + "\n\t" + formattedPaperTypes);
+				
+				if(widthMm == 0 || heightMm == 0)
+				{
+					CopySettings.get().set(CopySettings.PAPER_TYPE, 0);
+					if(wheelPaper)
+						wheelPaper.selectedIndex = 0;
+					return;
+				}
+				
+				var docDiagonalLength:Number = calcDiagonalLengthForDimensions(widthMm, heightMm);
+				var docOrientation:int = (widthMm > heightMm) ? 0 : 1; 
+				var currPaperType:PaperType = null;
+				var currDiagonalLength:Number = 0.0;
+				var nearestPaperType:PaperType = null;
+				var nearestDiagonalLength:Number = 0.0;
+				var map = CopySettings.get();
+				var whitePaperTypes:Array = new Array(); 
+				//trace("Formatted paper types: " + formattedPaperTypes + "\n\t" + whitePaperTypes);
+				var colourPaperTypes:Array = new Array();
+				var numPaperTypes:int = formattedPaperTypes.length;
+				
+				//Separate colour paper types from white paper types. 
+				//A colour paper type should only be chosen if there is no white paper available.
+				for(var j:int = 0; j < numPaperTypes; j++)
+				{
+					//trace(formattedPaperTypes[j].name);
+					if(formattedPaperTypes[j].name != "Auto")
+					{
+						if((formattedPaperTypes[j] as PaperType).colour == PaperType.WHITE)
+						{
+							whitePaperTypes.push(formattedPaperTypes[j]);
+							//colourPaperTypes.push(whitePaperTypes.splice(1, j)[0]);
+						}
+						else
+						{
+							colourPaperTypes.push(formattedPaperTypes[j]);
+							//whitePaperTypes.splice(1, j);
+						}
+					}
+				}
+				
+				//A reference to the array containing the paper types
+				//we want to select from
+				var paperTypesToSearch:Array = null;
+				
+				if(whitePaperTypes.length > 0)
+					paperTypesToSearch = whitePaperTypes;
+				else
+					paperTypesToSearch = colourPaperTypes;
+				
+				for(var i:int = 0; i < paperTypesToSearch.length; i++)
+				{
+					currPaperType = paperTypesToSearch[i];
+					currDiagonalLength = calcDiagonalLengthForDimensions(currPaperType.widthMillimeters,
+										 currPaperType.heightMillimeters);
+					
+					//If the current paper type is exactly the same size as the document
+					if(currDiagonalLength == docDiagonalLength)
+					{
+						nearestPaperType = currPaperType;
+						nearestDiagonalLength = currDiagonalLength;
+						if(currPaperType.orientation == docOrientation)
+							break;
+					}
+					//Else if the current paper type is the same size as the current nearest paper type
+					else if(int(Math.abs(docDiagonalLength - currDiagonalLength)) == int(Math.abs(docDiagonalLength - nearestDiagonalLength))
+							&& currPaperType.orientation == docOrientation)
+					{
+						nearestPaperType = currPaperType;
+						nearestDiagonalLength = currDiagonalLength;
+					}
+					else if( nearestPaperType == null ||
+							 int(Math.abs(docDiagonalLength - currDiagonalLength)) < int(Math.abs(docDiagonalLength - nearestDiagonalLength)) )
+					{
+						nearestPaperType = currPaperType;
+						nearestDiagonalLength = currDiagonalLength;
+					}
+				}
+				
+				//trace("CHOSEN PAPER TYPE: " + nearestPaperType);
+				if(!nearestPaperType)
+				{
+					//If no nearest paper type was found, just use autopaper
+					CopySettings.get().set(CopySettings.PAPER_TYPE, formattedPaperTypes[0]);
+					if(wheelPaper)
+						wheelPaper.selectedIndex = 0;
+				}
+				else
+				{
+					CopySettings.get().set(CopySettings.PAPER_TYPE, formattedPaperTypes.indexOf(nearestPaperType));
+					if(wheelPaper)
+						wheelPaper.selectedIndex = formattedPaperTypes.indexOf(nearestPaperType);
+				}
+				
+				copySettingsInfoPanel.infoLabel = createCopySettingsLabel();
+			}
+			
+			private function calcDiagonalLengthForDimensions(widthMm:Number, heightMm:Number):Number
+			{
+				return Math.sqrt(widthMm * widthMm + heightMm * heightMm);
+			}
+			
+			var useSharedStoragePath:Boolean = false;
+			
+			private function loadingXMLDone(event:ResultEvent):void
+			{
+				if(useSharedStoragePath)
+				{
+					addressList.userData = "file://" + File.userDirectory.nativePath + "/shared/documents/FUI Concept";
+				}
+				else
+				{
+					addressList.userData = event.result.AddressBook.imagePath;
+				}
+			}
+			
+			protected function btnClearAll_clickHandler(event:MouseEvent):void
+			{
+				//currentState='StartMenu';
+				if (sendTo != null && addressList != null)
+				{
+					var obj:Object;
+					for (var i:int = 0; i < sendTo.dataProvider.length;i++)
+					{
+						obj = sendTo.dataProvider.getItemAt(i);
+						obj.currentItemState = ScrollListItemBaseRenderer.ITEM_STATE_NORMAL;
+						addressList.dataProvider.addItem(obj);
+					}
+					
+					sendTo.dataProvider.removeAll();
+				}
+			}
+			
+			private function numItemsText(itemCount:Number):String {
+				if (itemCount == 1)
+				{
+					return '1 Entry';
+				} else {
+					return String(itemCount) + ' Entries';
+				}
+			}
+			
+			private function generatePaperColourString():String
+			{
+				var paperColour:String = CopySettings.get().get(CopySettings.COLOUR_TYPE);
+				var formattedColour:String = "";
+				
+				if(paperColour == "auto")
+					formattedColour = "Auto Color";
+				else if(paperColour == "blackwhite")
+					formattedColour = "Black & White";
+				else 
+				{
+					//formattedColour = paperColour;
+					//Else just capitalise the first letter of the current selected colour
+					formattedColour = paperColour.charAt(0).toUpperCase() + paperColour.substr(1);
+				}
+				
+				return formattedColour;
+			}
+			
+			private function generatePaperTypeString():String
+			{
+				var paperType:PaperType = CopySettings.get().get(CopySettings.MIMIC_FORMATTED_PAPER_TYPES)[CopySettings.get().get(CopySettings.PAPER_TYPE)];
+				var paperTypeString:String;
+				if(paperType.name == "Autoselect" || paperType.name == "Auto")
+					paperTypeString = "On Automatically Selected Paper";
+				else
+				{
+					//It should always be in the format "Name Orientation Colour"
+					var tokens:Array = paperType.name.split(" ");
+					paperTypeString = "On " + tokens[2] + " " + tokens[0] + " Paper (" + tokens[1] + ")";	
+				}
+				
+				return paperTypeString;
+			}
+			
+			private function generateStapleFinishingString():String
+			{
+				var stapleType:int = CopySettings.get().get(CopySettings.STAPLE_TYPE);
+				var numStaples:int = 0;
+				switch(stapleType)
+				{
+					case CopySettings.STAPLE_1_LEFT:
+						numStaples = 1;
+						break;
+					case CopySettings.STAPLE_2:
+						numStaples = 2;
+						break;
+					case CopySettings.STAPLE_3:
+						numStaples = 3;
+						break;
+					case CopySettings.STAPLE_4:
+						numStaples = 4;
+						break;
+				}
+				return numStaples + (numStaples == 1 ? " Staple" : " Staples");
+			}
+			
+			private function generateHolepunchFinishingString():String
+			{
+				var punchType:int = CopySettings.get().get(CopySettings.HOLEPUNCH_TYPE);
+				var punchString:String;
+				switch(punchType)
+				{
+					case CopySettings.HOLEPUNCH_2_HOLES:
+						punchString = "2 Holes";
+						break;
+					case CopySettings.HOLEPUNCH_3_HOLES:
+						punchString = "3 Holes";
+						break;
+					case CopySettings.HOLEPUNCH_4_HOLES:
+						punchString = "4 Holes";
+						break;
+					case CopySettings.HOLEPUNCH_4_SWEDISH:
+						punchString = "4 Holes (Swedish)";
+						break;
+				}
+				return punchString;
+			}
+			
+			private function generateFoldFinishingString():String
+			{
+				var foldType:int = CopySettings.get().get(CopySettings.FOLD_TYPE);
+				var foldString:String;
+				switch(foldType)
+				{
+					case CopySettings.FOLD_SINGLE:
+						foldString = "Booklet Fold";
+						break;
+					case CopySettings.FOLD_C:
+						foldString = "C Fold";
+						break;
+					case CopySettings.FOLD_Z:
+						foldString = "Z Fold";
+						break;
+					case CopySettings.FOLD_HALF_Z:
+						foldString = "Half Z Fold";
+						break;
+				}
+				return foldString;
+			}
+			
+			private function createCopyHeadingLabel():String
+			{
+				var numCopies:int = CopySettings.get().get(CopySettings.NUM_COPIES);
+				
+				//return numCopies + (numCopies > 1 ? " Copies" : " Copy");
+				return "" + numCopies;
+			}
+			
+			private function createCopySettingsLabel():String
+			{
+				var numCopies:int = CopySettings.get().get(CopySettings.NUM_COPIES);
+				var outSides:int = CopySettings.get().get(CopySettings.OUTPUT_SIDES);
+				
+				var sidesString:String = (outSides > 1) ? ((outSides == 2) ? "Two Sided" : "Two Sided (second side rotated)") : "One Sided";
+				var paperString:String = generatePaperTypeString();
+				
+				//Choose the finishing string based off the currently selected finishing options
+				//and the associated values.
+				var finishingString:String = "No finishing";
+				var finishingType:String;
+				if(wheelFinishing)
+					finishingType = wheelFinishing.currentSelectedItem.itemName;
+				else
+					finishingType = "Collated";
+				switch(finishingType)
+				{
+					case "Collated":
+						finishingString = "Collated";
+						break;
+					case "Stapled":
+						finishingString = generateStapleFinishingString();
+						break;
+					case "Punched":
+						finishingString = generateHolepunchFinishingString();
+						break;
+					case "Stapled & Punched":
+						finishingString = generateStapleFinishingString() + " & " + generateHolepunchFinishingString();
+						break;
+					case "Folded":
+						finishingString = generateFoldFinishingString();
+						break;
+					case "Creased":
+						finishingString = "Creased";
+						break;
+					default:
+						finishingString = "No finishing";
+						break;
+				}
+				
+				//No sizing options available so must always be this string.
+				var sizeString:String = "100% Original Size";
+				
+				return sidesString + ", " + generatePaperColourString() + ",\n"
+					+ paperString + ",\n"
+					+ finishingString + ", " + sizeString;
+			}
+			
+			private function generateSendStoreStrings():Array
+			{
+				//var numSelected:int = (sendToItemsData) ? sendToItemsData.length : 0;
+				var numSelected:int = (sendTo) ? sendTo.dataProvider.length : 0;
+				var str:Array;
+				
+				if(numSelected > 0)
+				{
+					var emailListString:String = "";
+					var faxListString:String = "";
+					var appListString:String = "";
+					
+					for each(var o:Object in sendTo.dataProvider)
+					{
+						if(o.itemData is AppBase)
+							appListString += o.itemData.display + "  |  ";
+						else
+						{
+							if(o.email)
+								emailListString += o.itemData.display + "  |  ";
+							if(o.fax)
+								faxListString += o.itemData.display + "  |  ";
+						}
+						//trace(o.itemData);
+					}
+					
+					//Substr is used to remove the last "  |  " added to each string.
+					str = [emailListString.substr(0, emailListString.length - 5), faxListString.substr(0, faxListString.length - 5), appListString.substr(0, appListString.length - 5)];
+				}
+				else
+					str = ["No send / store destinations set"];
+				
+				return str;
+			}
+			
+			private function sendSettingsInfoPanel_addedToStage(evt:Event):void
+			{
+				sendSettingsInfoPanel.setContentStrings(generateSendStoreStrings());
+			}
+			
+			private function infoPanelActiveStatusChanged(evt:Event):void
+			{
+				//if(!copySettingsInfoPanel.active && !sendSettingsInfoPanel.active)
+				if(!copySettingsInfoPanel.active && (!sendTo || sendTo.dataProvider.length == 0))
+					btnStart.enabled = false;
+				else
+					btnStart.enabled = true; 
+			}
+			
+			protected function btnSendBack_clickHandler(event:MouseEvent):void
+			{
+				currentState='StartMenu';
+				if(!copySettingsInfoPanel.active && (!sendTo || sendTo.dataProvider.length == 0))
+					btnStart.enabled = false;
+				else
+					btnStart.enabled = true; 
+				//We should ensure the send option in the start menu is enabled if
+				//contacts have been selected.
+				//sendSettingsInfoPanel.active = sendTo.dataProvider.length > 0;
+				
+				/* if(sendTo.dataProvider.length > 0)
+				{
+				sendSettingsInfoPanel.btnActive.selected = true;
+				sendSettingsInfoPanel.btnActive.enabled = true;
+				}
+				else
+				{
+				sendSettingsInfoPanel.btnActive.selected = false;
+				sendSettingsInfoPanel.btnActive.enabled = false;
+				} */
+			}
+			
+			
+			private var _copySettingsChanged:Boolean = false;
+			
+			[Bindable]
+			public function get copySettingsChanged():Boolean
+			{
+				return _copySettingsChanged;
+			}
+			
+			public function set copySettingsChanged(value:Boolean):void
+			{
+				_copySettingsChanged = value;	
+			}
+			
+			/*
+			* Reset button click handler for copy settings.
+			*/
+			protected function btnReset_clickHandler(event:MouseEvent):void
+			{
+				var currPaperOrientation:int = CopySettings.get().get(CopySettings.MIMIC_FORMATTED_PAPER_TYPES)[CopySettings.get().get(CopySettings.PAPER_TYPE)].orientation;
+				
+				//Reset num copies
+				spinCopies.value = 1;
+				wheelSides.selectedIndex = 1;
+				wheelColor.selectedIndex = 1;
+				wheelPaper.selectedIndex = 0;
+				CopySettings.setDefaults();
+				//Reset finishing option
+				wheelFinishing.selectedIndex = 0;
+				
+				var newOrientation:int = CopySettings.get().get(CopySettings.MIMIC_FORMATTED_PAPER_TYPES)[wheelPaper.selectedIndex].orientation;
+				var sameOrientation:Boolean = currPaperOrientation == newOrientation;
+				
+				//If the image source of the mimic isn't changing, the just validate, else we'll need to wait for
+				//the image to change source before we can validate successfully.
+				if(!ApplicationSettings.get().get(ApplicationSettings.USE_LOCAL_MIMIC) || sameOrientation)
+					_mimicViewRef.validateMimicView();
+				else
+					_mimicViewRef.addEventListener("localMimicChangedEvent", onLocalMimicChangedEvent);
+				
+				copySettingsChanged = false;
+			}
+			
+			protected function wheelFinishing_finishingScrollEndEventHandler(event:Event):void
+			{
+				//The finishing options should only be contracted after the wheel stops spinning
+				//if there are no options available for the current item on the wheel.
+				//This is currently the case for "Off" and "Collated"
+				if(wheelFinishing.currentSelectedItem.itemName == "Off" 
+					|| wheelFinishing.currentSelectedItem.itemName == "Collated")
+				{
+					wheelFinishing.currentState = "OptionsOff";
+					this.currentState = "CopySettings";
+				} 
+			}
+			
+			
+			private var _cachedAddressBook:ArrayCollection = null;
+			private var _currentAddressOption:String = 'togglePeople';
+			private var _cachedAppList:ArrayCollection = null;
+			private var _cachedSelectedAppList:ArrayCollection = null;
+			protected function appDroppedIn(obj:Object) : void
+			{
+				if (obj is AppBase)
+				{
+					(obj as AppBase).onActivated();
+				}
+			}
+			
+			public function get currentAddressOption():String
+			{
+				return _currentAddressOption;
+			}
+			
+			public function set currentAddressOption(value:String):void
+			{
+				_currentAddressOption = value;
+			}
+			
+			private var mobileAddressbookPollingTimer:Timer = new Timer(200, 1);
+			private var mobileAddr_prefsFile:File = File.userDirectory.resolvePath("MobileStorageAddressBook.xml");
+			
+			private function mobileAddressbookPollingTimeoutHandler(evt:Event):void {
+				//keep checking the mobile address book file
+				//if(ApplicationSettings.get().get(ApplicationSettings.LOCAL_MODE_ENABLED))
+				//	mobileAddr_prefsFile = new File("/MobileStorageAddressBook.xml");
+				//else
+					mobileAddr_prefsFile = new File("file://" + File.userDirectory.nativePath + "/shared/documents/FUI Concept/MobileStorageAddressBook.xml");
+				if( mobileAddr_prefsFile.exists == true ){
+					useSharedStoragePath = true;
+					addressList.scrollListService.send();
+				}else{
+					mobileAddressbookPollingTimer.start();
+					mobileAddressbookPollingTimer.addEventListener(TimerEvent.TIMER_COMPLETE, mobileAddressbookPollingTimeoutHandler);
+				}
+			}
+
+			public function sendToItemRendererFunction(item:*):IFactory
+			{
+				/* switch(currentAddressOption)
+				{
+					case 'togglePeople': //Address book
+						return new ClassFactory(ScrollListEmailFaxItemRenderer);
+					
+					case 'toggleMobile': //Mobile contacts
+						return null;
+					
+					case 'toggleStore': //Disk storage
+						return null;
+					
+					case 'toggleApps': //Apps
+						return AppBase.itemRendererFunction(item);
+				} */
+				
+				var appRendererFactory:IFactory = AppBase.itemRendererFunction(item);
+				if(appRendererFactory)
+					return appRendererFactory;
+				
+				return new ClassFactory(ScrollListEmailFaxItemRenderer);
+			}
+
+			
+			protected function wheelAddressItem_scrollEndEvent(event:Event):void
+			{
+				// Create Address book list on first access
+				if(!_cachedAddressBook) _cachedAddressBook = addressList.scrollList;
+				if(!_cachedAppList) _cachedAppList = appHelper.getAppArray();
+				trace('currentAddressOption: ' + currentAddressOption);
+				// Unselect the previous selection
+				switch(currentAddressOption)
+				{
+					case 'togglePeople': //Address book
+						togglePeople.selected = false;
+						togglePeople.invalidateSkinState();
+						_cachedAddressBook = new ArrayCollection();
+						for each(var data in addressList.dataProvider)
+						{
+							_cachedAddressBook.addItem(data.itemData);
+						}
+						break;
+					
+					case 'toggleMobile': //Mobile contacts
+						toggleMobile.selected = false;
+						toggleMobile.invalidateSkinState();
+						break;
+					
+					case 'toggleStore': //Disk storage
+						toggleStore.selected = false;
+						toggleStore.invalidateSkinState();
+						break;
+					
+					case 'toggleApps': //Apps
+						toggleApps.selected = false;
+						toggleApps.invalidateSkinState();
+						_cachedAppList = new ArrayCollection();
+						for each(var data in addressList.dataProvider)
+						{
+							_cachedAppList.addItem(data.itemData);	
+						}
+						break;
+				}
+				
+				
+				switch(event.target.id)
+				{
+					case 'togglePeople': //Address book
+						boxQRCode.visible = false;
+						currentAddressOption = 'togglePeople'
+						txtFilterBy.prompt = "Find <b>person</b>...";
+						txtAddressListInfo.text = "No contacts available";
+						addressList.itemExpandOnClick = true;
+						addressList.itemRenderer = new ClassFactory(ScrollListItemRenderer);
+						addressList.listSortField = "surname";
+						addressList.labelField = "display";
+						//addressList.scrollListService.send();
+						addressList.scrollList = _cachedAddressBook;
+						//sendTo.listSortField = "surname";
+						//sendTo.labelField = "display";
+						sendTo.itemRenderer = new ClassFactory(ScrollListEmailFaxItemRenderer);
+						//sendTo.scrollList = sendToItemsData;
+						sendTo.listItemDroppedInCallback = null;
+						break;
+					
+					case 'toggleMobile': //Mobile contacts
+						var messageText:String = "<b>ContactShare</b><br>Access your mobile phone's contact list<br><br>Free to download from the App Store or Marketplace"
+						//var deviceIP:String = getDeviceIP();
+						var deviceIP:String = ApplicationSettings.get().get(ApplicationSettings.LOCAL_IP);
+						boxQRCode.visible = true;
+						currentAddressOption = "toggleMobile"
+						txtFilterBy.prompt = "Find <b>contact</b>...";
+						txtAddressListInfo.textFlow = TextConverter.importToFlow(messageText, TextConverter.TEXT_FIELD_HTML_FORMAT);
+						//addressList.urlScrollList = "app-storage:/MobileStorageAddressBook.xml";
+						addressList.urlScrollList = "file://" + File.userDirectory.nativePath + "/shared/documents/FUI Concept/MobileStorageAddressBook.xml";
+						addressList.scrollList = new ArrayCollection();
+						bmpQRCode.source = createQRCode("ip " + deviceIP, 300, 300);
+						lblConnectionIP.text = deviceIP;
+						break;
+					
+					case 'toggleStore': //Disk storage
+						boxQRCode.visible = false;
+						currentAddressOption = 'toggleStore'
+						txtFilterBy.prompt = "Find <b>folder</b>...";
+						txtAddressListInfo.text = "No store locations available";
+						addressList.scrollList = new ArrayCollection();
+						break;
+					
+					case 'toggleApps': //Apps
+						boxQRCode.visible = false;
+						currentAddressOption = 'toggleApps'
+						txtFilterBy.prompt = "Find <b>app</b>...";
+						txtAddressListInfo.text = "No apps available";
+						addressList.itemExpandOnClick = false;
+						addressList.itemRenderer = new ClassFactory(AppListItemRenderer);
+						addressList.listSortField = "appName";
+						addressList.labelField = "appName";
+						/* if (!_cachedAppList)
+						{
+							_cachedAppList = appHelper.getAppArray();
+						}
+						if (!_cachedSelectedAppList)
+						{
+							_cachedSelectedAppList = new ArrayCollection;
+						} */
+						addressList.scrollList = _cachedAppList;
+						sendTo.itemRenderer = new ClassFactory(AppDetailItemRenderer);
+						/* sendTo.scrollList = _cachedSelectedAppList;
+						sendTo.listSortField = "appName";
+						sendTo.labelField = "appName"; */
+						sendTo.listItemDroppedInCallback = appDroppedIn;
+						break;
+				}
+				
+				if( event.target.id != 'toggleMobile' ){
+					mobileAddressbookPollingTimer.stop();					
+					mobileAddressbookPollingTimer.removeEventListener( TimerEvent.TIMER_COMPLETE,mobileAddressbookPollingTimeoutHandler);
+					
+					if( mobileAddr_prefsFile.exists == true ){
+						mobileAddr_prefsFile.deleteFile();
+					}
+				}else{
+					mobileAddressbookPollingTimer.start();
+					mobileAddressbookPollingTimer.addEventListener(TimerEvent.TIMER_COMPLETE, mobileAddressbookPollingTimeoutHandler); 
+				}
+			}
+			
+			/*
+			 * This needs fixing so it can be used for the playbook. The playbook does not use
+			 * the first net interface or the first address in either list.
+			 */
+			public function getDeviceIP():String
+			{
+				var netInterfaces:Vector.<NetworkInterface> = NetworkInfo.networkInfo.findInterfaces();
+				
+				for each(var ni:NetworkInterface in netInterfaces)
+				{
+					if(ni.active)
+					{
+						var addresses:Vector.<InterfaceAddress> = ni.addresses;
+						for each(var addr:InterfaceAddress in addresses)
+						{
+							if(addr.ipVersion == "IPv4")
+								return addr.address;
+						}
+					}
+				}
+				
+				return "";
+			}
+			
+			//=========================================================================================================
+			// QR code generator
+			//=========================================================================================================
+			protected function createQRCode(qrText:String, width:Number, height:Number):BitmapData
+			{
+				if (qrText.length > 0) {
+					try {
+						// generate QR code
+						var qrEncoder:MultiFormatWriter = new MultiFormatWriter();
+						var qrCode:ByteMatrix = (qrEncoder.encode(qrText,BarcodeFormat.QR_CODE, width, height)) as ByteMatrix;
+					}
+					catch (e:Error) {
+						trace('Catch Error - protected function updateQRCode: Invalid input string'); 
+						return null;
+					}
+					
+					var margin:Number = 0;
+					
+					// to work out the white space margin, need to find the first black pixel
+					for (var x:Number = 0; x < width; x++) {
+						for (var y:Number = 0; y < height ; y++) {
+							if (qrCode._get(x, y) == 0) {
+								margin = x;
+								
+								// found first black pixel, exit for loops
+								x = width;
+								break;
+							}
+						}
+					}
+					
+					
+					// create new bitmap data object white filled
+					var bmd:BitmapData = new BitmapData(width-(margin*2), height-(margin*2), true, 0x00FFFFFFF);
+					
+					// plot all the black pixels
+					bmd.unlock();
+					for (var xPos:int = margin; xPos < width - margin; xPos++) {
+						for (var yPos:int = margin; yPos < width - margin; yPos++) {
+							if (qrCode._get(xPos, yPos) == 0) bmd.setPixel32(xPos - margin, yPos - margin, 0xFF000000);						
+						}
+					}
+					bmd.lock();
+					
+					// Assign the bitmap data to the bitmap object
+					return bmd;			
+				}
+				
+				return null;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="StartMenu"/>
+		<s:State name="CopySettings"/>
+		<s:State name="CopySettingsFinishingExpanded"/>
+		<s:State name="CopySettingsCopyKeypad"/>
+		<s:State name="SendAndStoreSettings"/>
+	</s:states>
+	
+	<!--*** Transitions ***-->
+	<s:transitions>	
+		<s:Transition fromState="CopySettings" toState="CopySettingsFinishingExpanded">
+			<s:Parallel>				
+				<s:Move target="{wheelOptions}" duration="500"/>
+				<s:Move targets="{[nonWheelOptions, spinCopies]}" duration="500"/>
+				<s:Resize target="{wheelFinishing.compFinishingOptions}" widthFrom="0" widthTo="710" duration="600"/>	
+			</s:Parallel>
+		</s:Transition>
+		
+		<s:Transition fromState="CopySettingsFinishingExpanded" toState="CopySettings">
+			<s:Parallel>				
+				<s:Move target="{wheelOptions}" duration="500"/>
+				<s:Move targets="{[nonWheelOptions, spinCopies]}" duration="500"/>
+				<s:Resize target="{wheelFinishing.compFinishingOptions}" widthFrom="710" widthTo="0" duration="400"/>	
+			</s:Parallel>
+		</s:Transition>
+		
+		<s:Transition autoReverse="true" fromState="CopySettingsCopyKeypad" toState="*">
+			<s:Fade target="{contCopies}" duration="500" hideFocusRing="true" />
+		</s:Transition>
+	</s:transitions>
+	
+	
+	<!--*** Background ***-->
+	<s:Rect left="0" right="0" top="0"  top.StartMenu="0" bottom="-1">
+		<s:fill>
+			<s:SolidColor color="0x000000" alpha="0.5" />
+			<!--<s:BitmapFill id="imgFill" fillMode="repeat"
+						  source="{Textures.blueWoodLightClass}" />-->
+		</s:fill>
+	</s:Rect>
+	
+	<s:Group top="0" left="0" bottom="0" right="0">
+		
+		<!--*** Start Menu ***-->		
+		<x:buttonCopySettings id="copySettingsInfoPanel" includeIn="StartMenu" 
+							  width="420" height="195"
+							  left="10" bottom="10"
+							  titleLabel="-"
+							  infoLabel="-"
+							  alignment="left"
+							  active="true"
+							  editBtnClicked="currentState='CopySettings'"
+							  activeStatusChanged="infoPanelActiveStatusChanged(event)"
+							  addedToStage="copySettingsInfoPanel.titleLabel = createCopyHeadingLabel();
+							  copySettingsInfoPanel.infoLabel = createCopySettingsLabel()"/>			
+		
+		
+		<x:buttonSendSetings id="sendSettingsInfoPanel" includeIn="StartMenu" 
+							 width="420" height="195"
+							 right="10" bottom="10"
+							 titleLabel="Send and Store"
+							 alignment="right"
+							 editBtnClicked="currentState='SendAndStoreSettings'"
+							 activeStatusChanged="infoPanelActiveStatusChanged(event)"
+							 addedToStage="sendSettingsInfoPanel_addedToStage(event)"/>
+		
+		<w:wButton id="btnStart" includeIn="StartMenu"
+				   width="198" height="200" skinClass="assets.skins.skinButtonStart"
+				   horizontalCenter="0" bottom="7"
+				   mouseDown="Sounds.soundClick();" click="btnStart_clickHandler(event)"
+				   cornerRadius="3" />		
+		
+		
+		<!--*** Copy Settings Panel ***-->		
+		<!--Copy Setting Wheels-->		
+		<s:Group id="wheelOptions" left.CopySettings="10" left.CopySettingsFinishingExpanded="-476" >
+			<s:HGroup id="hboxWheelLabels" excludeFrom="StartMenu, SendAndStoreSettings" top="7">
+				<s:Label text="Sides" width="82" textAlign="center" styleName="widgetTitle" filters="{dsfLabel}"/>
+				<s:Label text="Color" width="82" textAlign="center" styleName="widgetTitle" filters="{dsfLabel}"/>
+				<s:Label text="Paper" width="282" textAlign="center" styleName="widgetTitle" filters="{dsfLabel}"/>
+				<s:Label text="Finishing" width="240" textAlign="center" styleName="widgetTitle" filters="{dsfLabel}"/>
+			</s:HGroup>
+			
+			<s:BorderContainer id="contCopyWheels" skinClass="assets.skins.skinScrollWheelContainerVertical" width="730"
+							   excludeFrom="StartMenu, SendAndStoreSettings" top="36" height="244">		
+				<!--Finishing Selection Wheel - consists of the FinishingWheel component
+				which in turn implements the FinishingOptions flyout-->
+				
+				<w:SpinnerListContainerWithOffset left="0" top="0" width="80" height="240" skinClass="widgets.SkinSpinnerListContainer">
+					<w:layout>
+						<s:HorizontalLayout gap="0"/>
+					</w:layout>
+					<s:SpinnerList id="wheelSides" itemRenderer="itemRenderers.ImgItemRenderer" 
+								   selectedIndex="1"
+								   change="wheelSides_selectedIndexChangedHandler(event)" width="100%" height="100%">
+						<s:dataProvider>
+							<s:ArrayCollection>
+								<itemRenderers:ImgItemRendererData index="-1" image="{[Side_Icons.oneSidedClass]}"/>
+								<itemRenderers:ImgItemRendererData index="0" image="{[Side_Icons.twoSidedClass]}"/>
+								<itemRenderers:ImgItemRendererData index="1" image="{[Side_Icons.twoSidedRotateClass]}"/>
+							</s:ArrayCollection>
+						</s:dataProvider>					
+					</s:SpinnerList>
+				</w:SpinnerListContainerWithOffset>
+				
+				<w:SpinnerListContainerWithOffset left="82" top="0" width="80" height="240" skinClass="widgets.SkinSpinnerListContainer">
+					<w:layout>
+						<s:HorizontalLayout gap="0"/>
+					</w:layout>
+					<s:SpinnerList id="wheelColor" itemRenderer="itemRenderers.ImgItemRenderer"
+								   selectedIndex="1"
+								   change="wheelColor_selectedIndexChangedHandler(event)" width="100%" height="100%">
+						<s:dataProvider>
+							<s:ArrayCollection>
+								<itemRenderers:ImgItemRendererData index="-1" image="{[Color_Icons.blackAndWhiteClass]}"/>
+								<itemRenderers:ImgItemRendererData index="0" image="{[Color_Icons.autoColorClass]}"/>
+								<itemRenderers:ImgItemRendererData index="1" image="{[Color_Icons.fullColorClass]}"/>
+								<itemRenderers:ImgItemRendererData index="2" image="{[Color_Icons.redClass]}"/>
+								<itemRenderers:ImgItemRendererData index="3" image="{[Color_Icons.greenClass]}"/>
+								<itemRenderers:ImgItemRendererData index="4" image="{[Color_Icons.blueClass]}"/>
+								<itemRenderers:ImgItemRendererData index="5" image="{[Color_Icons.cyanClass]}"/>
+								<itemRenderers:ImgItemRendererData index="6" image="{[Color_Icons.magentaClass]}"/>
+								<itemRenderers:ImgItemRendererData index="7" image="{[Color_Icons.yellowClass]}"/>
+							</s:ArrayCollection>
+						</s:dataProvider>
+					</s:SpinnerList>
+				</w:SpinnerListContainerWithOffset>
+				
+				<w:SpinnerListContainerWithOffset left="164" top="0" width="300" height="240" skinClass="widgets.SkinSpinnerListContainer">
+					<w:layout>
+						<s:HorizontalLayout gap="0"/>
+					</w:layout>
+					<s:SpinnerList id="wheelPaper" itemRenderer="itemRenderers.ImgLblItemRenderer"
+								   change="wheelPaper_selectedIndexChangedHandler(event)"
+								   selectedIndex="{CopySettings.get().get(CopySettings.PAPER_TYPE)}"
+								   dataProvider="{CopySettings.get().get(CopySettings.AVAILABLE_PAPER_TYPES)}" width="100%" height="100%">
+					</s:SpinnerList>
+				</w:SpinnerListContainerWithOffset>
+				
+				<x:FinishingWheel id="wheelFinishing" left="466"
+								  mimicViewReference="{this.mimicViewReference}"
+								  finishingScrollEndEvent="wheelFinishing_finishingScrollEndEventHandler(event)"/>
+			</s:BorderContainer>			
+		</s:Group>
+		
+		
+		<!--*** Copy Settings Navigation ***-->
+		<s:Group id="nonWheelOptions" right.CopySettings="10" right.CopySettingsFinishingExpanded="-224" >
+			<s:HGroup id="boxNavigation" excludeFrom="StartMenu, SendAndStoreSettings" gap="1"
+					  top="2" right="0">
+				
+				<w:wButton id="btnReset" enabled="{copySettingsChanged}"
+						   width="58" height="58"
+						   icon="{General_Icons.undoClass}" 
+						   mouseDown="Sounds.soundClick();" 
+						   skinClass="assets.skins.skinButton" topLeftRadius="3" bottomLeftRadius="3"
+						   click="btnReset_clickHandler(event)"/>
+				
+				<w:wButton id="btnCopyBack" label="Back" styleName="green"
+						   top="0" width="159" height="58"
+						   mouseDown="Sounds.soundClick();" click="currentState='StartMenu'"
+						   skinClass="assets.skins.skinButton" topRightRadius="3" bottomRightRadius="3"/>
+			</s:HGroup>
+			
+			<!--*** Copy Size ***-->		
+			<w:wButton id="btnSize" label="Size 100% Match Original" includeIn="CopySettings, CopySettingsFinishingExpanded, CopySettingsCopyKeypad"
+					   top="203" right="0" width="217" height="80"
+					   icon="{General_Icons.moreClass}" iconPlacement="right" cornerRadius="3"
+					   mouseDown="Sounds.soundClick();" click="null"
+					   skinClass="assets.skins.skinButton"/>
+		</s:Group>
+		
+		
+		<!--*** Copy Count Numeric Keypad Popup with dimmed background***-->
+		<s:BorderContainer id="contCopies" includeIn="CopySettingsCopyKeypad"
+						   top="0" bottom="0" left="0" right="0"
+						   borderVisible="false" backgroundColor="0x444444"
+						   backgroundAlpha="0.7">
+			
+			<x:NumericKeypad id="numpadCopies" 
+							 top="5" bottom="5" right="250"
+							 KeyPadPress="numpadCopies_KeyPadPressHandler(event);"
+							 KeyPadDelete="numpadCopies_KeyPadDeleteHandler(event);"
+							 KeyPadClose="numpadCopies_KeyPadCloseHandler(event);"/>
+		</s:BorderContainer>
+		
+		<!--*** Copies needs to be above the dimmed background ***-->
+		<w:spinboxHorizontal id="spinCopies" includeIn="CopySettings, CopySettingsFinishingExpanded, CopySettingsCopyKeypad"
+							 label="{spinCopies.value == 1 ? 'Copy' : 'Copies'}"
+							 width="217" height="116" top="73" right="10" right.CopySettingsFinishingExpanded="-224"
+							 value="1" minimum="1" maximum="9999"
+							 valueChangedEvent="spinCopies_valueChangedEventHandler(event)"
+							 addedToStage="spinCopies.value = CopySettings.get().get(CopySettings.NUM_COPIES)"
+							 valueSelectedEvent="{currentState == 'CopySettings' ? currentState='CopySettingsCopyKeypad': currentState = 'CopySettings'}"/>	
+		<!--</s:SkinnableContainer>		-->
+	</s:Group>
+	
+	<!--*** Send and Store Settings ***-->
+	<s:Group includeIn="SendAndStoreSettings" width="100%" height="290" top="1">
+		
+		<!--Address List Tab button background-->
+		<s:Rect width="77" height="260" top="11" bottom="20" left="10" topLeftRadiusX="10" bottomLeftRadiusX="10">
+			<s:fill>
+				<s:SolidColor color="0x9BA3A9" />
+			</s:fill>
+			
+			<s:stroke>
+				<s:SolidColorStroke color="0x565B5F" weight="1" />
+			</s:stroke>
+		</s:Rect>
+		
+		<!-- Shadow and Highlight -->
+		<s:Rect width="76" height="1" top="74" left="11">
+			<s:fill>
+				<s:LinearGradient>
+					<s:GradientEntry color="0x9BA3A9" ratio="0" />
+					<s:GradientEntry color="0x747B80" ratio=".2" />
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+		<s:Rect width="76" height="1" top="75" left="11">
+			<s:fill>
+				<s:LinearGradient>
+					<s:GradientEntry color="0x9BA3A9" ratio="0" />
+					<s:GradientEntry color="0xCAD3DA" ratio=".2" />
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+		
+		<!-- Shadow and Highlight -->
+		<s:Rect width="76" height="1" top="139" left="16">
+			<s:fill>
+				<s:LinearGradient>
+					<s:GradientEntry color="0x9BA3A9" ratio="0" />
+					<s:GradientEntry color="0x747B80" ratio=".2" />
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+		<s:Rect width="76" height="1" top="140" left="16">
+			<s:fill>
+				<s:LinearGradient>
+					<s:GradientEntry color="0x9BA3A9" ratio="0" />
+					<s:GradientEntry color="0xCAD3DA" ratio=".2" />
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+		
+		<!-- Shadow and Highlight -->
+		<s:Rect width="76" height="1" top="205" left="16">
+			<s:fill>
+				<s:LinearGradient>
+					<s:GradientEntry color="0x9BA3A9" ratio="0" />
+					<s:GradientEntry color="0x747B80" ratio=".2" />
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+		<s:Rect width="76" height="1" top="206" left="16">
+			<s:fill>
+				<s:LinearGradient>
+					<s:GradientEntry color="0x9BA3A9" ratio="0" />
+					<s:GradientEntry color="0xCAD3DA" ratio=".2" />
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+		
+		<!-- *** Left Page *** -->
+		<s:SkinnableContainer id="bcAddressList" skinClass="assets.skins.skinPageLeft"
+							  top="1" bottom="10" left="79" width="468" >
+			
+			<s:HGroup top="0" width="100%" height="58" gap="0">
+				<s:TextInput id="txtFilterBy" prompt="Find &lt;b&gt;person&lt;/b&gt;..."
+							 skinClass="assets.skins.skinTextInputSearch" focusAlpha="0"
+							 top="0" width="100%" height="100%"
+							 change="addressList.applyFilterString(txtFilterBy.text);"
+							 valueCommit="addressList.applyFilterString(txtFilterBy.text);" 
+							 creationComplete="FlexGlobals.topLevelApplication.softKeyboard.addHostTextComponent(txtFilterBy)"/>
+				
+				<!-- Vertical Dividing line - low cost to performance --> 
+				<s:Rect top="0" left="0" width="1" height="58" >
+					<s:fill>
+						<s:SolidColor color="0x888888" />
+					</s:fill>
+				</s:Rect>
+				
+				<w:wButton id="btnAdd"
+						   top="0" right="0" width="100" height="58" icon="{SendStore_Icons.addContactClass}" styleName="light"
+						   mouseDown="Sounds.soundClick();" click="currentState='StartMenu'"
+						   skinClass="assets.skins.skinButton" backgroundShadow="false"/>
+			</s:HGroup>
+			
+			<!-- Vertical Dividing line - low cost to performance --> 
+			<s:Rect  height="100%" width="1" right="0" >
+				<s:fill>
+					<s:SolidColor color="0x444444" />
+				</s:fill>
+			</s:Rect>
+			
+			<w:BounceScroller id="addressList" left="-1" right="0" height="100%" top="58"
+							  labelField="display"
+							  urlScrollList="assets/data/AddressBook.xml"
+							  scrollListXMLResultField="AddressBook.contact"
+							  xmlLoadingDoneCallback="loadingXMLDone"
+							  swipeToTarget="{sendTo}"
+							  listSortField="surname"
+							  filterCaseSensitive="false"
+							  itemRenderer="itemRenderers.ScrollListItemRenderer"
+							  scrollToBottomOnItemDropIn="false"/>
+			
+			
+			<!--Instructions for the address list usage-->
+			<s:Group id="infoBackgroundLeftPage" top="58" bottom="0" left="0" right="0"
+					 visible="{addressList.dataProvider.length == 0}"
+					 cacheAsBitmap="true">
+				
+				<!-- Background - low cost to performance -->
+				<s:Rect top="0" bottom="0" left="0" right="1">
+					<s:fill>
+						
+						<s:LinearGradient>
+							<s:GradientEntry color="0xFFFFFF" ratio="0"/>
+							<s:GradientEntry color="0xF0F0F0" ratio="1"/>							
+						</s:LinearGradient>
+					</s:fill>
+				</s:Rect>
+				
+				<s:HGroup width="100%" height="100%" top="20" left="20" right="40">
+					<s:RichText id="txtAddressListInfo" 
+								color="0x003663" 
+								fontSize="22"
+								width="100%" height="100%"
+								text="No contacts available."/>
+					
+					<s:VGroup id="boxQRCode" width="150" height="100%" gap="10" horizontalAlign="center" includeInLayout="{boxQRCode.visible}">
+						<s:BitmapImage id="bmpQRCode" width="150" height="150" />
+						
+						<s:Label id="lblConnectionIP"
+								 textAlign="center"
+								 color="0x003663" fontSize="20" maxDisplayedLines="1" 
+								 verticalAlign="middle" verticalCenter="1" width="100%" />		
+					</s:VGroup>						
+				</s:HGroup>
+				
+			</s:Group>
+			
+			
+			
+			<!-- Horizontal Dividing line - low cost to performance --> 
+			<s:Rect top="58" width="100%" height="1" >
+				<s:fill>
+					<s:SolidColor color="0x888888" />
+				</s:fill>
+			</s:Rect>
+			
+			
+			<!--Entries count for right page-->
+			<s:Group top="59" right="0" height="29" visible="{addressList.dataProvider.length > 0}">
+				<s:Rect bottomLeftRadiusX="3" width="100%" height="100%" >
+					<s:fill>
+						<s:SolidColor color="0x970000" alpha="0.6" />
+					</s:fill>
+				</s:Rect>		
+				
+				<s:Label text="{numItemsText(addressList.dataProvider.length)}"
+						 color="0xFFFFFF" fontSize="18" 
+						 maxDisplayedLines="1" left="10" right="10" top="2" bottom="2"
+						 verticalAlign="middle" verticalCenter="1" />		
+			</s:Group>
+			
+			<!-- Page Shadow - low cost to performance -->
+			<s:Rect top="0" bottom="0" right="0" width="20">
+				<s:fill>
+					<s:LinearGradient>
+						<s:GradientEntry color="0x000000" ratio="0" alpha="0"/>
+						<s:GradientEntry color="0x000000" ratio="1" alpha="0.2"/>							
+					</s:LinearGradient>							
+				</s:fill>
+			</s:Rect>
+		</s:SkinnableContainer>
+		
+		<s:VGroup width="69" height="100%" top="11" bottom="20" left="10" gap="2">
+			<w:wToggleButton id="togglePeople" icon="{SendStore_Icons.addressContactsClass}" width="100%" height="25%"
+							 skinClass="assets.skins.skinToggleButtonTab" selected="true"
+							 click="wheelAddressItem_scrollEndEvent(event)"/>
+			
+			<w:wToggleButton id="toggleMobile" icon="{SendStore_Icons.addressMobileClass}" width="100%" height="25%"
+							 skinClass="assets.skins.skinToggleButtonTab"
+							 click="wheelAddressItem_scrollEndEvent(event)"/>
+			
+			<w:wToggleButton id="toggleStore" icon="{SendStore_Icons.addressStoreClass}" width="100%" height="25%"
+							 skinClass="assets.skins.skinToggleButtonTab"
+							 click="wheelAddressItem_scrollEndEvent(event)"/>			
+			
+			<w:wToggleButton id="toggleApps" icon="{SendStore_Icons.addressAppClass}" width="100%" height="25%"
+							 skinClass="assets.skins.skinToggleButtonTab"
+							 click="wheelAddressItem_scrollEndEvent(event)"/>					
+		</s:VGroup>
+		
+		
+		<!-- *** Right Page *** -->
+		<s:SkinnableContainer id="bcSendTo" skinClass="assets.skins.skinPageRight"
+							  top="1" bottom="10" right="10" width="467">
+			
+			<!--*** Send & Store Settings Navigation ***-->
+			<s:HGroup width="100%" height="58" gap="0" top="0">				
+				<w:wButton id="btnOptions" label="Options" width="50%" height="58" styleName="light"
+						   mouseDown="Sounds.soundClick();" click="FlexGlobals.topLevelApplication.currentState='emailoption'"
+						   skinClass="assets.skins.skinButton" backgroundShadow="false"/>
+				
+				<!-- Vertical Dividing line - low cost to performance --> 
+				<s:Rect top="0" left="0" height="100%" width="1" >
+					<s:fill>
+						<s:SolidColor color="0x888888" />
+					</s:fill>
+				</s:Rect>
+				
+				<w:wButton id="btnClearAll" label="Clear All" width="50%" height="58" styleName="light"
+						   mouseDown="Sounds.soundClick();" click="btnClearAll_clickHandler(event)"
+						   skinClass="assets.skins.skinButton" backgroundShadow="false"/>
+				
+				<!-- Vertical Dividing line - low cost to performance --> 
+				<s:Rect top="0" left="0" height="100%" width="1" >
+					<s:fill>
+						<s:SolidColor color="0x888888" />
+					</s:fill>
+				</s:Rect>
+				
+				<w:wButton id="btnSendBack" label="Back" width="159" height="58" styleName="green"
+						   mouseDown="Sounds.soundClick();" click="btnSendBack_clickHandler(event)"
+						   skinClass="assets.skins.skinButton" backgroundShadow="false"/>
+			</s:HGroup>
+			
+			<!-- Vertical Dividing line - low cost to performance --> 
+			<s:Rect  height="100%" width="1" left="0" >
+				<s:fill>
+					<s:SolidColor color="0x777777" />
+				</s:fill>
+			</s:Rect>
+			
+			<w:BounceScroller id="sendTo" top="58" left="0" right="-1" height="100%" 
+							  scrollList="{sendToItemsData}"
+							  labelField="display" 
+							  swipeToRight="false"
+							  swipeToTarget="{addressList}"
+							  listSortField="surname"
+							  expandOnDropIn="true"
+							  sortOnDropIn="false"
+							  expandedItemAlignToTop="false"
+							  itemRendererFunction="sendToItemRendererFunction"/>	
+			
+			<!--Instructions for the address list usage-->
+			<s:Group id="infoBackgroundRightPage" top="58" bottom="0" left="0" right="0"
+					 visible="{sendTo.dataProvider.length == 0}"
+					 cacheAsBitmap="true">
+				<!-- Background - low cost to performance -->
+				<s:Rect id="rectButton" top="0" bottom="0" left="1" right="0">
+					<s:fill>
+						<s:LinearGradient>
+							<s:GradientEntry color="0xF0F0F0" ratio="0"/>
+							<s:GradientEntry color="0xFFFFFF" ratio="1"/>							
+						</s:LinearGradient>							
+					</s:fill>
+				</s:Rect>
+				
+				<s:VGroup top="21" left="40" right="20" gap="20">	
+					<s:RichText color="0x003663" fontSize="22" width="100%" height="100%">
+						<s:content>
+							<s:span fontWeight="bold">Send &#47; Save</s:span>
+							<s:p>To add contacts &#47; destinations, flick items across from the address list on the left</s:p>
+						</s:content>
+					</s:RichText>
+					
+					<s:BitmapImage source="{Info_Graphics.swipeRightClass}"/>
+				</s:VGroup>
+			</s:Group>
+			
+			<!-- Horizontal Dividing line - low cost to performance --> 
+			<s:Rect top="58" left="0" right="0" height="1" >
+				<s:fill>
+					<s:SolidColor color="0x888888" />
+				</s:fill>
+			</s:Rect>
+			
+			<!--Entries count for right page-->
+			<s:Group top="59" right="0" height="29" visible="{sendTo.dataProvider.length > 0}">
+				<s:Rect bottomLeftRadiusX="3" width="100%" height="100%" >
+					<s:fill>
+						<s:SolidColor color="0x970000" alpha="0.6" />
+					</s:fill>
+				</s:Rect>		
+				
+				<s:Label text="{numItemsText(sendTo.dataProvider.length)}"
+						 color="0xFFFFFF" fontSize="18" 
+						 maxDisplayedLines="1" left="10" right="10" top="2" bottom="2"
+						 verticalAlign="middle" verticalCenter="1" />		
+			</s:Group>
+			
+			<!-- Page Shadow - low cost to performance -->
+			<s:Rect top="0" bottom="0" left="0" width="20">
+				<s:fill>
+					<s:LinearGradient>
+						<s:GradientEntry color="0x000000" ratio="0" alpha="0.2"/>
+						<s:GradientEntry color="0x000000" ratio="1" alpha="0"/>							
+					</s:LinearGradient>							
+				</s:fill>
+			</s:Rect>
+		</s:SkinnableContainer>
+	</s:Group>
+</s:Group>

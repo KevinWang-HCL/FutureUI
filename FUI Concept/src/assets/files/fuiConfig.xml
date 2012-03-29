@@ -1,0 +1,5 @@
+<FUIConfig>
+	<ConnectToMachine>true</ConnectToMachine>
+	<MachineIP>13.200.24.77</MachineIP>
+	<PreviewPath>Z:\preview.XSM\00000001.jpg</PreviewPath>
+</FUIConfig>

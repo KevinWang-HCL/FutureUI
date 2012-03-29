@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+		minWidth="58" minHeight="58"
+		alpha.disabled="0.5">
+	<fx:Metadata>
+		[HostComponent("widgets.wToggleButton")]
+	</fx:Metadata>
+	
+	<!-- states -->
+	<s:states>
+		<s:State name="up" />
+		<s:State name="selected"/>
+		<s:State name="over" />
+		<s:State name="down" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<!-- Page Shadow -->
+	<s:Rect id="rectShadow" top="-1" bottom="-2" left="-1" right="0" includeIn="selected"
+			topLeftRadiusX="10" bottomLeftRadiusX="10">
+		<s:fill>
+			<s:SolidColor color="0x000000" alpha="0.5"/>
+		</s:fill>
+	</s:Rect>
+	
+	
+	<s:Rect id="rectSelected" left="0" right="0" top="0" bottom="0" topLeftRadiusX="10" bottomLeftRadiusX="10" includeIn="selected">
+		<s:fill>
+			<s:SolidColor color="0xFFFFFF" />
+		</s:fill>
+	</s:Rect>
+	
+	<s:BitmapImage id="iconDisplay" verticalCenter="0" horizontalCenter="0"/>
+	
+	<!-- Label -->
+	<!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay  -->
+	<s:Label id="labelDisplay" styleName="toggleButton"
+			 maxDisplayedLines="2"
+			 textAlign="{hostComponent.textAlignmentProp}"
+			 left="10" right="10" top="2" bottom="2">
+	</s:Label>
+	
+</s:Skin>

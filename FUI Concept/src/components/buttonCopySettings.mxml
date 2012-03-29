@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:widgets="widgets.*">
+	
+	<fx:Metadata>
+		[Event(name="editBtnClicked", type="flash.events.Event")]
+		[Event(name="activeStatusChanged", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.General_Icons;
+			import assets.skins.skinButton;
+			
+			import integration.CopySettings;
+			
+			[Bindable]
+			public function get active():Boolean
+			{
+				return btnActive.selected;
+			}
+			
+			public function set active(value:Boolean):void
+			{
+				btnActive.selected = !value;
+			}
+			
+			private var _alignment:String = "right";
+			
+			[Bindable]
+			public function get alignment():String
+			{
+				return _alignment;
+			}
+			
+			public function set alignment(value:String):void
+			{
+				if(value == "left" || value == "right")
+				{
+					_alignment = value;
+				}
+			}
+			
+			
+			private var _titleLabel:String;
+			
+			[Bindable]
+			public function get titleLabel():String
+			{
+				return _titleLabel;
+			}
+			
+			public function set titleLabel(value:String):void
+			{
+				_titleLabel = value;
+			}
+			
+			
+			private var _editBtnLabel:String;
+			
+			[Bindable]
+			public function get infoLabel():String
+			{
+				return _editBtnLabel;
+			}
+			
+			public function set infoLabel(value:String):void
+			{
+				_editBtnLabel = value;
+			}
+			
+			
+			protected function btnActive_selectedChangedEventHandler(event:Event):void
+			{
+				//active = !_active;
+				if(!btnActive.selected)
+					CopySettings.get().set(CopySettings.NUM_COPIES, 1);
+				this.dispatchEvent(new Event("activeStatusChanged"));
+			}
+			
+			protected function btnEdit_clickHandler(event:MouseEvent):void
+			{
+				if(!btnActive.selected)
+				{
+					btnActive.selected = true;
+					this.dispatchEvent(new Event("activeStatusChanged"));
+				}
+				this.dispatchEvent(new Event("editBtnClicked"));
+			}
+			
+			
+			protected function btnMinus_clickHandler(event:MouseEvent):void
+			{
+				var newNumCopies:int = CopySettings.get().get(CopySettings.NUM_COPIES) - 1;
+				if(newNumCopies < 1)
+				{
+					btnActive.selected = false;
+					this.dispatchEvent(new Event("activeStatusChanged"));
+				}
+				else
+				{
+					CopySettings.get().set(CopySettings.NUM_COPIES, newNumCopies);
+					titleLabel = "" + newNumCopies;
+				}
+			}
+			
+			protected function btnPlus_clickHandler(event:MouseEvent):void
+			{
+				var numCopies:int = CopySettings.get().get(CopySettings.NUM_COPIES);
+				if(numCopies < 9999)
+				{
+					if(!btnActive.selected)
+					{
+						btnActive.selected = true;
+						this.dispatchEvent(new Event("activeStatusChanged"));
+					}
+					else
+					{
+						CopySettings.get().set(CopySettings.NUM_COPIES, numCopies + 1);
+					}
+					titleLabel = "" + CopySettings.get().get(CopySettings.NUM_COPIES);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<!--	<widgets:wButton id="btnEdit"
+	left="{alignment == 'left' ? null : -40}"
+	right="{alignment == 'left' ? -40 : null}"
+	label=""
+	skinClass="{buttonSkinClass}"
+	topLeftRadius="{alignment == 'left' ? 3 : 30}"
+	topRightRadius="{alignment == 'left' ? 30 : 3}"
+	bottomLeftRadius="{alignment == 'left' ? 3 : 30}"
+	bottomRightRadius="{alignment == 'left' ? 30 : 3}"
+	textAlignment="{alignment}"
+	width="100%" height="100%"
+	click="btnEdit_clickHandler(event)"/>-->
+	
+	<widgets:wButton id="btnEdit"
+					 right="-40"
+					 label=""
+					 skinClass="{skinButton}"
+					 topLeftRadius="3"
+					 topRightRadius="30"
+					 bottomLeftRadius="3"
+					 bottomRightRadius="30"
+					 textAlignment="{alignment}"
+					 width="100%" height="100%"
+					 click="btnEdit_clickHandler(event)"/>
+	
+	
+	
+	
+	<!--<s:Rect height="58" width="200" top="5" left="15" topLeftRadiusX="29" bottomLeftRadiusX="29"  visible="{btnActive.selected}">
+	<s:fill>
+	<s:SolidColor color="0x666666" />
+	</s:fill>
+	</s:Rect>-->
+	
+	
+	
+	<s:HGroup width="375" top="7" left="15" height="59" gap="0" horizontalAlign="right">
+		
+		<s:Label text="Copies" height="100%"
+				 textAlign="left" verticalAlign="middle"
+				 mouseEnabled="false"/>
+		
+		<s:Spacer width="15" />
+		
+		<s:Group width="100%" height="100%">
+			<s:Rect width="100%" height="100%" radiusX="3">
+				<s:fill>
+					<s:SolidColor 
+						color="0x666666"/>
+				</s:fill>
+			</s:Rect>
+			
+			<s:ToggleSwitch id="btnActive" top="1" left="1" right="1" bottom="1"
+							label="{titleLabel}" 
+							iconPlacement="{alignment}"
+							selected="true"
+							change="btnActive_selectedChangedEventHandler(event)"
+							skinClass="assets.skins.skinToggleSwitchCopy"/>	
+		</s:Group>
+		
+		
+		<s:Spacer width="5" />
+		
+		<s:Group width="119" height="58">
+			<s:Rect width="100%" height="100%" radiusX="3">
+				<s:fill>
+					<s:SolidColor 
+						color="0x666666"/>
+				</s:fill>
+			</s:Rect>
+			
+			<widgets:wButton id="btnPlus"
+							 height="57" width="58" left="1" top="1" 
+							 icon="{General_Icons.plusClass}"
+							 topLeftRadius="3" bottomLeftRadius="3"
+							 click="btnPlus_clickHandler(event)"/>
+			
+			<widgets:wButton id="btnMinus" 
+							 height="57" width="58" right="1" top="1"
+							 icon="{General_Icons.minusClass}" 
+							 topRightRadius="3" bottomRightRadius="3"
+							 enabled="{btnActive.selected}"
+							 click="btnMinus_clickHandler(event)"/>			
+		</s:Group>
+		
+		
+		
+		
+	</s:HGroup>
+	
+	
+	
+	
+	
+	
+	<!--<s:Label text="{titleLabel}" styleName="startHeader" visible="{btnActive.selected}"
+			 textAlign="{alignment}" color="0xFFFFFF"
+			 top="25" left="160" right="15"
+			 mouseEnabled="false" width="100%"/>-->
+	
+	
+	<s:Label id="lblInfo" text="{infoLabel}" styleName="startSettings"
+			 textAlign="{alignment}" alpha="{btnActive.selected ? 1 : 0.5}"
+			 maxDisplayedLines="4"
+			 top="85" left="15" right="15"
+			 mouseEnabled="false" width="100%"/>
+	
+	
+	<s:Rect bottom="33" left="15" right="15" height="1">
+		<s:fill>
+			<s:SolidColor color="0x888888"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Rect bottom="32" left="15" right="15" height="1">
+		<s:fill>
+			<s:SolidColor color="0xE5E5E5"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Label id="promptLabel" styleName="startPrompt"
+			 text="Tap to change settings"
+			 maxDisplayedLines="1"
+			 textAlign="{alignment}"
+			 bottom="8" left="15" right="15"
+			 mouseEnabled="false"/>
+	
+	
+	
+	
+</s:Group>

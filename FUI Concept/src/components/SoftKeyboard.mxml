@@ -1,0 +1,1102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+                   xmlns:s="library://ns.adobe.com/flex/spark"
+				   backgroundImageFillMode="repeat"
+                   backgroundImage="{Textures.blueWoodDarkClass}"
+				   creationComplete="init()"
+                   borderVisible="false">
+
+    <fx:Declarations>
+        <!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:Linear id="moveLiner"/>
+		
+		<s:Parallel id="moveHostViewFirstShow">
+			<s:children>
+				<s:Move id="hostViewInHostViewFirstShow" target="{_hostScrollViewport}" easer="{moveLiner}"/>
+				<s:Move id="keyboardMovementInHostViewFirstShow" target="{this}" easer="{moveLiner}" yFrom="{this.y}"/>
+			</s:children>
+		</s:Parallel>
+		
+		<s:Sequence id="moveKeyboardFirstShow">
+			<s:children>
+				<s:Move id="keyboardInKeyboardFirstShow" target="{this}" easer="{moveLiner}"/>
+				<s:Parallel>
+					<s:Move id="hostViewInKeyboardFirstShow" target="{_hostScrollViewport}" easer="{moveLiner}"/>	
+					<s:Move id="keyboardMovementInKeyboardFirstShow" target="{this}" easer="{moveLiner}"/>
+				</s:Parallel>
+			</s:children>
+		</s:Sequence>
+    </fx:Declarations>
+    
+    <fx:Script>
+        <![CDATA[
+			import assets.embedded.Keyboard_Icons;
+			import assets.embedded.Sounds;
+			import assets.embedded.Textures;
+			import assets.skins.skinKey;
+			import assets.skins.skinKeyMenu;
+			
+			import flashx.textLayout.container.ScrollPolicy;
+			import flashx.textLayout.events.SelectionEvent;
+			
+			import menu.CustomMenu;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.managers.ToolTipManager;
+			
+			import spark.components.Group;
+			import spark.components.TextArea;
+			import spark.components.TextInput;
+			import spark.components.supportClasses.SkinnableTextBase;
+			
+			import widgets.ButtonKeyboard;
+            
+			
+			//Event enumerations for special keys
+			public static const ON_ENTER_EVENT:String = "onEnter"; //Index of the enter enumeration in the event array each host component can set
+			public static const ON_ENTER_CLOSE:int = 0;
+			public static const ON_ENTER_NEWLINE:int = 1;
+			
+            private static const keyRepeatDelay:int = 300;
+			private static const keyRepeatInterval:int = 300;
+            
+            private var KeyboardPaddingTop:Number = 0;
+            
+            private var capsLockKey:Boolean = false;
+            private var shiftKey:Boolean = false;
+            
+            private var keyMenu:CustomMenu = new CustomMenu;
+            private var keyDownTime:Number;
+            
+            static public var maxKeyPressTime:Number = 1000;
+            private var currentHostComponentAnchorPos:int = 0;
+            private var currentHostComponentActivePos:int = 0;
+            
+            [Bindable]
+            public var keyActivatedCallback:Function = null; 
+			
+			static private const ANIMATION_NONE:int = 0;
+			static private const ANIMATION_SHOW:int = 1;
+			static private const ANIMATION_HIDE:int = 2;
+			static private const ANIMATION_FACTOR:int = 30;
+			static private const ANIMATION_DURATION:Number = 500;
+			static private const ANIMATION_TOP_PADDING:Number = 0;
+			private var applicationTop:int = -1;
+			private var animationMode:int = ANIMATION_NONE;
+			private var currentActiveHostMovingDistance:Number = 0;
+			private var keyboardTopLeft:Point = null;
+			private var hostViewportTopLeft:Point = null;
+			public var keyboardVisible:Boolean = false;
+			private var activeHostTextComponetChange:Boolean = false;
+			
+			private var currentPressedKey:ButtonKeyboard = null;
+			private var defaultSelectedKeyMenuItem:int = -1;
+            
+            private var menuPopupTimer:Timer = new Timer(maxKeyPressTime, 1);            
+            
+            private var _hostTextComponents:ArrayCollection = new ArrayCollection;
+            
+            [Bindable]
+            public var xmlKeyboard:String = "";
+            
+            private var toolTipEnable:Boolean = false;
+            
+            private var currentActiveHostComponent : int = -1;
+			[Bindable]
+			private var _hostScrollViewport:Group = null;
+			
+			public function get hostScrollViewPort():Group
+			{
+				return _hostScrollViewport;
+			}
+			
+			public function set hostScrollViewport(host:Group) : void
+			{
+				_hostScrollViewport = host;
+				hostViewportTopLeft = null;
+				if (host)
+				{
+					hostViewportTopLeft = new Point;
+					hostViewportTopLeft = _hostScrollViewport.localToGlobal(hostViewportTopLeft);
+				}
+			}
+			
+			public function showKeyboardWindow(show:Boolean) : void
+			{
+				callLater(_showKeyboardWindow, [show]);
+			}
+			
+            private function _showKeyboardWindow(show:Boolean) : void
+            {
+				var topLeft:Point;
+				
+				if (show)
+                {
+					if (!keyboardVisible || activeHostTextComponetChange)
+					{
+						if (moveHostViewFirstShow.isPlaying)
+						{
+							moveHostViewFirstShow.stop();
+						}
+						
+						if (moveKeyboardFirstShow.isPlaying)
+						{
+							moveKeyboardFirstShow.stop();
+						}
+						
+	                    toolTipEnable = ToolTipManager.enabled;
+	                    ToolTipManager.enabled = false;
+						
+						if (_hostScrollViewport != null)
+						{
+							if (currentActiveHostComponent != -1)
+							{
+								_hostScrollViewport.y = hostViewportTopLeft.y;
+								if (!_hostTextComponents[currentActiveHostComponent].moveHostViewFirst)
+								{
+									this.y = keyboardTopLeft.y;
+									keyboardInKeyboardFirstShow.duration = _hostTextComponents[currentActiveHostComponent].firstDuration;
+									hostViewInKeyboardFirstShow.duration = _hostTextComponents[currentActiveHostComponent].secondDuration;
+																		
+									keyboardInKeyboardFirstShow.yFrom = _hostTextComponents[currentActiveHostComponent].firstMovingFrom;
+									keyboardInKeyboardFirstShow.yTo = _hostTextComponents[currentActiveHostComponent].firstMovingTo;
+									hostViewInKeyboardFirstShow.yFrom = _hostTextComponents[currentActiveHostComponent].secondMovingFrom;
+									hostViewInKeyboardFirstShow.yTo = _hostTextComponents[currentActiveHostComponent].secondMovingTo;
+									keyboardMovementInKeyboardFirstShow.duration = _hostTextComponents[currentActiveHostComponent].secondDuration;
+									keyboardMovementInKeyboardFirstShow.yFrom = keyboardInKeyboardFirstShow.yTo;
+									keyboardMovementInKeyboardFirstShow.yTo = keyboardInKeyboardFirstShow.yTo + _hostTextComponents[currentActiveHostComponent].secondMoveBy; 
+									
+									hostViewInKeyboardFirstShow.target = _hostScrollViewport;
+									/* trace("Frist="+hostViewInKeyboardFirstShow.duration);
+									trace("second="+keyboardInKeyboardFirstShow.duration);
+									trace("FromA="+keyboardInKeyboardFirstShow.yFrom +" toA=" + keyboardInKeyboardFirstShow.yTo + " FromB=" +hostViewInKeyboardFirstShow.yFrom+" toB="+hostViewInKeyboardFirstShow.yTo); */   
+									moveKeyboardFirstShow.play();
+								}
+								else
+								{
+									hostViewInHostViewFirstShow.duration = _hostTextComponents[currentActiveHostComponent].firstDuration;
+									hostViewInHostViewFirstShow.yFrom = _hostTextComponents[currentActiveHostComponent].firstMovingFrom;
+									hostViewInHostViewFirstShow.yTo = _hostTextComponents[currentActiveHostComponent].firstMovingTo;
+									
+									keyboardMovementInHostViewFirstShow.duration = _hostTextComponents[currentActiveHostComponent].secondDuration;
+									keyboardMovementInHostViewFirstShow.yFrom = _hostTextComponents[currentActiveHostComponent].secondMovingFrom;
+									keyboardMovementInHostViewFirstShow.yTo = _hostTextComponents[currentActiveHostComponent].secondMovingTo;
+									
+									hostViewInHostViewFirstShow.target = _hostScrollViewport;
+									
+									moveHostViewFirstShow.play();
+								}
+							}
+						}
+					}
+                }
+                else if (!show && keyboardVisible)
+                {
+					if (moveHostViewFirstShow.isPlaying)
+					{
+						moveHostViewFirstShow.stop();
+					}
+					
+					if (moveKeyboardFirstShow.isPlaying)
+					{
+						moveKeyboardFirstShow.stop();
+					}
+					
+                    if (keyMenu.visible)
+                    {
+                        keyMenu.visible = false;
+                    }
+                    
+                    ToolTipManager.enabled = toolTipEnable;
+					if (_hostScrollViewport)
+					{
+						if (currentActiveHostComponent != -1)
+						{
+							if (!_hostTextComponents[currentActiveHostComponent].moveHostViewFirst)
+							{
+								moveKeyboardFirstShow.play(null, true);
+							}
+							else
+							{
+								hostViewInHostViewFirstShow.yTo = _hostTextComponents[currentActiveHostComponent].firstMovingFrom;
+								hostViewInHostViewFirstShow.yFrom = _hostTextComponents[currentActiveHostComponent].firstMovingTo;
+								
+								keyboardMovementInHostViewFirstShow.yTo = _hostTextComponents[currentActiveHostComponent].secondMovingFrom;
+								keyboardMovementInHostViewFirstShow.yFrom = _hostTextComponents[currentActiveHostComponent].secondMovingTo;
+								moveHostViewFirstShow.play();
+							}
+						}
+					}
+                }
+				
+				keyboardVisible = show;
+				activeHostTextComponetChange = false;
+				//trace("activeHostTextComponetChange change to false");
+            }
+            
+            private function hostComponentsMouseClick(event:MouseEvent) : void
+            {	
+				if (event.currentTarget is SkinnableTextBase &&
+				    (event.currentTarget as SkinnableTextBase).editable)
+				{
+					if (currentActiveHostComponent != -1 &&
+						event.currentTarget == _hostTextComponents[currentActiveHostComponent].host)
+					{
+						_hostTextComponents[currentActiveHostComponent].host.selectRange(currentHostComponentAnchorPos, currentHostComponentActivePos);
+					}
+					else
+					{
+						for (var i:int = 0;i < _hostTextComponents.length;i++)
+						{
+							if (_hostTextComponents[i].host == event.currentTarget)
+							{
+								if (currentActiveHostComponent != i)
+								{
+									currentActiveHostComponent = i;
+									activeHostTextComponetChange = true;
+									
+									validateLeftRightKeyState();
+									currentHostComponentAnchorPos = _hostTextComponents[currentActiveHostComponent].host.selectionAnchorPosition;
+									currentHostComponentActivePos = _hostTextComponents[currentActiveHostComponent].host.selectionActivePosition;
+								}
+								break;
+							}	
+						}
+					}
+					
+					if (currentActiveHostComponent != -1 &&
+						event.currentTarget == _hostTextComponents[currentActiveHostComponent].host &&
+						_hostTextComponents[currentActiveHostComponent].host.editable)
+					{
+						showKeyboardWindow(true);
+					}
+				}
+            }
+			
+			private function validateLeftRightKeyState(): void
+			{
+				if (currentActiveHostComponent == -1)
+					return;
+				
+				var moveToLeftKey:ButtonKeyboard = getSoftKeyButton("", "MoveLeft");
+				var moveToRightKey:ButtonKeyboard = getSoftKeyButton("", "MoveRight");
+				var moveToLeftKeyEnableChangeToFalse:Boolean = false;
+				var MoveToRightKeyEnableChangeToFalse:Boolean = false;
+				
+				if (_hostTextComponents[currentActiveHostComponent].host.selectionActivePosition == 0)
+				{
+					if (moveToLeftKey != null)
+					{
+						moveToLeftKeyEnableChangeToFalse = true;
+					}
+				}
+				
+				if (_hostTextComponents[currentActiveHostComponent].host.text == "" || 
+					_hostTextComponents[currentActiveHostComponent].host.selectionActivePosition == _hostTextComponents[currentActiveHostComponent].host.text.length)
+				{
+					if (moveToRightKey != null)
+					{
+						MoveToRightKeyEnableChangeToFalse = true;
+					}
+				}
+				
+				if (moveToLeftKey)
+				{
+					if ((moveToLeftKeyEnableChangeToFalse && moveToLeftKey.enabled) ||
+						(!moveToLeftKeyEnableChangeToFalse && !moveToLeftKey.enabled)) 
+					{
+						moveToLeftKey.enabled = !moveToLeftKeyEnableChangeToFalse;
+					}
+				}
+				
+				if (moveToRightKey)
+				{
+					if ((MoveToRightKeyEnableChangeToFalse && moveToRightKey.enabled) ||
+						(!MoveToRightKeyEnableChangeToFalse && !moveToRightKey.enabled)) 
+					{
+						moveToRightKey.enabled = !MoveToRightKeyEnableChangeToFalse;
+					}
+				}
+			}
+			
+			private function hostComponentsSelectionChange(event:FlexEvent):void
+			{
+				if (currentActiveHostComponent != -1 && 
+					_hostTextComponents[currentActiveHostComponent].host == event.currentTarget)
+				{
+					validateLeftRightKeyState();
+				}
+			}
+                        
+            public function hideKeyboard() : void
+            {
+                var host:SkinnableTextBase;
+                if (visible)
+                {
+                    for (var i:uint = 0;i < _hostTextComponents.length;i++)
+                    {
+                        host = _hostTextComponents[i].host as SkinnableTextBase;
+                        if (host == focusManager.getFocus())
+                        {
+                            return;
+                        }
+                    }
+                    
+                    if (focusManager.getFocus() == keyMenu.itemList)
+                    {
+                        return;
+                    }
+                }
+                
+                showKeyboardWindow(false);
+            }
+            
+            private function hostComponentsFocusOut(event:FocusEvent) : void
+            {
+                callLater(hideKeyboard);
+            }
+            
+            public function set hostTextComponents(args:Array) : void
+            {
+                var host:SkinnableTextBase;
+				_hostTextComponents.removeAll();
+				activeHostTextComponetChange = false;
+				
+                for (var i:uint = 0; i < args.length; i++)
+                {
+                    if (args[i] != null && args[i] is SkinnableTextBase)
+                    {
+                        host = args[i] as SkinnableTextBase;
+                        _addHostTextComponent(host, null);
+                    }
+                }
+            }
+            
+            public function removeHostTextComponent(host:SkinnableTextBase) : void
+            {
+                if (host != null && host is SkinnableTextBase)
+                {
+                    for (var i:uint = 0;i < _hostTextComponents.length;i++)
+                    {
+                        if (_hostTextComponents[i].host == host)
+                        {
+                            _hostTextComponents.removeItemAt(i);
+                            host.removeEventListener(FocusEvent.FOCUS_OUT, hostComponentsFocusOut);
+                            host.removeEventListener(MouseEvent.CLICK, hostComponentsMouseClick);
+							host.removeEventListener(SelectionEvent.SELECTION_CHANGE, hostComponentsSelectionChange);
+                            
+                            if (host == focusManager.getFocus() && visible)
+                            {
+                                visible = false;
+								activeHostTextComponetChange = true;
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+			
+			public function addHostTextComponent(host:SkinnableTextBase, evtHandlingFlags:Object = null) : void
+			{
+				callLater(_addHostTextComponent, [host, evtHandlingFlags]);
+			}
+			
+			private function _addHostTextComponent(host:SkinnableTextBase, evtFlags:Object) : void
+			{
+				if (host != null && host is SkinnableTextBase)
+                {
+					if (keyboardTopLeft == null)
+					{
+						keyboardTopLeft = new Point;
+						keyboardTopLeft = this.localToGlobal(keyboardTopLeft);
+					}
+					
+					var topLeft : Point = new Point;
+					var obj:Object = new Object;
+					var moveHostViewFirst:Boolean = false;
+					var hostViewMovingDistance:Number = 0;
+					var keyboardMovingDistance:Number = 0;
+					var firstMovingFrom:Number = 0;
+					var firstDuration:Number = 0;
+					var secondMovingFrom:Number = 0;
+					var secondMovingTo:Number = 0;
+					var firstMovingTo:Number = 0;
+					var secondDuration:Number = 0;
+					var hostViewPortTopLeft:Point = null;
+					var firstMoveBy:Number = 0;
+					var secondMoveBy:Number = 0;
+					
+					topLeft = host.localToGlobal(topLeft);
+					
+					if (hostViewportTopLeft && _hostScrollViewport)
+					{
+						var tmp:Point = new Point;
+						hostViewportTopLeft.x = 0;
+						hostViewportTopLeft.y = 0;
+						tmp = _hostScrollViewport.localToGlobal(tmp);
+						//in case hostViewportTopLeft is changed
+						
+						if (tmp.x != hostViewportTopLeft.x)
+						{
+							topLeft.x -= (tmp.x - hostViewportTopLeft.x);
+						}
+						
+						if (tmp.y != hostViewportTopLeft.y)
+						{
+							topLeft.y -= (tmp.y - hostViewportTopLeft.y);
+						}
+					}
+					
+					if (topLeft.y - ANIMATION_TOP_PADDING > this.height)
+					{
+						moveHostViewFirst = true;
+						firstMovingFrom = hostViewportTopLeft.y;
+						firstMovingTo = hostViewportTopLeft.y - this.height;
+						
+						secondMovingFrom = keyboardTopLeft.y;
+						secondMovingTo = keyboardTopLeft.y - this.height; //no move for second one 
+						/*trace(topLeft);
+						trace("fristFrom=" + firstMovingFrom + " firstTo=" + firstMovingTo + 
+							" secondFrom=" + secondMovingFrom + " secondTo=" + secondMovingTo); */
+					}
+					else
+					{
+						firstMovingFrom = keyboardTopLeft.y;
+						firstMovingTo = keyboardTopLeft.y - (this.height - (topLeft.y - ANIMATION_TOP_PADDING));
+						
+						secondMovingFrom = hostViewportTopLeft.y;
+						secondMovingTo = hostViewportTopLeft.y + 
+							ANIMATION_TOP_PADDING - topLeft.y;
+					}
+					firstMoveBy = firstMovingTo - firstMovingFrom;
+					secondMoveBy = secondMovingTo - secondMovingFrom;
+					
+					firstDuration = ANIMATION_DURATION * Math.abs(firstMoveBy) / 
+						(Math.abs(secondMoveBy) + Math.abs(firstMoveBy));
+					secondDuration = ANIMATION_DURATION - firstDuration;
+					
+					obj.host = host;
+					
+					obj.topLeft = topLeft;
+					obj.moveHostViewFirst = moveHostViewFirst;
+					obj.firstMovingFrom = firstMovingFrom;
+					obj.firstMovingTo = firstMovingTo;
+					obj.secondMovingFrom = secondMovingFrom;
+					obj.secondMovingTo = secondMovingTo;
+					obj.firstDuration = firstDuration;
+					obj.secondDuration = secondDuration;
+					obj.firstMoveBy = firstMoveBy;
+					obj.secondMoveBy = secondMoveBy; 
+					
+                    for (var i:uint = 0;i < _hostTextComponents.length;i++)
+                    {
+                        if (_hostTextComponents[i].host == host)
+                        {
+                            return;
+                        }
+                    }
+					
+					if(evtFlags)
+					{
+						obj.eventFlags = evtFlags;
+					}
+					
+                    _hostTextComponents.addItem(obj);
+                    host.addEventListener(FocusEvent.FOCUS_OUT, hostComponentsFocusOut);
+                    host.addEventListener(MouseEvent.CLICK, hostComponentsMouseClick);
+					host.addEventListener(SelectionEvent.SELECTION_CHANGE, hostComponentsSelectionChange);
+                 
+                    if (host == focusManager.getFocus() && !visible)
+                    {
+                        showKeyboardWindow(true);
+                    }
+                }
+            }
+            
+            private function timeOutToPopupMenu(event:TimerEvent): void
+            {
+                showMenuPopup();
+            }
+                        
+            private function init():void 
+            {
+                createKeyEnlargePopup();
+                var uRLLoader:URLLoader = new URLLoader();
+                uRLLoader.addEventListener(Event.COMPLETE, buildKeyboard);
+                //addEventListener(MouseEvent.MOUSE_OUT, mouseOutHandler);
+                //addEventListener(MouseEvent.ROLL_OUT, mouseOutHandler);
+                
+                uRLLoader.load(new URLRequest(xmlKeyboard));
+                menuPopupTimer.addEventListener(TimerEvent.TIMER_COMPLETE, timeOutToPopupMenu);
+            }
+            
+            // Called once the XML keyboard has loaded
+            private function buildKeyboard(event:Event):void 
+            {
+                var xmlData:XML = new XML(event.target.data);
+                
+                KeyboardPaddingTop = Number(xmlData.setting.@keyboardPaddingTop);
+                
+                var buttonY:Number = KeyboardPaddingTop;
+                
+                // Get all the nodes and @attributes of Row
+                var buttonRows:XMLList = xmlData.row;
+                var menuItems:ArrayCollection;
+                var buttonPathData:String = null;
+                
+                for each (var buttonRow:XML in buttonRows)
+                {
+                    // Get all the child @attributes and nodes of row
+                    var buttonX:Number = buttonRow.@indent;
+                    var buttonRowKeys:XMLList = buttonRow.children();
+                    var buttonHeight:Number = Number(buttonRow.@height);
+                    
+                    // For each key in button row add the new key to the right of the previous key
+                    for each (var buttonItem:XML in buttonRowKeys)
+                    {
+                        // Build a key based on the @attributes for the current key
+                        var buttonWidth:Number = buttonItem.@width;
+                        
+                        if (!buttonItem.hasOwnProperty("menu"))
+                        {
+                            menuItems = null;
+                        }
+                        else
+                        {
+                            menuItems = new ArrayCollection;
+							var index:int = 0;
+                            for each (var i:XML in buttonItem.menu.children()) 
+                            {
+                                menuItems.addItem(i);
+								if (i.@default == "yes")
+								{
+									defaultSelectedKeyMenuItem = index;
+								}
+								index++;
+                            }
+                        }
+                        
+                        if (!buttonItem.hasOwnProperty("path"))
+                        {
+                            buttonPathData = null;
+                        }
+                        else
+                        {
+                            buttonPathData = 'M ';
+                            buttonHeight = 0;
+                            for each (var ptPath:XML in buttonItem.path.children()) 
+                            {
+                                buttonPathData += ptPath.@x + ' ' + ptPath.@y + ' ';
+                                if (Number(ptPath.@y) + 1 > buttonHeight)
+                                {
+                                    buttonHeight = Number(ptPath.@y) + 1;
+                                }
+                            }
+                        }
+                        
+						var enlarge:Boolean = (buttonItem.hasOwnProperty("@enlarge")) ? buttonItem.@enlarge as Boolean: true;
+						var background:Array = new Array();
+						if(buttonItem.hasOwnProperty("@background"))
+						{
+							var split:Array = buttonItem.@background.split(",");
+							background[0] = uint(split[0]);
+							background[1] = uint(split[1]);
+						}
+						else
+						{
+							background[0] = 0xF0F0F0;
+							background[1] = 0xDDDDDD;
+						}
+						var leftPadding:Number = (buttonItem.hasOwnProperty("@leftPadding")) ? buttonItem.@leftPadding as Number: 4;
+						var rightPadding:Number = (buttonItem.hasOwnProperty("@rightPadding")) ? buttonItem.@rightPadding as Number: 4;
+						
+                        addElement(buildKey(buttonItem.@label, buttonItem.@style, 
+                            buttonWidth, buttonItem.@icon, buttonX, buttonY, 
+                            buttonItem.@action, enlarge, background,
+							leftPadding, rightPadding, menuItems,
+                            buttonHeight, buttonPathData));
+                        
+                        // Increment the horizontal position for the next button 
+                        buttonX += buttonWidth;
+                    }
+                    // Increment the vertical position for the next button row
+                    buttonY += Number(buttonRow.@height);
+                }
+            }
+            
+            private function repeatableButtonDown(event:FlexEvent) : void
+            {
+                var keyButton:ButtonKeyboard = (event.target as ButtonKeyboard);
+                keyActivated(keyButton);
+            }
+            
+            private function buildKey(buttonLabel:String, buttonType:String, buttonWidth:Number, 
+                                      buttonIcon:String, buttonX:Number, buttonY:Number, buttonAction:String,
+									  enlarge:Boolean, backgroundGradient:Array, leftPadding:Number, rightPadding:Number,
+                                      softKeyMenuItems:ArrayCollection, buttonHeight:Number, buttonPathData:String):Group 
+            {
+				//trace("BUILDING KEY: " + enlarge + ", " + backgroundGradient + ", " + leftPadding + ", " + rightPadding);
+                // Holding canvas required to place image in button
+                var canvasKey:Group = new Group;
+                //canvasKey.cacheAsBitmap = true;
+                canvasKey.width = buttonWidth;
+                canvasKey.height = buttonHeight;
+                canvasKey.x = buttonX;
+                canvasKey.y = buttonY;
+                
+                // Internal button - required to set popup button size
+                var cmdKey:ButtonKeyboard = new ButtonKeyboard;
+               // cmdKey.cacheAsBitmap = true;
+                cmdKey.keyStyle = buttonType;
+				cmdKey.setStyle("skinClass", skinKey);
+				
+				cmdKey.enlarge = enlarge;
+				cmdKey.background = backgroundGradient;
+				cmdKey.leftPadding = leftPadding;
+				cmdKey.rightPadding = rightPadding;
+				
+				if(buttonIcon != "")
+				{
+	                cmdKey.keyIcon = buttonIcon;
+					switch(buttonIcon)
+					{
+						case "Symbols":
+							cmdKey.keyIcon = Keyboard_Icons.symbolsClass;
+							break;
+						case "Left":
+							cmdKey.keyIcon = Keyboard_Icons.LeftClass;
+							break;
+						case "Right":
+							cmdKey.keyIcon = Keyboard_Icons.RightClass;
+							break;
+						case "Lang-ENG":
+							cmdKey.keyIcon = Keyboard_Icons.LangENGClass;
+							break;
+						case "Shift":
+							cmdKey.keyIcon = Keyboard_Icons.ShiftClass;
+							break;
+						case "CapsLock":
+							cmdKey.keyIcon = Keyboard_Icons.capsLockClass;
+							break;
+						case "Delete":
+							cmdKey.keyIcon = Keyboard_Icons.deleteClass;
+							break;
+					}
+				}
+                
+               /*  var skinClassName:String = "assets.skins.skinKey" + cmdKey.keyStyle;
+                var skin:Object = getDefinitionByName(skinClassName);
+                cmdKey.setStyle("skinClass", skin); */
+				
+				
+                /* Need to use seperate spark toggle button - cmdKey.toggle = (buttonType == 'IconToggle'); */
+                cmdKey.width = buttonWidth;
+                /* Data is not in spark property list - cmdKey.data = buttonAction; */
+                cmdKey.keyAction = buttonAction;
+                cmdKey.height = buttonHeight;
+                cmdKey.mouseEnabled = true;
+                cmdKey.label = (buttonType != 'Icon' ? buttonLabel : '');
+                
+                cmdKey.addEventListener(MouseEvent.MOUSE_OVER, showKeyEnlarge);
+                cmdKey.addEventListener(MouseEvent.MOUSE_DOWN, showKeyEnlarge);
+                if (buttonAction == "Delete" || buttonAction == "MoveLeft" || 
+				    buttonAction == "MoveRight")
+                {
+					cmdKey.autoRepeat = true;
+					cmdKey.setStyle("repeatDelay", keyRepeatDelay);
+					cmdKey.setStyle("repeatInterval", keyRepeatInterval);
+                    cmdKey.addEventListener(FlexEvent.BUTTON_DOWN, repeatableButtonDown);
+                }
+                else
+                {
+                    cmdKey.addEventListener(MouseEvent.MOUSE_UP, keyUp);
+                }
+                
+                cmdKey.focusEnabled = false;
+                cmdKey.softKeyMenuItems = softKeyMenuItems;
+                cmdKey.toolTip = null;
+                cmdKey.keyPathData = buttonPathData;
+                canvasKey.addElement(cmdKey);
+                
+                // Return the built key component to the calling function    
+                return canvasKey;
+            }
+            
+            private function getSoftKeyButton(label:String, action:String = null) : ButtonKeyboard
+            {
+                var keyButton:ButtonKeyboard = null;
+                
+                // Find the shift key in the keyboard and deselect it
+                for (var key:Number = 0; key < numElements; key++) 
+                {
+                    keyButton = ((getElementAt(key) as Group).getElementAt(0) as ButtonKeyboard);
+                    
+                    if (action != null)
+                    {
+                        if (keyButton.keyAction == action)
+                        {
+                            return keyButton;
+                        }
+                    }
+                    else
+                    {
+                        if (label != null && keyButton.label.toLocaleLowerCase() == label.toLocaleLowerCase())
+                        {
+                            return keyButton;
+                        }
+                    }
+                }
+                
+                return keyButton;
+            }
+            
+            private function toggleCase(upperCase:Boolean):void 
+            {
+                var keyButton:ButtonKeyboard;
+                // For every button key in the keyboard
+                for (var key:Number = 0; key < numElements; key++) 
+                {
+                    keyButton = ((getElementAt(key) as Group).getElementAt(0) as ButtonKeyboard);
+                    // From its style check to see if it is of type Char
+                    var buttonKeyType:String = keyButton.keyStyle;
+                    
+                    if (buttonKeyType == 'Char' && keyButton.keyAction == "Key") 
+                    {
+                        //Get its current label and provide it is not empty
+                        var buttonKeyLabel:String = keyButton.label;
+                        if (buttonKeyLabel != '') 
+                        {
+                            // Change the case to upper or lower case respectivly
+                            if (upperCase) 
+                            {
+                                buttonKeyLabel = buttonKeyLabel.toLocaleUpperCase();
+                            } 
+                            else 
+                            {
+                                buttonKeyLabel = buttonKeyLabel.toLocaleLowerCase();
+                            }
+                            // Change the key's button label to show the new case
+                            keyButton.label = buttonKeyLabel; 
+                        }
+                    }
+                }
+            }
+            
+            private function showKeyEnlarge(event:MouseEvent):void 
+            {
+                var keyButton:ButtonKeyboard = event.target as ButtonKeyboard;
+                if (event.buttonDown == true) 
+                {
+                    keyDownTime = getTimer();
+                    
+                    if (currentPressedKey != keyButton)
+                    {
+                        //reset the timer as this is a new button pressed.
+                        if (menuPopupTimer.running)
+                        {
+                            menuPopupTimer.reset();
+                        }
+                        
+                        currentPressedKey = keyButton;
+                    }
+                    
+                    if (currentPressedKey.softKeyMenuItems != null && !menuPopupTimer.running)
+                    {
+                        menuPopupTimer.start();
+                    }
+                    // Play the key click sound 
+                    Sounds.soundClick();
+                    keyMenu.visible = false;
+                }
+            }
+            private function showMenuPopup():void
+            {
+                if (currentPressedKey)
+                {
+                    var ptTopLeft:Point = new Point(0, 0);
+                    
+                    if (currentPressedKey.softKeyMenuItems != null && currentPressedKey.softKeyMenuItems.length > 0)
+                    {
+                        keyMenu.menuData = currentPressedKey.softKeyMenuItems;
+                        keyMenu.width = currentPressedKey.softKeyMenuItems.length * (currentPressedKey.width + 7);
+                        keyMenu.height = currentPressedKey.height + 6;
+						keyMenu.itemList.selectedIndex = defaultSelectedKeyMenuItem;
+                        keyMenu.itemList.width = currentPressedKey.softKeyMenuItems.length * (currentPressedKey.width + 7);
+                        ptTopLeft = currentPressedKey.localToGlobal(ptTopLeft);
+						
+						if (ptTopLeft.x >= keyMenu.width)
+						{
+							ptTopLeft.x -= keyMenu.width; 
+						}
+						else
+						{
+							ptTopLeft.x += currentPressedKey.width;
+						}
+						keyMenu.x = ptTopLeft.x + currentPressedKey.width;
+						keyMenu.y = Number(ptTopLeft.y - currentPressedKey.height);
+						keyMenu.visible = true;	
+                    }
+                }
+            }
+            
+            private function keyActivated(keyButton : ButtonKeyboard) : void
+            {
+                if (keyButton == null)
+                {
+                    return;
+                }
+                
+                var keyAction:String = keyButton.keyAction;
+				
+                switch (keyAction) 
+                {
+                    case 'CapsLock':
+                        // Invert the capsLockKey boolean value
+                        capsLockKey = !capsLockKey;
+                        
+                        if (capsLockKey == true) 
+                        {
+                            toggleCase(!shiftKey);
+                        } 
+                        else
+                        {
+                            //Caps lock is false
+                            toggleCase(shiftKey);
+                        }
+                        keyButton.selected = capsLockKey;
+                        break;
+                
+                case 'Shift':
+                    // Invert the shiftKey boolean value
+                    shiftKey = !shiftKey
+                    
+                    if (capsLockKey == true) 
+                    {
+                        toggleCase(!shiftKey);
+                        
+                    }
+                    else 
+                    { //Caps lock is false
+                        toggleCase(shiftKey);
+                    }
+                    keyButton.selected = shiftKey;
+                    break;
+                
+                case 'Enter':
+					if (currentActiveHostComponent != -1)
+					{
+						var evtHandled:Boolean = false;
+						
+						if(_hostTextComponents[currentActiveHostComponent].hasOwnProperty("eventFlags"))
+						{
+							var flags:Object = _hostTextComponents[currentActiveHostComponent].eventFlags;
+							
+							if(flags.hasOwnProperty(ON_ENTER_EVENT))
+							{
+								var enterEvt:int = flags[ON_ENTER_EVENT];
+								
+								if(enterEvt == ON_ENTER_CLOSE)
+									showKeyboardWindow(false);
+								else if(enterEvt == ON_ENTER_NEWLINE)
+								{
+									if (_hostTextComponents[currentActiveHostComponent].host.text != null && 
+										_hostTextComponents[currentActiveHostComponent].host.editable)
+									{
+										_hostTextComponents[currentActiveHostComponent].host.insertText("\r");
+										currentHostComponentAnchorPos = _hostTextComponents[currentActiveHostComponent].host.selectionAnchorPosition;
+										currentHostComponentActivePos = _hostTextComponents[currentActiveHostComponent].host.selectionActivePosition;
+									}
+								}
+									
+								evtHandled = true;
+							}
+						}
+						
+						if(!evtHandled)
+						{
+							if (_hostTextComponents[currentActiveHostComponent].host is TextInput)
+		                    {
+		                        showKeyboardWindow(false);
+		                    }
+		                    else if (_hostTextComponents[currentActiveHostComponent].host is TextArea)
+		                    {
+		                        if (_hostTextComponents[currentActiveHostComponent].host.text != null && 
+									_hostTextComponents[currentActiveHostComponent].host.editable)
+		                        {
+									_hostTextComponents[currentActiveHostComponent].host.insertText("\r");
+		                            currentHostComponentAnchorPos = _hostTextComponents[currentActiveHostComponent].host.selectionAnchorPosition;
+		                            currentHostComponentActivePos = _hostTextComponents[currentActiveHostComponent].host.selectionActivePosition;
+		                        }
+		                    }
+						}
+					}
+                    break;
+                
+                case "Key":
+                case "SubDomain":
+				    if (currentActiveHostComponent != -1 && 
+						_hostTextComponents[currentActiveHostComponent].host.text != null && 
+						_hostTextComponents[currentActiveHostComponent].host.editable)
+                    {
+						_hostTextComponents[currentActiveHostComponent].host.insertText(keyButton.label);
+                        currentHostComponentAnchorPos = _hostTextComponents[currentActiveHostComponent].host.selectionAnchorPosition;
+                        currentHostComponentActivePos = _hostTextComponents[currentActiveHostComponent].host.selectionActivePosition;
+                    }
+                    
+                    if (shiftKey == true)
+                    {
+                        // Deselect the shift key flag
+                        shiftKey = false;
+                        toggleCase(capsLockKey);
+                        
+                        keyButton = getSoftKeyButton(null, 'Shift');
+                        if (keyButton != null)
+                        {
+                            //unselect shift key
+                            keyButton.selected = false;
+                        }
+                    }
+                    break;
+                
+                case "Delete":
+                    if (currentActiveHostComponent != -1 && 
+						_hostTextComponents[currentActiveHostComponent].host.text != null && 
+						_hostTextComponents[currentActiveHostComponent].host.text != "" &&
+						_hostTextComponents[currentActiveHostComponent].host.selectionActivePosition > 0 &&
+						_hostTextComponents[currentActiveHostComponent].host.editable)
+                    {
+                        if (_hostTextComponents[currentActiveHostComponent].host.selectionActivePosition == 
+							_hostTextComponents[currentActiveHostComponent].host.selectionAnchorPosition)
+                        {
+							_hostTextComponents[currentActiveHostComponent].host.selectRange(
+								_hostTextComponents[currentActiveHostComponent].host.selectionActivePosition - 1, 
+								_hostTextComponents[currentActiveHostComponent].host.selectionActivePosition);
+                        }
+						_hostTextComponents[currentActiveHostComponent].host.insertText("");
+                        currentHostComponentAnchorPos = _hostTextComponents[currentActiveHostComponent].host.selectionAnchorPosition;
+                        currentHostComponentActivePos = _hostTextComponents[currentActiveHostComponent].host.selectionActivePosition;
+                    }
+                    break;
+				
+			    case "MoveLeft":
+					if (currentActiveHostComponent != -1 && 
+						_hostTextComponents[currentActiveHostComponent].host.text != null && 
+						_hostTextComponents[currentActiveHostComponent].host.text != "" &&
+						_hostTextComponents[currentActiveHostComponent].host.selectionActivePosition > 0 &&
+						_hostTextComponents[currentActiveHostComponent].host.editable)
+					{
+						_hostTextComponents[currentActiveHostComponent].host.selectRange(
+							_hostTextComponents[currentActiveHostComponent].host.selectionActivePosition - 1, 
+							_hostTextComponents[currentActiveHostComponent].host.selectionActivePosition - 1);
+						
+						currentHostComponentAnchorPos = _hostTextComponents[currentActiveHostComponent].host.selectionAnchorPosition;
+						currentHostComponentActivePos = _hostTextComponents[currentActiveHostComponent].host.selectionActivePosition;
+					}
+					break;
+				
+				case "MoveRight":
+					if (currentActiveHostComponent != -1 && 
+						_hostTextComponents[currentActiveHostComponent].host.text != null && 
+						_hostTextComponents[currentActiveHostComponent].host.text != "" &&
+						_hostTextComponents[currentActiveHostComponent].host.selectionActivePosition < 
+						_hostTextComponents[currentActiveHostComponent].host.text.length &&
+						_hostTextComponents[currentActiveHostComponent].host.editable)
+					{
+						_hostTextComponents[currentActiveHostComponent].host.selectRange(
+							_hostTextComponents[currentActiveHostComponent].host.selectionActivePosition + 1, 
+							_hostTextComponents[currentActiveHostComponent].host.selectionActivePosition + 1);
+						
+						currentHostComponentAnchorPos = _hostTextComponents[currentActiveHostComponent].host.selectionAnchorPosition;
+						currentHostComponentActivePos = _hostTextComponents[currentActiveHostComponent].host.selectionActivePosition;
+					}
+					break;
+                }
+                keyMenu.visible = false;
+                
+                if (keyActivatedCallback != null)
+                {
+                    keyActivatedCallback(keyButton);
+                }
+            }
+            
+            private function keyUp(event:MouseEvent):void 
+            {
+				var keyButton:ButtonKeyboard = (event.target as ButtonKeyboard);
+                
+                if (keyButton.softKeyMenuItems)
+                {
+                    menuPopupTimer.stop();
+                    
+                    //hide the menu popup if it is visible
+                    if (keyMenu.visible)
+                    {
+                        keyMenu.visible = false;
+                    }
+                    else
+                    {
+                        keyActivated(keyButton);
+                    }
+                }
+                else
+                {
+                    keyActivated(keyButton);
+                }
+            }
+            
+            private function popupMouseOut(event:MouseEvent):void 
+            {
+                if (keyMenu.visible && event.target == keyMenu.itemList)
+                {
+                    keyMenu.visible = false;
+                }
+            }
+			
+			private function changeMenuButtonLabel(button:ButtonKeyboard) : void
+			{
+				if (keyMenu.itemList.selectedIndex != -1)
+				{
+					button.label = keyMenu.itemList.selectedItem.@label;
+				}
+				keyMenu.visible = false;
+			}
+            
+            private function menuListMouseUp(event:MouseEvent): void
+            {
+                if (currentPressedKey)
+                {
+                    callLater(changeMenuButtonLabel, [currentPressedKey]);
+                }
+            }
+            
+            // *** Build Expanded Key Rollover ***
+            private function createKeyEnlargePopup():void 
+            {   
+                keyMenu.cacheAsBitmap = true;
+                keyMenu.visible = false;
+                keyMenu.setStyle("verticalScrollPolicy", ScrollPolicy.OFF);
+                keyMenu.setStyle("horizontalScrollPolicy", ScrollPolicy.OFF);
+				keyMenu.setStyle("skinClass", skinKeyMenu);
+				keyMenu.mouseChildren = true;
+                keyMenu.addEventListener(MouseEvent.MOUSE_OUT, popupMouseOut);;
+                keyMenu.addEventListener(MouseEvent.MOUSE_UP, menuListMouseUp);
+				PopUpManager.addPopUp(keyMenu, this, false);
+                keyMenu.itemList.setStyle("verticalScrollPolicy", ScrollPolicy.OFF);
+                keyMenu.itemList.setStyle("horizontalScrollPolicy", ScrollPolicy.OFF);
+            }
+            
+            protected function mouseOutHandler(event:MouseEvent):void
+            {
+                if (!keyMenu.visible)
+                {
+                    //When mouse moved into the enlarger box, keyboard will get a roll out event
+                    //in this case, we should not hide keyboard
+                    showKeyboardWindow(false);
+                }
+            }
+		]]>
+    </fx:Script>
+    
+    <s:visible>true</s:visible>
+</s:BorderContainer>

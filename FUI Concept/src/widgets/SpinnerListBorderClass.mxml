@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<s:Graphic xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   viewHeight = "100"
+		   viewWidth = "100" creationComplete="Init()">
+	
+	<fx:Script>
+		<![CDATA[
+			
+			[Bindable]
+			private var drawBackground:Boolean = true; 
+			
+			private function Init():void
+			{
+				viewHeight = (owner as SkinSpinnerListContainer).height;
+				viewWidth = (owner as SkinSpinnerListContainer).width;
+				height = viewHeight;
+				width = viewWidth ;
+				
+				rectSelection.height = SkinSpinnerListContainer.selectionIndicatorHeight;
+				rectSelection.width = viewWidth; 
+				rectSelection.top = (viewHeight - SkinSpinnerListContainer.selectionIndicatorHeight) / 2;
+								
+				background.width = viewWidth;
+				background.height = viewHeight; 
+				drawBackground = ((owner as SkinSpinnerListContainer).hostComponent as SpinnerListContainerWithOffset).drawBackground;
+			}
+		]]>
+	</fx:Script>
+	
+	<s:Rect id="background" left="0" top="0" width="0" height="0" radiusX="3" radiusY="3" visible="{drawBackground}">
+		<s:fill>
+			<s:SolidColor color="#E2E2E2"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Rect id="rectSelection" left="0" right="0" top="0" height="0">
+		<s:fill>
+			<s:LinearGradient rotation="90"> 
+				<s:GradientEntry color="0x3DA6EA" ratio="0"/>
+				<s:GradientEntry color="0x3793D0" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+</s:Graphic>

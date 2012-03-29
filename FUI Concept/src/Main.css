@@ -1,0 +1,231 @@
+
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+@namespace xc "Components.*";
+@namespace widgets "widgets.*";
+@namespace sk "assets.skins.*";
+
+@font-face
+{
+	fontFamily: "XeroxSans";
+	src: url("assets/fonts/XEROXSANS.TTF");
+	embedAsCFF: true;	
+}
+
+@font-face
+{
+	fontFamily: "XeroxSans";
+	fontWeight: bold;
+	src: url("assets/fonts/XEROXSANS-BOLD.TTF");
+	embedAsCFF: true;	
+}
+
+global {
+	fontFamily: "XeroxSans";
+	fontSize: 24;
+	textAlign: start;
+	fontWeight: normal;
+}
+
+
+/*widgets|wButton
+{
+	fontSize: 24;
+	textAlign: center;
+	fontWeight: normal;
+	backgroundAlpha: 1;
+	colorHighlight: #D4D4D4;
+	colorShadow: #B6B6B6;
+	colorHighlightDown: #338AC3;
+	colorShadowDown: #3CA5E9;
+}*/
+
+widgets|wButton
+{
+	fontSize: 24;
+	textAlign: center;
+	fontWeight: normal;
+	backgroundAlpha: 1;
+	colorHighlight: #d0d7dc;
+	colorShadow: #b0b7bd;
+	colorHighlightDown: #338AC3;
+	colorShadowDown: #3CA5E9;
+}
+
+widgets|wButton.keypad {
+	color: #222222;
+	fontSize: 32;
+	verticalAlign: middle;
+	textAlign: center;
+	fontWeight: bold;
+	
+}
+
+widgets|wButton.green
+{
+	fontSize: 24;
+	textAlign: center;
+	fontWeight: normal;
+	color: #FFFFFF;
+	backgroundAlpha: 1;
+	colorHighlight: #70B375;
+	colorShadow: #5C9360;
+	colorHighlightDown: #70B375;
+	colorShadowDown: #70B375;
+}
+
+widgets|wButton.light
+{
+	fontSize: 24;
+	textAlign: center;
+	fontWeight: normal;
+	backgroundAlpha: 1;
+	colorHighlight: #d0d7dc;
+	colorShadow: #b0b7bd;
+	colorHighlightDown: #338AC3;
+	colorShadowDown: #3CA5E9;
+}
+
+widgets|wButton.value
+{
+	fontSize: 24;
+	textAlign: center;
+	fontWeight: normal;
+	backgroundAlpha: 1;
+	colorHighlight: #F5F5F5;
+	colorShadow: #DADADA;
+	colorHighlightDown: #3DA6EA;
+	colorShadowDown: #3793D0;
+}
+
+s|Label.widgetTitle {
+	color: #FFFFFF;
+	textAlign: center;
+}
+
+s|Label.widget {
+	fontSize: 22;
+	color: #FFFFFF;
+	textAlign: center;
+}
+
+s|Label.settings {
+	color: #CCCCCC;
+	textAlign: end;
+	verticalAlign: middle;
+	paddingLeft: 10;
+	paddingRight: 10;
+}
+
+s|Label.buttonNav {
+	color: #000000;
+	verticalAlign: middle;
+	textAlign: center;
+	fontWeight: normal;
+}
+
+s|Label.addressListStyle {
+	color: #000000;
+	verticalAlign: middle;
+	textAlign: center;
+	fontWeight: normal;
+}
+
+s|Label.toggleButton {
+	color: #222222;
+	verticalAlign: middle;
+	textAlign: left;
+	fontWeight: normal;
+}
+
+widgets|wToggleButtonBar.toggleButtonCenter s|Label {
+	color: #222222;
+	verticalAlign: middle;
+	textAlign: center;
+	fontWeight: normal;
+	
+}
+
+s|Label.buttonMore {
+	color: #222222;
+	verticalAlign: middle;
+	textAlign: center;
+	fontWeight: normal;
+}
+
+s|Label.buttonBack {
+	color: #FFFFFF;
+	fontSize: 26;
+	verticalAlign: middle;
+	textAlign: center;
+	fontWeight: bold;
+}
+
+s|Button.NumericKeypad {
+	color: #646464;
+	fontSize: 32;
+	fontWeight: bold;
+}
+
+s|Label.keypadAccept {
+	color: #FFFFFF;
+	fontSize: 28;
+	verticalAlign: middle;
+	textAlign: center;
+	fontWeight: normal;
+}
+
+s|Label.keyboard {
+	color: #646464;
+	fontSize: 26;
+	verticalAlign: middle;
+	textAlign: center;
+}
+
+s|Label.cssKeyEnlargeLabel {
+	fontSize: 32pt;
+	fontWeight: bold;
+	color: #FFFFFF;
+	textAlign: center;
+}
+
+s|Label.detailsHeader {
+	fontSize: 24;
+	fontWeight: bold;
+}
+
+s|Label.details {
+	fontSize: 18;
+}
+
+s|Label.icon {
+	fontSize: 18;
+}
+
+s|Label.startHeader {
+	fontSize: 24;
+	fontWeight: bold;
+	color: #222222;
+}
+
+s|Label.startPrompt {
+	fontSize: 20;
+	fontWeight: normal;
+	color: #444444;
+}
+
+s|Label.startSettings {
+	fontSize: 20;
+	fontWeight: normal;
+	color: #222222;
+}
+
+s|TextInput
+{
+	skinClass:ClassReference("spark.skins.mobile.TextInputSkin");
+}
+
+s|TextArea
+{
+	skinClass:ClassReference("spark.skins.mobile.TextAreaSkin");	
+}

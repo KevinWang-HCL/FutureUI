@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<s:SparkButtonSkin xmlns:fx="http://ns.adobe.com/mxml/2009"
+				   xmlns:s="library://ns.adobe.com/flex/spark"
+				   xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+				   xmlns:w="widgets.*"
+				   minWidth="58" minHeight="58"
+				   left="0" right="0" top="0" top.down="0" bottom="0" bottom.down="-1"
+				   alpha.disabled="0.9">
+	
+	<fx:Metadata>
+		[HostComponent("widgets.wButton")]
+	</fx:Metadata>
+	
+	<!-- states -->
+	<s:states>
+		<s:State name="up" />
+		<s:State name="selected"/>
+		<s:State name="over" />
+		<s:State name="down" />
+		<s:State name="disabled" />
+	</s:states>	
+	
+	<fx:Script>
+		<![CDATA[
+			import spark.components.IconPlacement;
+			import spark.components.supportClasses.ButtonBase;
+			
+			import widgets.wButton;
+			
+			private var _backgroundAlpha:Number = 1;
+			
+			[Bindable]
+			public function get backgroundAlpha():Number
+			{
+				return _backgroundAlpha;
+			}
+			
+			public function set backgroundAlpha(value:Number):void
+			{
+				_backgroundAlpha = value;
+			}
+			
+			
+			private var _highlight:uint = 0;
+			
+			[Bindable]
+			public function get highlightUp():uint
+			{
+				return _highlight;
+			}
+			
+			public function set highlightUp(value:uint):void
+			{
+				_highlight = value;
+			}
+			
+			
+			private var _shadow:uint = 0;
+			
+			[Bindable]
+			public function get shadowUp():uint
+			{
+				return _shadow;
+			}
+			
+			public function set shadowUp(value:uint):void
+			{
+				_shadow = value;
+			}
+			
+			
+			private var _highlightDown:uint = 0;
+			
+			[Bindable]
+			public function get highlightDown():uint
+			{
+				return _highlightDown;
+			}
+			
+			public function set highlightDown(value:uint):void
+			{
+				_highlightDown = value;
+			}
+			
+			
+			private var _shadowDown:uint = 0;
+			
+			[Bindable]
+			public function get shadowDown():uint
+			{
+				return _shadowDown;
+			}
+			
+			public function set shadowDown(value:uint):void
+			{
+				_shadowDown = value;
+			}
+			
+			private var _hasIndicator:Boolean = false;
+			
+			[Bindable]
+			public function get hasIndicator():Boolean
+			{
+				return _hasIndicator;
+			}
+			
+			 public function set hasIndicator(value:Boolean):void
+			{
+				_hasIndicator = value;
+			} 
+			
+			
+			private var _indicatorOn:Boolean = false;
+			
+			[Bindable]
+			public function get indicatorOn():Boolean
+			{
+				return _indicatorOn;
+			}
+			
+			public function set indicatorOn(value:Boolean):void
+			{
+				_indicatorOn = value;
+			}
+			
+			private var _textAlignment:String = "center";
+			
+			[Bindable]
+			public function get textAlignment():String
+			{
+				return _textAlignment;
+			}
+			
+			public function set textAlignment(value:String):void
+			{
+				_textAlignment = value;
+			}
+			
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				var host:wButton = hostComponent as wButton;
+				// Use Shadow
+				rectShadow.visible = host.backgroundShadow;
+				this.shadowUp = host.shadow;
+				this.highlightUp = host.highlight;
+				this.shadowDown = host.shadowDown;
+				this.highlightDown = host.highlightDown;
+				this.hasIndicator = host.hasIndicator;
+				this.indicatorOn = host.indicatorOn;
+				this.textAlignment = host.textAlignmentProp;
+				
+				// Set rounded corners
+				if (host.cornerRadius > 0)
+				{
+					rectShadow.radiusX = host.cornerRadius;
+					rectButton.radiusX = host.cornerRadius;
+					rectIndicator.bottomLeftRadiusX = host.cornerRadius;
+					rectIndicator.bottomRightRadiusX = host.cornerRadius;
+					
+					lineTop.left = host.cornerRadius - 1;
+					lineTop.right = host.cornerRadius;
+					
+				} else {
+					
+					rectShadow.topLeftRadiusX = host.topLeftRadius;
+					rectShadow.topRightRadiusX = host.topRightRadius;
+					rectShadow.bottomLeftRadiusX = host.bottomLeftRadius;
+					rectShadow.bottomRightRadiusX = host.bottomRightRadius;					
+					rectButton.topLeftRadiusX = host.topLeftRadius;
+					rectButton.topRightRadiusX = host.topRightRadius;
+					rectButton.bottomLeftRadiusX = host.bottomLeftRadius;
+					rectButton.bottomRightRadiusX = host.bottomRightRadius;
+					rectIndicator.bottomLeftRadiusX = host.bottomLeftRadius;
+					rectIndicator.bottomRightRadiusX = host.bottomRightRadius;
+					
+					lineTop.left = host.topLeftRadius - 1;
+					lineTop.right = host.topRightRadius;
+				} 		
+				
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+		]]>
+	</fx:Script>
+	
+	<!-- Button Shadow -->
+	<s:Rect id="rectShadow" top="0" bottom="-2" left="0" right="0"
+			top.down="-1"  bottom.down="-1" left.down="-1" right.down="-1">
+		<s:fill>
+			<s:SolidColor color="0x000000" alpha.up="{this.backgroundAlpha * 0.3}" alpha.disabled="0.3"/>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- Button Background -->
+	<s:Rect id="rectButton" left="0" right="0" top="0" top.down="1" bottom="0" >
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="{this.highlightUp}" color.down="{this.highlightDown}" ratio="0"/>
+				<s:GradientEntry color="{this.shadowUp}" color.down="{this.shadowDown}" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- Button - Optional Indicator -->
+	<s:Rect id="rectIndicator" left="0" right="0" bottom="0" bottom.down="-1" height="5" visible="{this.hasIndicator}">
+		<s:fill>
+			<s:LinearGradient rotation="90" >
+				<s:GradientEntry id="gradientStatus0" color="{ this.indicatorOn ? 0x3DA6EA : 0x7E7E7E }" ratio="0"/>
+				<s:GradientEntry id="gradientStatus1" color="{ this.indicatorOn ? 0x3793D0 : 0x646464 }" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>		
+	</s:Rect>
+	
+	
+	<!-- Button Top Highlight -->
+	<s:Rect id="lineTop" top="0" height="1" alpha="0.7" alpha.up="{this.backgroundAlpha}" excludeFrom="down">
+		<s:fill>
+			<s:SolidColor color="0xFFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- Label -->
+	<!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay  -->
+	<s:Label id="labelDisplay" maxDisplayedLines="2"
+			 left="10" right="10" top="2" bottom="2"
+			 verticalAlign="middle" verticalCenter="1" verticalCenter.down="2"/>			
+	
+</s:SparkButtonSkin>

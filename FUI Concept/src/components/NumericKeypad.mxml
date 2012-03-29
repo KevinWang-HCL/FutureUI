@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:w="widgets.*"
+		title="NumericKeypad" backgroundAlpha="0" backgroundColor="0x000000" >
+	<s:layout>
+		<s:TileLayout rowHeight="70" columnWidth="100" requestedColumnCount="3"
+					  horizontalGap="1" verticalGap="1" />
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.Keyboard_Icons;
+			import assets.embedded.Sounds;
+			
+			import events.KeypadEvent;			
+		]]>
+	</fx:Script>
+	
+	<fx:Metadata>
+		[Event(name="KeyPadPress", type="events.KeypadEvent")]
+		[Event(name="KeyPadClose", type="events.KeypadEvent")]
+		[Event(name="KeyPadDelete", type="events.KeypadEvent")]
+	</fx:Metadata>
+	
+	<w:wButton id="btnNum7" label="7" topLeftRadius="3" styleName="keypad"
+			  mouseDown="Sounds.soundClick();"
+			  click="this.dispatchEvent(new KeypadEvent(KeypadEvent.KEYPAD_PRESS_EVENT, '7'));"/>
+	
+	<w:wButton id="btnNum8" label="8" styleName="keypad"
+			  mouseDown="Sounds.soundClick();"
+			  click="this.dispatchEvent(new KeypadEvent(KeypadEvent.KEYPAD_PRESS_EVENT, '8'));"/>
+	
+	<w:wButton id="btnNum9" label="9" topRightRadius="3" styleName="keypad"
+			  mouseDown="Sounds.soundClick();" 
+			  click="this.dispatchEvent(new KeypadEvent(KeypadEvent.KEYPAD_PRESS_EVENT, '9'));"/>
+	
+	
+	<w:wButton id="btnNum4" label="4" styleName="keypad"
+			  mouseDown="Sounds.soundClick();" 
+			  click="this.dispatchEvent(new KeypadEvent(KeypadEvent.KEYPAD_PRESS_EVENT, '4'));"/>
+	
+	<w:wButton id="btnNum5" label="5" styleName="keypad"
+			  mouseDown="Sounds.soundClick();" 
+			  click="this.dispatchEvent(new KeypadEvent(KeypadEvent.KEYPAD_PRESS_EVENT, '5'));"/>
+	
+	<w:wButton id="btnNum6" label="6" styleName="keypad"
+			  mouseDown="Sounds.soundClick();" 
+			  click="this.dispatchEvent(new KeypadEvent(KeypadEvent.KEYPAD_PRESS_EVENT, '6'));"/>
+	
+	
+	<w:wButton id="btnNum3" label="1" styleName="keypad"
+			  mouseDown="Sounds.soundClick();" 
+			  click="this.dispatchEvent(new KeypadEvent(KeypadEvent.KEYPAD_PRESS_EVENT, '1'));"/>
+	
+	<w:wButton id="btnNum2" label="2" styleName="keypad"
+			  mouseDown="Sounds.soundClick();" 
+			  click="this.dispatchEvent(new KeypadEvent(KeypadEvent.KEYPAD_PRESS_EVENT, '2'));"/>
+	
+	<w:wButton id="btnNum1" label="3" styleName="keypad"
+			  mouseDown="Sounds.soundClick();" 
+			  click="this.dispatchEvent(new KeypadEvent(KeypadEvent.KEYPAD_PRESS_EVENT, '3'));"/>
+	
+	
+	<w:wButton id="btnNum0" label="0" bottomLeftRadius="3" styleName="keypad"
+			  mouseDown="Sounds.soundClick();"
+			  click="this.dispatchEvent(new KeypadEvent(KeypadEvent.KEYPAD_PRESS_EVENT, '0'));"/>
+	
+	<w:wButton id="btnNumDel" icon="{Keyboard_Icons.deleteClass}" styleName="keypad"
+			  mouseDown="Sounds.soundClick();" 
+			  click="this.dispatchEvent(new KeypadEvent(KeypadEvent.KEYPAD_DELETE_EVENT));"/>
+	
+	<w:wButton id="btnNumOK" label="OK" bottomRightRadius="3"
+			  mouseDown="Sounds.soundClick();" styleName="green"
+			  click="this.dispatchEvent(new KeypadEvent(KeypadEvent.KEYPAD_CLOSE_EVENT));"/>	
+</s:View>

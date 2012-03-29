@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 creationComplete="init()" backgroundAlpha="0" backgroundColor="0x000000">
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.managers.PopUpManager;
+			
+			import spark.skins.spark.PanelSkin;
+			
+			[Bindable]
+			private var _menuData:ArrayCollection = null;
+			
+			private var listGlobalPosition:Point = null;
+			
+			public function set menuData(menuItems:ArrayCollection):void
+			{
+				_menuData = menuItems;
+				listGlobalPosition = null;
+			}
+			
+			public function showMenu(show:Boolean, parent:DisplayObject) : void
+			{
+				if (show)
+				{
+					PopUpManager.addPopUp(this, parent, false);
+					visible = true;
+				}
+				else
+				{
+					visible = false;
+					PopUpManager.removePopUp(this);
+				}
+				
+				if (listGlobalPosition == null)
+				{
+					listGlobalPosition = itemList.localToGlobal(new Point(0,0));
+				}
+			}
+
+			private function init() : void
+			{
+				//Hide the header
+				if (skin != null && skin is PanelSkin)
+				{
+					var skin:PanelSkin = skin as PanelSkin;
+					
+					if (skin.hasOwnProperty("topGroup"))
+					{
+						skin.topGroup.includeInLayout = false;
+						skin.topGroup.visible = false;
+					}
+				}
+			}
+			
+			protected function itemList_mouseMoveHandler(event:MouseEvent):void
+			{
+				var index:int = 0;
+				
+				if (listGlobalPosition == null)
+				{
+					listGlobalPosition = itemList.localToGlobal(new Point(0,0));
+				}
+
+				if (event.buttonDown && itemList.dataProvider.length > 0)
+				{
+					/*
+					 * for vertical layout
+					index = Math.floor((event.stageY - listGlobalPosition.y) / CustomMenuItemRenderer.CUSTOM_MENU_ITEM_HEIGHT);
+					
+					if (index != itemList.selectedIndex &&
+					    index >= 0 &&
+					    index < _menuData.length)
+					{
+						itemList.selectedIndex = index;
+					}
+					*/
+					
+					index = Math.floor((event.stageX - listGlobalPosition.x) / CustomMenuItemRenderer.CUSTOM_MENU_ITEM_WIDTH);
+					
+					if (index != itemList.selectedIndex &&
+						index >= 0 &&
+						index < _menuData.length)
+					{
+						itemList.selectedIndex = index;
+					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:List id="itemList"
+			labelField="@label" 
+			itemRenderer="menu.CustomMenuItemRenderer"
+			 borderVisible="false" 
+			contentBackgroundAlpha="0"
+			dataProvider="{_menuData}"
+			mouseMove="itemList_mouseMoveHandler(event)">
+		<s:layout>
+			<s:HorizontalLayout clipAndEnableScrolling="true" useVirtualLayout="false" columnWidth="100"/>
+		</s:layout>
+	</s:List>
+	
+</s:SkinnableContainer>

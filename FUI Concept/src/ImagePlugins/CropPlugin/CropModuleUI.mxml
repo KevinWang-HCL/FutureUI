@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MimicPlugin:ImageEditModuleUI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							   xmlns:s="library://ns.adobe.com/flex/spark" 
+							   xmlns:mx="library://ns.adobe.com/flex/mx" 
+							   xmlns:MimicPlugin="MimicPlugin.*" 
+							   width="100%" height="100%"
+							   creationComplete="imageeditmoduleui1_creationCompleteHandler(event)" xmlns:widgets="widgets.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import integration.ApplicationSettings;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.filters.DropShadowFilter;
+			
+			[Bindable]
+			private var dsfLabel:spark.filters.DropShadowFilter = new spark.filters.DropShadowFilter(0, 90, 0, 1, 2, 2);	
+			
+			//Ordered: Left, right, top, bottom
+			private static const HOLEPUNCH_PRESETS:Array = [0.5 * ApplicationSettings.get().get(ApplicationSettings.PRESCAN_DPI), 0, 0, 0];
+			private static const HEADERFOOTER_PRESETS:Array = [0, 0,
+																0.5 * ApplicationSettings.get().get(ApplicationSettings.PRESCAN_DPI),
+																0.5 * ApplicationSettings.get().get(ApplicationSettings.PRESCAN_DPI)];
+			
+			protected function imageeditmoduleui1_creationCompleteHandler(event:FlexEvent):void
+			{
+				//this.imageEditHost.applyImageEffect(this.imageEditModule.createImageEffect());
+			}
+			
+			protected function holePunchPresetBtn_clickHandler(event:MouseEvent):void
+			{
+				setPresetOffsets(HOLEPUNCH_PRESETS);
+			}
+			
+			protected function headerFooterPresetBtn_clickHandler(event:MouseEvent):void
+			{
+				setPresetOffsets(HEADERFOOTER_PRESETS);
+			}
+			
+			private function setPresetOffsets(values:Array):void
+			{
+				//(imageEditModule as CropModule).createImageEffect().setProperty(CropEffect.CROP_LEFT, values[0]);
+				//(imageEditModule as CropModule).createImageEffect().setProperty(CropEffect.CROP_RIGHT, values[1]);
+				//(imageEditModule as CropModule).createImageEffect().setProperty(CropEffect.CROP_TOP, values[2]);
+				//(imageEditModule as CropModule).createImageEffect().setProperty(CropEffect.CROP_BOTTOM, values[3]);
+				(imageEditModule as CropModule).setCropMargin(CropEffect.CROP_LEFT, values[0]);
+				(imageEditModule as CropModule).setCropMargin(CropEffect.CROP_RIGHT, values[1]);
+				(imageEditModule as CropModule).setCropMargin(CropEffect.CROP_TOP, values[2]);
+				(imageEditModule as CropModule).setCropMargin(CropEffect.CROP_BOTTOM, values[3]);
+			}
+			
+			public override function get requiredHeight():Number
+			{
+				return 78;
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Group top="10" left="10">
+		<s:layout>
+			<s:ButtonBarHorizontalLayout gap="10"/>
+		</s:layout>
+		
+		<s:Label text="Margin Presets" textAlign="right" styleName="widgetTitle" filters="{dsfLabel}" height="100%" verticalAlign="middle"/>
+		
+		<widgets:wButton id="holePunchPresetBtn"
+				  label="Hole Punch"
+				  height="58"
+				  cornerRadius="3"
+				  click="holePunchPresetBtn_clickHandler(event)"/>
+		<widgets:wButton id="headerFooterPresetBtn"
+				  label="Header and Footer"
+				  height="58"
+				  cornerRadius="3"
+				  click="headerFooterPresetBtn_clickHandler(event)"/>
+	</s:Group>
+</MimicPlugin:ImageEditModuleUI>

@@ -1,0 +1,725 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:List xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:components="components.*"
+		contentBackgroundAlpha="0"
+		creationComplete="Init()"
+		labelFunction="listItemFieldFunction"
+		dataProvider="{scrollListItemsWithStates}"
+		skinClass="assets.skins.skinTransparentList"
+		borderVisible="false">
+	<fx:Script>
+		<![CDATA[
+			import events.SwipeListItemEvent;
+			
+			import integration.ApplicationSettings;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.UIComponent;
+			import mx.rpc.events.ResultEvent;
+			
+			import spark.collections.Sort;
+			import spark.collections.SortField;
+			import spark.components.RichEditableText;
+			import spark.components.supportClasses.ButtonBase;
+			import spark.components.supportClasses.SkinnableTextBase;
+			
+			
+			// Need to use different code on the desktop emulator as we don't have guesture support
+			private var isTouchScreen:Boolean = ApplicationSettings.get().get(ApplicationSettings.ON_TOUCHSCREEN);
+			
+			[Bindable]
+			public var currentExpandedItem:int = -1;
+			
+			[Bindable]
+			public var scrollListXMLResultField:String = null;
+			
+			/***************************************
+			 * The list content, can be assigned on
+			 * mxml file via scrollList, mutually exclusive to
+			 * urlScrollList, the item data is not 
+			 * ScrollListItemData 
+			 ***************************************/
+			private var _scrollList:ArrayCollection = null;
+			
+			/***************************************
+			 * The real list content, loaded from _scrollList,
+			 * the item data is extended to object of 
+			 * ScrollListItemData which is including 
+			 * item state of EXPANDED or NORMAL
+			 ***************************************/
+			[Bindable]
+			private var scrollListItemsWithStates:ArrayCollection = new ArrayCollection;
+			
+			[Bindable]
+			public var expandedItemAlignToTop:Boolean = true;
+			
+			/***************************************
+			 * The list content loaded from url, 
+			 * can be assigned on mxml file, mutually 
+			 * exclusive to scrollList
+			 ***************************************/
+			[Bindable]
+			public var urlScrollList:String = null;
+			
+			/***************************************
+			 * private filter string backup, internal
+			 * use only
+			 ***************************************/
+			private var strFilterString:String;
+			
+			/************************************
+			 * Maximum pixel movement for item to 
+			 * be expanded, when you move the mouse on 
+			 * list item less than MAX_PIXEL_FOR_ITEM_ACTIVE,
+			 * the clicked item will be expanded, else
+			 * system will regard the movement as scrolling.
+			 * please aware user could change moving direction
+			 * during scrolling, this value means
+			 * any movement in any moving direction.
+			 * refer to code for more detail
+			 ***********************************/
+			private static const MAX_PIXEL_FOR_ITEM_ACTIVE:int = 5;
+			
+			/***************************************
+			 * filter string casesitive
+			 ***************************************/
+			public var filterCaseSensitive:Boolean = true;
+			
+			public var userData:Object = null;
+			
+			[Bindable]
+			public var xmlLoadingDoneCallback:Function = null; 
+			
+			[Bindable]
+			public var swipeToRight:Boolean = true;
+			private var swipeEventProecessed:Boolean = false;
+			private var mouseDownPoint:Point = new Point;
+			private var previousMousePoint:Point = new Point;
+			private var swipeInProgress:Boolean = false;
+			private var swipeStartTime:Number = 0;
+			static private const MAX_SWIPE_TIME:Number = 1000;
+			static private const MIN_SWIPE_DISTANCE:Number = 60;
+			private var currentSwipeItem:Number = -1;
+			[Bindable]
+			public var expandOnDropIn:Boolean = false;
+			private var mouseDownVerticalPos:Number = 0;
+			
+			[Bindable]
+			public var swipeToTarget:UIComponent = null;
+			private var sort:Sort = new Sort;
+			private var sortField:Array = null;
+			[Bindable]
+			public var listSortField:String = "";
+			[Bindable]
+			public var itemExpandOnClick:Boolean = true;
+			
+			[Bindable]
+			public var listItemDroppedInCallback:Function = null;
+			
+			private var _scrollToBottomOnDropIn:Boolean = true;
+			[Bindable]
+			public function get scrollToBottomOnItemDropIn():Boolean
+			{
+				return _scrollToBottomOnDropIn;
+			}
+			
+			public function set scrollToBottomOnItemDropIn(value:Boolean):void
+			{
+				_scrollToBottomOnDropIn = value;
+			}
+			
+			private var _sortOnDropIn:Boolean = true;
+			[Bindable]
+			public function get sortOnDropIn():Boolean
+			{
+				return _sortOnDropIn;
+			}
+			public function set sortOnDropIn(value:Boolean):void
+			{
+				_sortOnDropIn = value;
+			}
+			
+			private function moveVerticalPosTo(pos:Number) : void
+			{
+				layout.verticalScrollPosition = pos;
+			}
+			
+			public function itemStateChange(item:ScrollListItemData, fromHeight:int, toHeight:int, expanded:Boolean):void
+			{
+				if (itemExpandOnClick && expanded && currentExpandedItem != -1)
+				{
+					var obj : ScrollListItemData;
+					
+					obj = getListItemData(currentExpandedItem);
+					if (obj == item)
+					{
+						//expand new selected item
+						var verticalPos:Number;
+						var listSelectedItemPos:Number = currentExpandedItem * ScrollListItemBaseRenderer.ITEM_HEIGHT - 
+							layout.verticalScrollPosition;
+						
+						if (listSelectedItemPos + toHeight > height)
+						{
+							if (expandedItemAlignToTop)
+							{
+								verticalPos = currentExpandedItem * ScrollListItemBaseRenderer.ITEM_HEIGHT;
+							}
+							else
+							{
+								//these code is to allign to bottom
+								verticalPos = layout.verticalScrollPosition;
+								verticalPos += listSelectedItemPos + toHeight - height;
+							}
+							
+							//There is no enough room to fit the expanded part, so scroll the list down a bit
+							callLater(moveVerticalPosTo, [verticalPos]);
+						}
+					}
+				}
+			}
+			
+			private function myCompare(a:Object, b:Object, fields:Array = null): int
+			{
+				var f:Function = sort.compareFunction;
+				return f.call(null, a.itemData, b.itemData, fields);
+			}
+			
+			/***************************************
+			 * Initialization function
+			 ***************************************/
+			private function Init() : void
+			{
+				if (urlScrollList)
+				{
+					scrollListService.send();
+				}
+				//scroller.verticalScrollBar.setStyle('skinClass', ScrollListVScrollBarSkin);
+				//scroller.horizontalScrollBar.enabled = false;
+				
+				trace('isTouchScreen: ' + isTouchScreen);
+				
+				addEventListener(MouseEvent.MOUSE_MOVE, listMouseMoveHandler);
+				addEventListener(MouseEvent.MOUSE_DOWN, listMouseMoveDown);
+				addEventListener(MouseEvent.MOUSE_UP, listMouseUp);
+				addEventListener(TransformGestureEvent.GESTURE_SWIPE, handleSwipe );
+				addEventListener("listitem", listItemDroppedIn);
+				
+				if (_scrollList)
+				{
+					assignDataProvider(_scrollList);
+				}
+			}
+			
+			/***************************************
+			 * set function for scrollList
+			 ***************************************/
+			public function set scrollList(obj :ArrayCollection) : void
+			{
+				if (obj != _scrollList)
+				{
+					_scrollList = obj;
+					assignDataProvider(_scrollList);
+				}
+			}
+			
+			/***************************************
+			 * get function for scrollList
+			 ***************************************/
+			public function get scrollList() : ArrayCollection
+			{
+				return _scrollList;
+			}
+			
+			private function getListItemData(index:int) : ScrollListItemData
+			{
+				if (index < 0 || index >= dataProvider.length)
+				{
+					//illeagal paramter
+					return null;
+				}
+				
+				var obj : ScrollListItemData = dataProvider.getItemAt(index) as ScrollListItemData;
+				return obj;
+			}
+			
+			/***************************************
+			 * Interface to expand/contract one list item
+			 ***************************************/
+			private function changeListItemState(index:int, state:int, playAnimation:Boolean = true) : void
+			{
+				if (index < 0 || index >= dataProvider.length)
+				{
+					//illeagal paramter
+					return;
+				}
+				
+				if (!itemExpandOnClick)
+				    return;
+				
+				var obj : ScrollListItemData = getListItemData(index);
+				if (obj)
+				{
+					obj.currentItemState = state;
+					obj.playAnimation = playAnimation;
+					dataProvider.setItemAt(obj, index);
+				}
+			}
+			
+			/**************************************************
+			 * Inteface to apply filter function to the list
+			 * filter : the filter string to be applied
+			 **************************************************/
+			public function applyFilterString(filter:String):void
+			{
+				if (!filter || filter == "")
+				{
+					//remove the filter function if 
+					//filter string is null
+					scrollListItemsWithStates.filterFunction = null;
+				}
+				else
+				{
+					strFilterString = filter;
+					scrollListItemsWithStates.filterFunction = filterScrollListFunction;
+				}
+				
+				//start the filter function
+				scrollListItemsWithStates.refresh();
+			}
+			
+			/**************************************************
+			 * Inteface to filter contents in the list,
+			 * filter : the filter string to be applied
+			 **************************************************/
+			private function filterScrollListFunction(obj:Object):Boolean
+			{
+				var strItemText:String;
+				
+				if (obj == null)
+				{
+					//Do not display null object in the list
+					//this should not happen normally
+					return false;
+				}
+				
+				if (obj is String)
+				{
+					//The item text is right the item object,
+					//this is for string items
+					strItemText = obj as String;
+				}
+				else if (labelFunction != null)
+				{
+					//Top level is applying a lablelfunction to the list,
+					//then use the labelFunction to get item text
+					strItemText = labelFunction(obj);
+				}
+				else if (labelField)
+				{
+					//Top level is using labelField="***"
+					//for the list
+					strItemText = obj[labelField]
+				}
+				else
+				{
+					//not to display the item while I am not sure what to do
+					return false;
+				}
+				
+				if (filterCaseSensitive)
+				{
+					if (strItemText.indexOf(strFilterString) == 0)
+					{
+						return true;
+					}
+					return false;
+				}
+				else
+				{
+					if (strItemText.toLowerCase().indexOf(strFilterString.toLowerCase()) == 0)
+					{
+						return true;
+					}
+					return false;
+				}
+			}
+			
+			private function insertItemData(item:ScrollListItemData): void
+			{
+				var f:Function = sort.compareFunction;
+				var insertPos:int = 0;
+				
+				if (scrollListItemsWithStates.length == 1)
+				{
+					if (f.call(null, item.itemData, scrollListItemsWithStates[0].itemData, sortField) >= 0)
+					{
+						insertPos = 1;
+					}
+				}
+				else if (scrollListItemsWithStates.length > 1)
+				{
+					insertPos = scrollListItemsWithStates.length;
+					if (f.call(null, item.itemData, scrollListItemsWithStates[0].itemData, sortField) < 0)
+					{
+						insertPos = 0;
+					}
+					else
+					{
+						for (var i:int = 0;i < scrollListItemsWithStates.length-1;i++)
+						{
+							if (f.call(null, item.itemData, scrollListItemsWithStates[i].itemData, sortField) >= 0 && 
+								f.call(null, item.itemData, scrollListItemsWithStates[i+1].itemData, sortField) < 0)
+							{
+								insertPos = i+1;
+								break;
+							}
+						}
+					}
+				}
+				
+				if (insertPos == scrollListItemsWithStates.length)
+				{
+					scrollListItemsWithStates.addItem(item);
+				}
+				else
+				{
+					scrollListItemsWithStates.addItemAt(item, insertPos);
+				}
+			}
+			
+			/**************************************************
+			 * Inteface to assign a normal ArrayCollection class
+			 * to the list, the interface will convert the items
+			 * to extended ScrollListItemData items
+			 **************************************************/
+			public function assignDataProvider(dataProvider:ArrayCollection) : void
+			{
+				var itemRendererData:ScrollListItemData;
+				scrollListItemsWithStates.removeAll();
+				trace(listSortField);
+				sortField = [new SortField(listSortField)];
+				sort.fields = sortField;
+				
+				if (dataProvider)
+				{
+					for each (var obj:Object in dataProvider) 
+					{
+						if (obj is ScrollListItemData)
+						{
+							itemRendererData = obj as ScrollListItemData;
+						}
+						else
+						{
+							itemRendererData = new ScrollListItemData(obj);
+						}
+						itemRendererData.userData = userData;
+						itemRendererData.listOwner = this;
+						
+						insertItemData(itemRendererData);
+					}
+				}
+				currentExpandedItem = -1;
+				
+				trace("assignDataProvider ");
+				/*sort.compareFunction = myCompare;
+				scrollListItemsWithStates.sort = sort;
+				scrollListItemsWithStates.refresh(); */ 
+			}
+			
+			/**************************************************
+			 * Event handler when we get http service result
+			 **************************************************/
+			protected function scrollListService_resultHandler(event:ResultEvent):void
+			{
+				if (xmlLoadingDoneCallback != null)
+				{
+					xmlLoadingDoneCallback(event);
+				}
+				
+				var obj:Object = scrollListService.lastResult;
+				if (scrollListXMLResultField)
+				{
+					var scrollListResultFields:Array = scrollListXMLResultField.split(".");
+					for each (var field:String in scrollListResultFields) 
+					{
+						obj = obj[field]; 
+					}
+					
+					_scrollList = obj as ArrayCollection;
+					
+					if (_scrollList)
+					{
+						assignDataProvider(_scrollList);
+					}
+				}
+			}
+			
+			private function listItemFieldFunction(obj:Object):String
+			{
+				if (labelField != null)
+				{
+					return obj.itemData[labelField];
+				}
+				
+				return "";
+			}
+			
+			private function listMouseMoveDown(event:MouseEvent) : void
+			{
+				mouseDownPoint.x = event.stageX;
+				mouseDownPoint.y = event.stageY;
+				mouseDownVerticalPos = layout.verticalScrollPosition;
+				previousMousePoint.x = event.stageX;
+				previousMousePoint.y = event.stageY;
+				//trace("DOWN stageX="+event.stageX+" mouseDownPoint.x=" + mouseDownPoint.x);
+				//trace(event.target);
+				
+				swipeStartTime = getTimer();
+				swipeInProgress = true;
+			}
+			
+			private function swipeItem(mouseOnItem:int):void
+			{
+				var itemData:ScrollListItemData = getListItemData(mouseOnItem);
+				var obj:ScrollListItemData;
+				
+				if (swipeToTarget && mouseOnItem != -1)
+				{	
+					if (itemData)
+					{
+						if (currentExpandedItem != -1 && currentExpandedItem != mouseOnItem)
+						{
+							obj = getListItemData(currentExpandedItem);
+							if (obj && obj.currentItemState == ScrollListItemBaseRenderer.ITEM_STATE_EXPANDED)
+							{
+								changeListItemState(currentExpandedItem, ScrollListItemBaseRenderer.ITEM_STATE_NORMAL);
+							}
+						}
+						
+						itemData.playAnimation = false;
+						swipeToTarget.dispatchEvent(new SwipeListItemEvent("listitem", itemData));
+						//trace("mouseOnItem = " + mouseOnItem);
+						dataProvider.removeItemAt(mouseOnItem);
+						
+						currentExpandedItem = -1;
+						swipeEventProecessed = true;
+					}
+				}
+			}
+			
+			private function handleSwipe(e:TransformGestureEvent):void
+			{
+				if (!isTouchScreen)
+				{
+					return;
+				}
+				
+				var mouseOnItem:int = mouseOnItem(e.stageX, e.stageY);
+				
+				if (mouseOnItem == -1)
+				{
+					return;
+				}
+				
+				// Swipe was to the right
+				if ((e.offsetX == 1 && swipeToRight) ||
+					(e.offsetX == -1 && !swipeToRight))
+				{
+					swipeItem(mouseOnItem);
+				}		
+			}
+			
+			
+			private function mouseOnItem(x:Number, y:Number) : int
+			{
+				var itemData:ScrollListItemData;
+				var verticalPos:Number = 0;
+				var pt:Point = localToGlobal(new Point);
+				
+				for (var i:int = 0;i < dataProvider.length;i++)
+				{
+					itemData = dataProvider.getItemAt(i) as ScrollListItemData;
+					switch(itemData.currentItemState)
+					{
+						case ScrollListItemBaseRenderer.ITEM_STATE_NORMAL:
+							verticalPos += ScrollListItemBaseRenderer.ITEM_HEIGHT;
+							break;
+						case ScrollListItemBaseRenderer.ITEM_STATE_EXPANDED:
+							verticalPos += itemData.itemHeight;
+							break;
+					}
+					
+					if (verticalPos > layout.verticalScrollPosition + y - pt.y)
+					{
+						return i;
+					}
+				}
+				return -1;
+			}
+			
+			private function listMouseUp(event:MouseEvent) : void
+			{
+				var mouseOnItem:int = mouseOnItem(event.stageX, event.stageY);
+				var obj : ScrollListItemData;
+				var i:int;
+				
+				if (isTouchScreen && swipeEventProecessed)
+				{
+					//the mouse up is caused by swipe event, don't expand item					
+					swipeEventProecessed = false;
+					return;
+				}
+				
+				if (!isTouchScreen && swipeInProgress)
+				{
+					swipeInProgress = false;
+					
+					if (swipeToTarget && 
+						mouseOnItem != -1 && 
+						Math.abs(event.stageX - mouseDownPoint.x) >= MIN_SWIPE_DISTANCE)
+					{
+						swipeItem(mouseOnItem);
+						return;
+					}
+				}
+				//trace(event.target + ": " + (event.target is SkinnableTextBase) + ", " + (event.target is ButtonBase));
+				if (Math.abs(event.stageY - mouseDownPoint.y) <= MAX_PIXEL_FOR_ITEM_ACTIVE &&
+					!(event.target is ButtonBase) && !(event.target is SkinnableTextBase) &&
+					!(event.target is RichEditableText) && mouseOnItem != -1)
+				{
+					if (currentExpandedItem != -1 && currentExpandedItem != mouseOnItem)
+					{
+						obj = getListItemData(currentExpandedItem);
+						if (obj && obj.currentItemState == ScrollListItemBaseRenderer.ITEM_STATE_EXPANDED)
+						{
+							changeListItemState(currentExpandedItem, ScrollListItemBaseRenderer.ITEM_STATE_NORMAL);
+						}
+					}
+					
+					obj = getListItemData(mouseOnItem);
+					if (obj)
+					{
+						//expand new selected item
+						if (obj.currentItemState != ScrollListItemBaseRenderer.ITEM_STATE_EXPANDED)
+						{
+							currentExpandedItem = mouseOnItem;
+							changeListItemState(mouseOnItem, ScrollListItemBaseRenderer.ITEM_STATE_EXPANDED);
+						}
+						else
+						{
+							changeListItemState(mouseOnItem, ScrollListItemBaseRenderer.ITEM_STATE_NORMAL);
+							currentExpandedItem = -1;
+						}
+					}
+				}
+			}
+			
+			
+			
+			private function listScrollToBottom():void
+			{
+				if (dataGroup.contentHeight > height)
+				{
+					layout.verticalScrollPosition = dataGroup.contentHeight - height;
+				}
+			}
+			
+			private function listItemDroppedIn(event:SwipeListItemEvent) : void
+			{
+				var itemData:ScrollListItemData;
+				if (currentExpandedItem != -1)
+				{
+					changeListItemState(currentExpandedItem, ScrollListItemBaseRenderer.ITEM_STATE_NORMAL, false);
+				}
+				
+				
+				itemData = (event.itemObj as ScrollListItemData);
+				if(_sortOnDropIn)
+					insertItemData(itemData);
+				else
+					dataProvider.addItem(itemData);
+				itemData.listOwner = this;
+				
+				if (expandOnDropIn)
+				{			
+					currentExpandedItem = dataProvider.length - 1;
+					changeListItemState(currentExpandedItem, ScrollListItemBaseRenderer.ITEM_STATE_EXPANDED, false);
+				}
+				else if (event.itemObj.currentItemState == ScrollListItemBaseRenderer.ITEM_STATE_EXPANDED)
+				{
+					changeListItemState(dataProvider.length - 1, ScrollListItemBaseRenderer.ITEM_STATE_NORMAL, false);
+					currentExpandedItem = -1;
+				}
+				
+				if (listItemDroppedInCallback != null)
+				{
+					listItemDroppedInCallback(itemData.itemData);
+				}
+				
+				if(_scrollToBottomOnDropIn)
+					callLater(listScrollToBottom);
+			}
+			
+			
+			private function listMouseMoveHandler(event:MouseEvent) : void
+			{
+				if (event.buttonDown)
+				{
+					if (currentExpandedItem != -1 &&
+						Math.abs(mouseDownVerticalPos - layout.verticalScrollPosition) > ScrollListItemBaseRenderer.ITEM_HEIGHT/2)
+					{
+						changeListItemState(currentExpandedItem, ScrollListItemBaseRenderer.ITEM_STATE_NORMAL, false);
+						currentExpandedItem = -1;
+					}
+					
+					var currentTime:Number = getTimer();
+					if (currentTime - swipeStartTime > MAX_SWIPE_TIME)
+					{
+						swipeInProgress = false;
+						return;
+					}
+					
+					if (swipeToRight)
+					{
+						if (event.stageX < previousMousePoint.x)
+						{
+							swipeInProgress = false
+							return;
+						}
+					}
+					else
+					{
+						if (event.stageX > previousMousePoint.x)
+						{
+							swipeInProgress = false;
+							return;
+						}
+					}
+					
+					previousMousePoint.x = event.stageX;
+					previousMousePoint.y = event.stageY;
+					return;
+				}
+				else
+				{
+					swipeInProgress = false;
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Metadata>
+		[Event(name="listitem", type="SwipeListItemEvent")]
+	</fx:Metadata>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:HTTPService id="scrollListService" 
+					   url="{urlScrollList}" 
+					   result="scrollListService_resultHandler(event)"/>
+		
+	</fx:Declarations>
+</s:List>
+
+

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MimicPlugin:ImageEditModuleUI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							   xmlns:s="library://ns.adobe.com/flex/spark"
+							   xmlns:w="widgets.*"
+							   xmlns:MimicPlugin="MimicPlugin.*" width="100%" height="100%">
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.Edit_Icons;
+			import assets.embedded.General_Icons;
+			import assets.embedded.Sounds;
+			
+			import spark.filters.DropShadowFilter;
+			
+			[Bindable]
+			private var dsfLabel:DropShadowFilter = new spark.filters.DropShadowFilter(0, 90, 0, 1, 2, 2);
+			
+			import spark.events.TrackBaseEvent;
+			
+			public override function get requiredHeight():Number
+			{
+				return 146;
+			}
+			
+			protected function redactionWeightingSlider_thumbReleaseHandler(event:TrackBaseEvent):void
+			{
+				(imageEditModule as RedactionModule).weighting = redactionWeightingSlider.value;
+			}
+			
+			protected function clearRedactionsBtn_clickHandler(event:MouseEvent):void
+			{
+				(imageEditModule as RedactionModule).reset();
+			}
+			
+			protected function placeToolBar_selectedIndexChangedEventHandler(event:Event):void
+			{
+				(imageEditModule as RedactionModule).placeMode = (placeToolBar.selectedIndex > 0) ? ((placeToolBar.selectedIndex == 1) ? 2 : 1) : 0;
+				
+				if(placeToolBar.selectedIndex == 2) 
+				{
+					lineWeightingGroup.alpha = 1;
+					lineWeightingGroup.enabled = true;
+				} else {
+					lineWeightingGroup.alpha = 0.1;
+					lineWeightingGroup.enabled = false;
+				}
+			}
+			
+			protected function undoBtn_clickHandler(event:MouseEvent):void
+			{
+				(imageEditModule as RedactionModule).undoEffect();
+			}
+			
+			protected function redoBtn_clickHandler(event:MouseEvent):void
+			{
+				(imageEditModule as RedactionModule).redoEffect();
+			}
+			
+			protected function clearAllBtn_clickHandler(event:MouseEvent):void
+			{
+				(imageEditModule as RedactionModule).clearAllEffects();	
+			}
+			
+			/* protected function colourBtnBar_selectedIndexChangedEventHandler(event:Event):void
+			{
+			if(colourBtnBar.selectedIndex == 0) //Black
+			{
+			(imageEditModule as RedactionModule).colour = RedactionModule.BLACK;
+			}
+			else
+			{
+			(imageEditModule as RedactionModule).colour = RedactionModule.WHITE;
+			}
+			} */
+			
+			protected function placeModeBar_selectedIndexChangedEventHandler(event:Event):void
+			{
+				if(placeModeBar.selectedIndex == 0) //Redact
+				{
+					(imageEditModule as RedactionModule).colour = RedactionModule.BLACK;
+				}
+				else //Erase
+				{
+					(imageEditModule as RedactionModule).colour = RedactionModule.WHITE;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<!--<MimicPlugin:layout>
+	<s:HorizontalLayout/>
+	</MimicPlugin:layout>-->
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<s:HGroup top="10" bottom="10" left="10" right="10" gap="40">
+		<s:VGroup gap="10">
+			<s:HGroup height="58" gap="10">
+				<s:Label text="Tool" width="100" height="58" verticalAlign="middle"
+						 styleName="widgetTitle" textAlign="right" filters="{[dsfLabel]}"/>
+				
+				<w:wToggleButtonBar id="placeToolBar" height="58"
+									left="15" top="15"
+									selectedIndexChangedEvent="placeToolBar_selectedIndexChangedEventHandler(event)">
+					<w:Buttons>
+						<fx:Object label="Pan" icon="{General_Icons.panClass}" />
+						<fx:Object label="Box" icon="{Edit_Icons.drawRectClass}" />
+						<fx:Object label="Line" icon="{Edit_Icons.drawLineClass}" />
+					</w:Buttons>
+				</w:wToggleButtonBar>	
+			</s:HGroup>
+			
+			<s:HGroup height="58" gap="10">
+				<s:Label text="Mode" width="100" height="58" verticalAlign="middle"
+						 styleName="widgetTitle" textAlign="right" filters="{[dsfLabel]}"/>
+				
+				<w:wToggleButtonBar id="placeModeBar" styleName="toggleButtonCenter"
+									height="58" width="{placeToolBar.width}"
+									left="15" top="15"
+									selectedIndexChangedEvent="placeModeBar_selectedIndexChangedEventHandler(event)">
+					<w:Buttons>
+						<fx:Object label="Redact" />
+						<fx:Object label="Erase" />
+					</w:Buttons>
+				</w:wToggleButtonBar>	
+			</s:HGroup>
+		</s:VGroup>
+		
+		<s:VGroup id="lineWeightingGroup" alpha="0.1" gap="5" width="300" enabled="false">
+			<s:Label text="{'Line Thickness ' + redactionWeightingSlider.value}"
+					 width="100%" height="50"
+					 textAlign="center"
+					 styleName="widgetTitle" verticalAlign="bottom"
+					 filters="{[dsfLabel]}"/>
+			
+			<s:HSlider id="redactionWeightingSlider" skinClass="assets.skins.skinHSlider"
+					   width="100%" minimum="1" maximum="20" value="10"
+					   showDataTip="false"
+					   thumbRelease="redactionWeightingSlider_thumbReleaseHandler(event)"/>
+		</s:VGroup>
+	</s:HGroup>
+	
+	<s:HGroup top="78" right="10" gap="1">
+		<w:wButton id="btnUndoLast" label="Undo" height="58" width="159"
+				   icon="{General_Icons.undoLastClass}" 
+				   mouseDown="Sounds.soundClick();" click="undoBtn_clickHandler(event)"
+				   skinClass="assets.skins.skinButton" topLeftRadius="3" bottomLeftRadius="3"/>
+		
+		<w:wButton id="btnRedo" label="" height="58" width="58"
+				   icon="{General_Icons.redoClass}" iconPlacement="right" 
+				   mouseDown="Sounds.soundClick();" click="redoBtn_clickHandler(event)"
+				   skinClass="assets.skins.skinButton" topRightRadius="3" bottomRightRadius="3"/>		
+	</s:HGroup>
+	
+</MimicPlugin:ImageEditModuleUI>

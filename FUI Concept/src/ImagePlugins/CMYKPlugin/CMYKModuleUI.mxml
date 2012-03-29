@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MimicPlugin:ImageEditModuleUI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							   xmlns:s="library://ns.adobe.com/flex/spark" 
+							   xmlns:mx="library://ns.adobe.com/flex/mx" 
+							   xmlns:MimicPlugin="MimicPlugin.*" 
+							   xmlns:i="itemRenderers.*"
+							   xmlns:components="components.*"
+							   xmlns:w="widgets.*"
+							   width="100%"
+							   creationComplete="imageeditmoduleui1_creationCompleteHandler(event)"  >
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import itemRenderers.LblItemRenderer;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.TrackBaseEvent;
+			import spark.filters.DropShadowFilter;
+			
+			[Bindable]
+			private var dsfLabel:DropShadowFilter = new spark.filters.DropShadowFilter(0, 90, 0, 1, 2, 2);
+			
+			
+			private var effect:CMYKEffect;
+			
+			private static const CUSTOM_INDEX:int = 0, BRIGHT_INDEX:int = 1, LIVELY_INDEX:int = 2,
+				WARM_INDEX:int = 3, COOL_VALUES:int = 4;
+			private static const PRESET_VALUES:Array = [ [0,0,0,0],
+				[0,0,0,0],
+				[0,0,0,0],
+				[25,43,37,0],
+				[28,42,27,0] ];
+			
+			protected function imageeditmoduleui1_creationCompleteHandler(event:FlexEvent):void
+			{
+				effect = imageEditModule.createImageEffect() as CMYKEffect;
+			}
+			
+			protected function cyanSlider_thumbReleaseHandler(event:TrackBaseEvent):void
+			{
+				effect.setProperty(CMYKEffect.CYAN_OFFSET_PROP, cyanSlider.value / 100.0);
+				imageEditHost.updateCachedImage([effect.shaderFilter]);
+			}
+			
+			protected function yellowSlider_thumbReleaseHandler(event:TrackBaseEvent):void
+			{
+				effect.setProperty(CMYKEffect.YELLOW_OFFSET_PROP, yellowSlider.value / 100.0);
+				imageEditHost.updateCachedImage([effect.shaderFilter]);
+			}
+			
+			protected function magentaSlider_thumbReleaseHandler(event:TrackBaseEvent):void
+			{
+				effect.setProperty(CMYKEffect.MAGENTA_OFFSET_PROP, magentaSlider.value / 100.0);
+				imageEditHost.updateCachedImage([effect.shaderFilter]);
+			}
+			
+			protected function blackSlider_thumbReleaseHandler(event:TrackBaseEvent):void
+			{
+				effect.setProperty(CMYKEffect.KEY_OFFSET_PROP, blackSlider.value / 100.0);
+				imageEditHost.updateCachedImage([effect.shaderFilter]);
+			}
+			
+			public override function reset():void
+			{
+ 				cyanSlider.value = 0;
+				magentaSlider.value = 0;
+				yellowSlider.value = 0;
+				blackSlider.value = 0; 
+				//presetWheel.moveToIndex(0);
+				if(presetWheel)
+					presetWheel.selectedIndex = 0;
+			}
+			
+			public override function get requiredHeight():Number
+			{
+				return 285;
+			}
+			
+			protected function presetWheel_selectedIndexChangedHandler(event:Event):void
+			{
+				cyanSlider.value = PRESET_VALUES[presetWheel.selectedIndex][0];
+				effect.setProperty(CMYKEffect.CYAN_OFFSET_PROP, PRESET_VALUES[presetWheel.selectedIndex][0] / 100.0);
+				
+				magentaSlider.value = PRESET_VALUES[presetWheel.selectedIndex][1];
+				effect.setProperty(CMYKEffect.MAGENTA_OFFSET_PROP, PRESET_VALUES[presetWheel.selectedIndex][1] / 100.0);
+				
+				yellowSlider.value = PRESET_VALUES[presetWheel.selectedIndex][2];
+				effect.setProperty(CMYKEffect.YELLOW_OFFSET_PROP, PRESET_VALUES[presetWheel.selectedIndex][2] / 100.0);
+				
+				blackSlider.value = PRESET_VALUES[presetWheel.selectedIndex][3];
+				effect.setProperty(CMYKEffect.KEY_OFFSET_PROP, PRESET_VALUES[presetWheel.selectedIndex][3] / 100.0);
+				
+				imageEditHost.updateCachedImage([effect.shaderFilter]);
+			}
+			
+			/* protected function presetWheel_scrollItemSelectedHandler(event:ScrollItemSelectedEvent):void
+			{
+				cyanSlider.value = PRESET_VALUES[event.itemIndex][0];
+				effect.setProperty(CMYKEffect.CYAN_OFFSET_PROP, PRESET_VALUES[event.itemIndex][0] / 100.0);
+				
+				magentaSlider.value = PRESET_VALUES[event.itemIndex][1];
+				effect.setProperty(CMYKEffect.MAGENTA_OFFSET_PROP, PRESET_VALUES[event.itemIndex][1] / 100.0);
+				
+				yellowSlider.value = PRESET_VALUES[event.itemIndex][2];
+				effect.setProperty(CMYKEffect.YELLOW_OFFSET_PROP, PRESET_VALUES[event.itemIndex][2] / 100.0);
+				
+				blackSlider.value = PRESET_VALUES[event.itemIndex][3];
+				effect.setProperty(CMYKEffect.KEY_OFFSET_PROP, PRESET_VALUES[event.itemIndex][3] / 100.0);
+			} */
+			
+			protected function presetWheel_scrollEndEventHandler(event:Event):void
+			{
+				imageEditHost.updateCachedImage([effect.shaderFilter]);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	
+	<s:HGroup top="15" bottom="10" left="10" right="244">
+		<!-- Column one -->
+		<s:VGroup width="100%">
+			
+			<s:Label text="Cyan {cyanSlider.value > 0 ? '+' + cyanSlider.value : cyanSlider.value}" width="100%" styleName="widgetTitle" filters="{[dsfLabel]}"/>
+			<w:wStylableHSlider id="cyanSlider" skinClass="assets.skins.skinHSlider"
+							   styleName="cmykSlider"
+							   width="100%" maximum="100" minimum="-100" stepSize="1" value="0"
+							   thumbRelease="cyanSlider_thumbReleaseHandler(event)"
+							   showDataTip="false"
+							   trackStartColor="0x000000"
+							   trackEndColor="0x00AEEF"/>
+			
+			<s:Spacer height="10" />
+			
+			<s:Label text="Yellow {yellowSlider.value > 0 ? '+' + yellowSlider.value : yellowSlider.value}" width="100%" styleName="widgetTitle" filters="{[dsfLabel]}"/>
+			<w:wStylableHSlider id="yellowSlider" skinClass="assets.skins.skinHSlider"
+							   styleName="cmykSlider"
+							   width="100%" maximum="100" minimum="-100" stepSize="1" value="0"
+							   thumbRelease="yellowSlider_thumbReleaseHandler(event)"
+							   showDataTip="false"
+							   trackStartColor="0x000000"
+							   trackEndColor="0xFFF200"/>	
+		</s:VGroup>
+		
+		<!-- Column two -->
+		<s:VGroup width="100%">
+			
+			<s:Label text="Magenta {magentaSlider.value > 0 ? '+' + magentaSlider.value : magentaSlider.value}" width="100%" styleName="widgetTitle" filters="{[dsfLabel]}"/>
+			<w:wStylableHSlider id="magentaSlider" skinClass="assets.skins.skinHSlider"
+							   styleName="cmykSlider" 
+							   width="100%" maximum="100" minimum="-100" stepSize="1" value="0"
+							   thumbRelease="magentaSlider_thumbReleaseHandler(event)"
+							   showDataTip="false"
+							   trackStartColor="0x000000"
+							   trackEndColor="0xEC008C"/>
+			
+			<s:Spacer height="10" />
+			
+			<s:Label text="Black {blackSlider.value > 0 ? '+' + blackSlider.value : blackSlider.value}" width="100%" styleName="widgetTitle" filters="{[dsfLabel]}"/>
+			<w:wStylableHSlider id="blackSlider" skinClass="assets.skins.skinHSlider"
+							   styleName="cmykSlider"
+							   width="100%" maximum="100" minimum="-100" stepSize="1" value="0"
+							   thumbRelease="blackSlider_thumbReleaseHandler(event)"
+							   showDataTip="false"
+							   trackStartColor="0x000000"
+							   trackEndColor="0x231F20"/>
+		</s:VGroup>
+	</s:HGroup>		
+	
+	<!-- Column three -->
+	<s:VGroup top="84" right="12" width="217">
+		<!--<s:Label text="Color Presets" width="217" styleName="widgetTitle" filters="{dsfLabel}"/>-->
+		<s:BorderContainer skinClass="assets.skins.skinScrollWheelContainerVertical" width="217">
+			<!--<components:ScrollWheel id="presetWheel"
+									itemWidth="213" itemHeight="58" wrapAround="true" numItemsInView="3" boundaryClip="39"
+									itemRenderer="itemRenderers.LblItemRenderer"
+									selectedIndexChanged="presetWheel_selectedIndexChangedHandler(event)"
+									scrollItemSelected="presetWheel_scrollItemSelectedHandler(event)"
+									scrollEndEvent="presetWheel_scrollEndEventHandler(event)">
+				<components:contents>
+					<i:LblRendererData index="0" itemName="Original"/>
+					<i:LblRendererData index="1" itemName="Bright"/>
+					<i:LblRendererData index="2" itemName="Lively"/>
+					<i:LblRendererData index="3" itemName="Warm"/>
+					<i:LblRendererData index="4" itemName="Cool"/>
+				</components:contents>
+			</components:ScrollWheel>-->
+			<w:SpinnerListContainerWithOffset width="213" height="130"
+											  skinClass="widgets.SkinSpinnerListContainer" >
+				<s:SpinnerList id="presetWheel" selectedIndex="0" width="213"
+							   itemRenderer="itemRenderers.LblItemRenderer" 
+							   change="presetWheel_selectedIndexChangedHandler(event)">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<i:LblRendererData index="0" itemName="Original"/>
+							<i:LblRendererData index="1" itemName="Bright"/>
+							<i:LblRendererData index="2" itemName="Lively"/>
+							<i:LblRendererData index="3" itemName="Warm"/>
+							<i:LblRendererData index="4" itemName="Cool"/>
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:SpinnerList>
+			</w:SpinnerListContainerWithOffset>
+		</s:BorderContainer>
+	</s:VGroup>		
+	
+	
+	
+</MimicPlugin:ImageEditModuleUI>

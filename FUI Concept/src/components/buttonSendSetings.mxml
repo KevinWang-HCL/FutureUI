@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:widgets="widgets.*">
+	
+	<fx:Metadata>
+		[Event(name="editBtnClicked", type="flash.events.Event")]
+		[Event(name="activeStatusChanged", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.SendStore_Icons;
+			import assets.skins.skinButton;
+			
+			/* [Bindable]
+			public function get active():Boolean
+			{
+				//return btnActive.selected;
+			}
+			
+			public function set active(value:Boolean):void
+			{
+				//btnActive.selected = value;
+			} */
+			
+			private var _alignment:String = "right";
+			
+			[Bindable]
+			public function get alignment():String
+			{
+				return _alignment;
+			}
+			
+			public function set alignment(value:String):void
+			{
+				if(value == "left" || value == "right")
+				{
+					_alignment = value;
+				}
+			}
+			
+			
+			private var _titleLabel:String;
+			
+			[Bindable]
+			public function get titleLabel():String
+			{
+				return _titleLabel;
+			}
+			
+			public function set titleLabel(value:String):void
+			{
+				_titleLabel = value;
+			}
+			
+			
+			private var _emailList:String;
+			
+			[Bindable]
+			public function get emailList():String
+			{
+				return _emailList;
+			}
+			
+			public function set emailList(value:String):void
+			{
+				_emailList = value;
+			}
+			
+			private var _faxList:String;
+			
+			[Bindable]
+			public function get faxList():String
+			{
+				return _faxList;
+			}
+			
+			public function set faxList(value:String):void
+			{
+				_faxList = value;
+			}
+			
+			private var _appList:String;
+			
+			[Bindable]
+			public function get appList():String
+			{
+				return _appList;
+			}
+			
+			public function set appList(value:String):void
+			{
+				_appList = value;
+			}
+			
+			
+			protected function btnActive_selectedChangedEventHandler(event:Event):void
+			{
+				//active = !_active;
+				this.dispatchEvent(new Event("activeStatusChanged"));
+			}
+			
+			protected function btnEdit_clickHandler(event:MouseEvent):void
+			{
+				this.dispatchEvent(new Event("editBtnClicked"));
+			}
+			
+			public function setContentStrings(strings:Array):void
+			{
+				//The array passed into the function will either contains 1 or 3 elements.
+				//It'll contain 1 if there're no output destinations selected, or 3 if
+				//1 or more output destinations are selected.
+				if(strings.length > 1) 
+				{
+					noDestinationsLabel.visible = false;
+					destinationsGroup.visible = true;
+					
+					var visibleIndexes:Array = new Array();
+					
+					if(strings[0].length > 0)
+					{
+						emailLabel.text = strings[0];
+						emailRow.visible = true;
+						emailRow.includeInLayout = true;
+						visibleIndexes.push(0);
+					}
+					else
+					{
+						emailLabel.text = "";
+						emailRow.visible = false;
+						emailRow.includeInLayout = false;
+					}
+					
+					if(strings[1].length > 0)
+					{
+						faxLabel.text = strings[1];
+						faxRow.visible = true;
+						faxRow.includeInLayout = true;
+						visibleIndexes.push(1);
+					}
+					else
+					{
+						faxLabel.text = "";
+						faxRow.visible = false;
+						faxRow.includeInLayout = false;
+					}
+					
+					if(strings[2].length > 0)
+					{
+						appLabel.text = strings[2];
+						appRow.visible = true;
+						appRow.includeInLayout = true;
+						visibleIndexes.push(2);
+					}
+					else
+					{
+						appLabel.text = "";
+						appRow.visible = false;
+						appRow.includeInLayout = false;
+					}
+					
+					//Adjust the number of displayed lines for each label dependant on
+					//which type of outputs are being used and which ones have more to show.
+					switch(visibleIndexes.length)
+					{
+						case 1:
+							getLabelForIndex(visibleIndexes[0]).maxDisplayedLines = 3;
+							break;
+						case 2:
+							var labelOne:Label = getLabelForIndex(visibleIndexes[0]);
+							var labelTwo:Label = getLabelForIndex(visibleIndexes[1]);
+							
+							if(labelOne.text.length > labelTwo.text.length)
+							{
+								labelOne.maxDisplayedLines = 2;
+								labelTwo.maxDisplayedLines = 1;
+							}
+							else
+							{
+								labelOne.maxDisplayedLines = 1;
+								labelTwo.maxDisplayedLines = 2;
+							}
+							break;
+						case 3:
+							emailLabel.maxDisplayedLines = 1;
+							faxLabel.maxDisplayedLines = 1;
+							appLabel.maxDisplayedLines = 1;
+							break;
+					}
+				}
+				else
+				{
+					noDestinationsLabel.visible = true;
+					destinationsGroup.visible = false;
+					noDestinationsLabel.text = strings[0];
+				}
+			}
+			
+			private function getLabelForIndex(index:int):Label
+			{
+				switch(index)
+				{
+					case 0:
+						return emailLabel;
+					case 1:
+						return faxLabel;
+					case 2:
+						return appLabel;
+					default:
+						return null;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+<!--	<widgets:wButton id="btnEdit"
+					 left="{alignment == 'left' ? null : -40}"
+					 right="{alignment == 'left' ? -40 : null}"
+					 label=""
+					 skinClass="{buttonSkinClass}"
+					 topLeftRadius="{alignment == 'left' ? 3 : 30}"
+					 topRightRadius="{alignment == 'left' ? 30 : 3}"
+					 bottomLeftRadius="{alignment == 'left' ? 3 : 30}"
+					 bottomRightRadius="{alignment == 'left' ? 30 : 3}"
+					 textAlignment="{alignment}"
+					 width="100%" height="100%"
+					 click="btnEdit_clickHandler(event)"/>-->
+	
+	<widgets:wButton id="btnEdit"
+					 left="-40"
+					 label=""
+					 skinClass="{skinButton}"
+					 topLeftRadius="30"
+					 topRightRadius="3"
+					 bottomLeftRadius="30"
+					 bottomRightRadius="3"
+					 textAlignment="{alignment}"
+					 width="100%" height="100%"
+					 click="btnEdit_clickHandler(event)"/>
+	
+	<s:Label text="{titleLabel}" styleName="startHeader"
+			 textAlign="{alignment}"
+			 top="10" left="15" right="15"
+			 mouseEnabled="false" width="100%"/>
+	
+	<s:Label id="promptLabel" styleName="startPrompt"
+			 text="Tap to add or change settings"
+			 maxDisplayedLines="1"
+			 textAlign="{alignment}"
+			 top="42" left="15" right="15"
+			 mouseEnabled="false"/>
+	
+	<s:Rect top="72" left="15" right="15" height="1">
+		<s:fill>
+			<s:SolidColor color="0x888888"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Rect top="73" left="15" right="15" height="1">
+		<s:fill>
+			<s:SolidColor color="0xE5E5E5"/>
+		</s:fill>
+	</s:Rect>
+	
+	
+	<s:Label id="noDestinationsLabel"
+			 styleName="startSettings"
+			 textAlign="{alignment}"
+			 maxDisplayedLines="4"
+			 top="85" left="15" right="15"
+			 mouseEnabled="false" width="100%"
+			 visible="true"/>
+	
+	<s:VGroup id="destinationsGroup"
+			  visible="false"
+			  top="85" left="15" right="15" bottom="15" gap="10"
+			  mouseEnabled="false">
+		
+		<s:HGroup id="emailRow" width="100%" horizontalAlign="right" gap="10"
+				  mouseEnabled="false">
+			<s:Label id="emailLabel"
+					 styleName="startSettings"
+					 textAlign="{alignment}"
+					 maxDisplayedLines="2"
+					 mouseEnabled="false" width="80%"
+					 verticalCenter="1"/>
+			
+			<s:BitmapImage id="emailIcon"
+						   source="{SendStore_Icons.emailGrayClass}"/>
+		</s:HGroup>
+		
+		<s:HGroup id="faxRow" width="100%" horizontalAlign="right" gap="10"
+				  mouseEnabled="false" > <!-- alpha="{btnActive.selected ? 1 : 0.5}" -->
+			<s:Label id="faxLabel"
+					 styleName="startSettings"
+					 textAlign="{alignment}"
+					 maxDisplayedLines="2"
+					 mouseEnabled="false" width="80%"
+					 verticalCenter="1"/>
+			
+			<s:BitmapImage id="faxIcon"
+						   source="{SendStore_Icons.faxGrayClass}"/>	
+		</s:HGroup>
+		
+		<s:HGroup id="appRow" width="100%" horizontalAlign="right" gap="10"
+				  mouseEnabled="false">
+			<s:Label id="appLabel"
+					 styleName="startSettings"
+					 textAlign="{alignment}"
+					 maxDisplayedLines="2"
+					 mouseEnabled="false" 
+					 width="80%"
+					 verticalCenter="1"/>
+			<s:BitmapImage id="appIcon"
+						   source="{SendStore_Icons.emailGrayClass}"/>
+		</s:HGroup>
+	</s:VGroup>
+	
+	<!--<s:ToggleSwitch id="btnActive"
+					label="On" 
+					left="{alignment == 'left' ? null : 35}" right="{alignment == 'left' ? 35 : null}"
+					top="5" width="112" height="58"
+					iconPlacement="{alignment}"
+					change="btnActive_selectedChangedEventHandler(event)"
+					skinClass="assets.skins.skinToggleSwitch"/>-->
+	
+</s:Group>

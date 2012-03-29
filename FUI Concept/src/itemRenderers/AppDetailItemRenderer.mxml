@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widgets:ScrollListItemBaseRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+									xmlns:s="library://ns.adobe.com/flex/spark" 
+									xmlns:components="components.*"
+									xmlns:widgets="widgets.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import spark.components.Group;
+			override public function set data(value : Object) : void
+			{
+				super.data = value;
+				
+				if (value && value.itemData is Group)
+				{
+					trace(value.itemData);
+					removeAllElements();
+					addElement(value.itemData as Group);
+				}
+			} 
+		]]>
+	</fx:Script>
+	<widgets:states>
+		<s:State name="normal"/>
+		<s:State name="expanded"/>
+	</widgets:states>
+</widgets:ScrollListItemBaseRenderer>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Button xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark">
+	<fx:Metadata>
+		[SkinState("upseleceted")]
+		[SkinState("overseleceted")]
+		[SkinState("overdownselected")]
+		[SkinState("downseleceted")]
+		[SkinState("disabledseleceted")]
+		[SkinState("upnormal")]
+		[SkinState("overnormal")]
+		[SkinState("overdownnormal")]
+		[SkinState("downnormal")]
+		[SkinState("disablednormal")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			
+			public var keyStyle:String = "Char";
+			
+			public var keyWidth:Number = 66;
+			
+			private var _keyIcon:* = "";
+			
+			public function get keyIcon():*
+			{
+				return _keyIcon;
+			}
+			
+			public function set keyIcon(value:*):void
+			{
+				_keyIcon = value;
+				//trace("BTN: " + value);
+				//this.setStyle("icon", value);
+			}
+			
+			
+			private var _keySelected:Boolean = false;
+			
+			private var _currentState:String = "up";
+			
+			public var softKeyMenuItems:ArrayCollection = null;
+			
+			public var keyAction:String = "";
+			
+			private var _enlarge:Boolean = true;
+			[Bindable]
+			public function get enlarge():Boolean
+			{
+				return _enlarge;
+			}
+
+			public function set enlarge(value:Boolean):void
+			{
+				_enlarge = value;
+				this.invalidateSkinState();
+			}
+			
+			private var _background:Array = [];
+			[Bindable]
+			public function get background():Array
+			{
+				return _background;
+			}
+
+			public function set background(value:Array):void
+			{
+				_background = value;
+				this.invalidateSkinState();
+			}
+
+			private var _leftPadding:Number = 4;
+			[Bindable]
+			public function get leftPadding():Number
+			{
+				return _leftPadding;
+			}
+
+			public function set leftPadding(value:Number):void
+			{
+				_leftPadding = value;
+				this.invalidateSkinState();
+			}
+
+			private var _rightPadding:Number = 4;
+
+			[Bindable]
+			public function get rightPadding():Number
+			{
+				return _rightPadding;
+			}
+
+			public function set rightPadding(value:Number):void
+			{
+				_rightPadding = value;
+				this.invalidateSkinState();
+			}
+
+			
+			public var keyPathData:String = null;
+			
+			private var keyEnabled:Boolean = true;
+									
+			public function get selected() : Boolean
+			{
+				return _keySelected;
+			}
+			
+			public function set selected(keySelected:Boolean):void
+			{
+				if (keyStyle == "IconToggle")
+				{
+					_keySelected = keySelected;
+					invalidateSkinState();
+				}
+			}
+			
+			protected override function commitProperties():void
+			{
+				super.commitProperties();
+				if (enabled != keyEnabled)
+				{
+					if (enabled)
+					{
+						_currentState = "up";
+					}
+					else
+					{
+						_currentState = "disabled";
+					}
+					
+					keyEnabled = enabled;
+					callLater(invalidateSkinState);
+				}
+			}
+			
+			override protected function getCurrentSkinState():String 
+			{
+				return _keySelected ? (_currentState + "selected") : (_currentState + "normal");
+			}
+			
+			private function keyMouseOver(event:MouseEvent):void
+			{
+				if (event.buttonDown)
+				{
+					_currentState = enabled ? "overdown" : "disabled";
+					//not sure why we have to call this to force
+					//skin state change, others will trigger state change automatically
+				}
+				else
+				{
+					_currentState = enabled ? "over" : "disabled";
+				}
+				invalidateSkinState();
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:mouseDown>
+		<![CDATA[
+		_currentState = enabled ? "down" : "disabled";
+		]]>
+	</s:mouseDown>
+	<s:mouseOver>keyMouseOver(event)
+	</s:mouseOver>
+	<s:mouseUp>
+		<![CDATA[
+		_currentState = enabled ? "up" : "disabled";
+		]]>
+	</s:mouseUp>
+	<s:mouseOut>
+		<![CDATA[
+		_currentState = enabled ? "up" : "disabled";
+		]]>
+	</s:mouseOut>
+	<s:rollOut>
+		<![CDATA[
+		_currentState = enabled ? "up" : "disabled";
+		//not sure why we have to call this to force
+		//skin state change, others will trigger state change automatically
+		invalidateSkinState();
+		]]>
+	</s:rollOut>
+</s:Button>

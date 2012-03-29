@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark"
+				xmlns:widgets="widgets.*"
+				autoDrawBackground="false" cacheAsBitmap="true" 
+				height="{widgets.SkinSpinnerListContainer.selectionIndicatorHeight}">
+	<fx:Script>
+		<![CDATA[
+			import widgets.SkinSpinnerListContainer;
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal"/>
+	</s:states>
+	
+	<!--Adds a solid divide between the first and last items-->
+	<s:Line width="{this.width + 1}" top="0" visible="{data.index == 0}">
+		<s:stroke>
+			<s:SolidColorStroke color="0x444444" weight="1" caps="square" pixelHinting="true" />
+		</s:stroke>
+	</s:Line>
+	
+	<s:HGroup paddingLeft="10" paddingRight="10" height="100%"
+			  gap="10" horizontalAlign="{data.itemName != null ? 'center' : 'left'}" verticalAlign="middle">
+		
+		<widgets:wLayeredImage images="{data.image}"
+							   xAlignment="{wLayeredImage.CENTRE}"
+							   yAlignment="{wLayeredImage.MIDDLE}"
+							   width="32" height="32"/>
+		
+		<s:Label text="{data.itemName}"
+				 textAlign="left"
+				 maxDisplayedLines="1"
+				 color="#333333"/>					
+	</s:HGroup>
+</s:ItemRenderer>

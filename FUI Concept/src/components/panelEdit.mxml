@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark"
+					  xmlns:w="widgets.*"
+					  currentState="pluginSelection"
+					  backgroundColor="0x000000"
+					  backgroundAlpha="0.5"
+					  initialize="group1_initializeHandler(event)"
+					  addedToStage="onAddedToStage(event)"
+				      left="0" right="0" height="{requiredPluginUIHeight}">
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.Textures;
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Metadata>
+		[Event(name="backBtnClicked", type="flash.events.Event")]
+		[Event(name="pluginUIHeightChanged", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<s:states>
+		<s:State name="pluginSelection"/>
+		<s:State name="pluginSelected"/>
+	</s:states>
+	
+	<fx:Script>
+		<![CDATA[
+			import widgets.wNavigationBar;
+			import MimicPlugin.ImageEditModuleUI;
+			import MimicPlugin.ImageEditPlugin;
+			
+			import assets.embedded.General_Icons;
+			import assets.embedded.Sounds;
+			
+			import mimicViewComponent.ImageEditPluginList;
+			import mimicViewComponent.ImageEditView;
+			import mimicViewComponent.MimicViewer;
+			
+			import mx.core.UIComponent;
+			import mx.events.FlexEvent;
+			
+			import widgets.wButton;
+			
+			public static const PLUGIN_SELECTION_STATE:String = "pluginSelection";
+			public static const PLUGIN_SELECTED_STATE:String = "pluginSelected";
+			
+			public static const MAX_PLUGIN_UI_HEIGHT:Number = 290;
+			public static const PLUGIN_SELECTOR_GROUP_HEIGHT:Number = 120;
+			
+			private var _mimicViewRef:MimicViewer;
+			private var _pluginList:ImageEditPluginList;
+			private var currentPlugin:ImageEditPlugin;
+			private var currentUI:ImageEditModuleUI;
+
+			public function get mimicViewReference():MimicViewer
+			{
+				return _mimicViewRef;
+			}
+			
+			public function set mimicViewReference(value:MimicViewer):void
+			{
+				_mimicViewRef = value;
+			}
+			
+			private var _navBarRef:wNavigationBar;
+			
+			public function set navBarReference(ref:wNavigationBar):void
+			{
+				_navBarRef = ref;	
+			}
+			
+			private var _requiredPluginUIHeight:Number = 0;
+			
+			[Bindable]
+			public function get requiredPluginUIHeight():Number
+			{
+				return _requiredPluginUIHeight;
+			}
+			
+			public function set requiredPluginUIHeight(value:Number):void
+			{
+				_requiredPluginUIHeight = value;
+			}
+			
+			protected function btnFinish_clickHandler(event:MouseEvent):void
+			{
+				this.dispatchEvent(new Event("backBtnClicked"));
+			}
+			
+			protected function btnBack_clickHandler(event:MouseEvent):void
+			{
+				if(currentPlugin)
+				{
+					var btn:wButton;
+					//Loop through every button to check the effect due to the fact that
+					//plugins can affect the effects of the other plugins, therefore each
+					//button and its corresponding plugin must be checked.
+					for(var i:int = 0; i < pluginButtonContainer.numElements; i++)
+					{
+						btn = pluginButtonContainer.getElementAt(i) as wButton;
+						///btn.indicatorOn = _pluginList.getPluginAt(i).getEditModule().hasActiveEffects();
+						btn.setStyle("indicator", _pluginList.getPluginAt(i).getEditModule().hasActiveEffects());
+					}
+					
+					_mimicViewRef.imageEditView.setActiveEditModule(null);
+					pluginUIGroup.removeElement(currentUI);
+					currentUI = null;
+					currentPlugin = null;
+					_navBarRef.popNavStage();
+				}
+				requiredPluginUIHeight = PLUGIN_SELECTOR_GROUP_HEIGHT;
+				this.dispatchEvent(new Event("pluginUIHeightChanged"));
+				this.currentState = PLUGIN_SELECTION_STATE;
+				this.invalidateSkinState();
+			}
+			
+			public function returnToPluginSelection():void
+			{
+				if(currentPlugin)
+				{
+					var btn:wButton;
+					//Loop through every button to check the effect due to the fact that
+					//plugins can affect the effects of the other plugins, therefore each
+					//button and its corresponding plugin must be checked.
+					for(var i:int = 0; i < pluginButtonContainer.numElements; i++)
+					{
+						btn = pluginButtonContainer.getElementAt(i) as wButton;
+						btn.indicatorOn = _pluginList.getPluginAt(i).getEditModule().hasActiveEffects();
+					}
+					
+					_mimicViewRef.imageEditView.setActiveEditModule(null);
+					pluginUIGroup.removeElement(currentUI);
+					currentUI = null;
+					currentPlugin = null;
+					_navBarRef.popNavStage();
+				}
+				requiredPluginUIHeight = PLUGIN_SELECTOR_GROUP_HEIGHT;
+				this.dispatchEvent(new Event("pluginUIHeightChanged"));
+				this.currentState = PLUGIN_SELECTION_STATE;
+				this.invalidateSkinState();
+			}
+			
+			protected function onAddedToStage(event:Event):void
+			{
+				if(currentUI)
+				{
+					pluginUIGroup.removeElement(currentUI);
+					currentUI = null;
+					currentPlugin = null;
+				}
+				requiredPluginUIHeight = PLUGIN_SELECTOR_GROUP_HEIGHT;
+				this.dispatchEvent(new Event("pluginUIHeightChanged"));
+				this.currentState = PLUGIN_SELECTION_STATE;
+			}
+			
+			protected function group1_initializeHandler(event:FlexEvent):void
+			{
+				var pluginList:ImageEditPluginList = _mimicViewRef.pluginList;
+				this._pluginList = pluginList;
+				for(var i:int = 0; i < pluginList.numPlugins; i++)
+				{
+					var newBtn:wButton = new wButton();
+					newBtn.width = 150;
+					newBtn.height = 100;
+					newBtn.cornerRadius = 3;
+					newBtn.setStyle("iconPlacement", "top");
+					newBtn.setStyle("icon", pluginList.getPluginAt(i).getIcon());
+					newBtn.label = pluginList.getPluginAt(i).getName();
+					newBtn.hasIndicator = true;
+					newBtn.indicatorOn = false;
+					newBtn.addEventListener(MouseEvent.CLICK, function(evt:Event):void {
+						setCurrentPlugin(evt.target.label);
+						_navBarRef.pushNavStage({id:"pluginNavBtn", label:currentPlugin.getName(), icon:null, clickHandler:null});
+					});
+					pluginButtonContainer.addElement(newBtn); 
+				}
+				
+				requiredPluginUIHeight = PLUGIN_SELECTOR_GROUP_HEIGHT;
+			}
+			
+			private function setCurrentPlugin(pluginLabel:String):void
+			{
+				currentPlugin = null;
+				for(var i:int = 0; i < _pluginList.numPlugins; i++)
+				{
+					if(_pluginList.getPluginAt(i).getName() == pluginLabel)
+					{
+						currentPlugin = _pluginList.getPluginAt(i);
+						var imv:ImageEditView = mimicViewReference.imageEditView;
+						imv.setActiveEditModule(currentPlugin.getEditModule());
+						break;
+					}
+				}
+				
+				if(currentPlugin)
+				{
+					currentUI = currentPlugin.getEditModuleUI();
+					pluginUIGroup.addElementAt(currentUI, 0);
+					requiredPluginUIHeight = currentUI.requiredHeight;
+					this.currentState = PLUGIN_SELECTED_STATE;
+					this.dispatchEvent(new Event("pluginUIHeightChanged"));
+				}
+			}
+			
+			protected function btnReset_clickHandler(event:MouseEvent):void
+			{
+				if(currentPlugin)
+					currentPlugin.getEditModule().reset();
+			}
+			
+			public function resetUIState():void
+			{
+				var btn:wButton;
+				//Loop through each plugin button and reset its indicator state
+				for(var i:int = 0; i < pluginButtonContainer.numElements; i++)
+				{
+					btn = pluginButtonContainer.getElementAt(i) as wButton;
+					if(btn)
+						btn.setStyle("indicator", false);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:Group id="pluginUIGroup"
+			 width="100%" height="100%"
+			 visible.pluginSelection="false"
+			 visible.pluginSelected="true">
+		
+<!--		<w:wButton id="btnBack" label="Back" 
+				  right="10" top="10"
+				  width="120" height="58"
+				  styleName="green" cornerRadius="3"
+				  mouseDown="Sounds.soundClick();" 
+				  click="btnBack_clickHandler(event)"/>-->
+		
+		<s:HGroup id="boxNavigation" gap="1"
+				  top="10" right="10">
+			
+			<w:wButton id="btnReset"
+					   width="58" height="58"
+					   icon="{General_Icons.undoClass}" 
+					   mouseDown="Sounds.soundClick();" click="btnReset_clickHandler(event)"
+					   skinClass="assets.skins.skinButton" topLeftRadius="3" bottomLeftRadius="3"/>
+			
+			<w:wButton id="btnEditBack" label="Back"
+					   top="0" width="159" height="58"
+					   mouseDown="Sounds.soundClick();" click="btnBack_clickHandler(event)"
+					   skinClass="assets.skins.skinButton" styleName="green" topRightRadius="3" bottomRightRadius="3"/>
+		</s:HGroup>
+	</s:Group>
+	
+	<s:Group width="100%" height="100%"
+			 visible.pluginSelection="true"
+			 visible.pluginSelected="false" left="10" top="10" right="10" >
+		<s:Group id="pluginButtonContainer"
+				 horizontalCenter="0">
+			 <s:layout>
+				<s:HorizontalLayout gap="10"/>
+			</s:layout> 
+		</s:Group>
+	</s:Group>
+	
+	<!--<w:wButton id="btnFinish" label="Exit"
+			   visible.pluginSelection="true"
+			   visible.pluginSelected="false"
+				  top="10" right="10" 
+				  width="150" height="100"
+				  styleName="green" cornerRadius="3"
+				  mouseDown="Sounds.soundClick();" 
+				  click="btnFinish_clickHandler(event)"/>-->
+</s:BorderContainer>

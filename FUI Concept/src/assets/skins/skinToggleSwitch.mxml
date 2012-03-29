@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" alpha.disabled="0.5">
+	<!-- host component -->
+	<fx:Metadata>
+		[HostComponent("spark.components.ToggleSwitch")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.Widget_Images;
+		]]>
+	</fx:Script>
+	
+	<!-- states -->
+	<s:states>
+		<s:State name="disabledAndSelected" stateGroups="selected" />
+		<s:State name="downAndSelected" stateGroups="selected" />
+		<s:State name="overAndSelected" stateGroups="selected" />
+		<s:State name="upAndSelected" stateGroups="selected" />
+		<s:State name="disabled" stateGroups="unselected" />
+		<s:State name="down" stateGroups="unselected" />
+		<s:State name="over" stateGroups="unselected" />
+		<s:State name="up" stateGroups="unselected" />
+	</s:states>
+	
+	<!-- SkinParts
+	name=iconDisplay, type=spark.primitives.BitmapImage, required=false
+	name=labelDisplay, type=spark.core.IDisplayText, required=false
+	name=track, type=mx.core.IVisualElement, required=false
+	name=thumb, type=mx.core.IVisualElement, required=false
+	-->
+	
+	<!--*** Transitions ***-->
+	<s:transitions>
+		<s:Transition autoReverse="true" fromState="*" toState="upAndSelected">
+			<s:Parallel duration="250" hideFocusRing="true">
+				<s:AnimateColor target="{gradientStatus0}" />
+				<s:AnimateColor target="{gradientStatus1}" />
+			</s:Parallel>			
+		</s:Transition>
+	</s:transitions>
+	
+	<s:Group>
+		<s:Rect id="track" height="59" width="112" 
+				top="0" left="0" bottom="0" right="0" radiusX="30">
+			<s:fill>
+				<s:LinearGradient rotation="90" >
+					<s:GradientEntry id="gradientStatus0" color="0x646464" color.selected="0x3793D0" ratio="0"/>
+					<s:GradientEntry id="gradientStatus1" color="0x7E7E7E" color.selected="0x3DA6EA" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			
+			<s:stroke>
+				<s:LinearGradientStroke rotation="90" weight="1">
+					<s:GradientEntry color="0x808080" ratio="0"/>
+					<s:GradientEntry color="0xF0F0F0" ratio="1"/>
+				</s:LinearGradientStroke>
+			</s:stroke>
+		</s:Rect>
+		
+		<!-- Tick Icon -->
+		<s:Group id="tick" verticalCenter="0" left="15" >
+<!--				 left="{String(hostComponent.getStyle('iconPlacement')) == 'left' ?  null : 15}"
+				 right="{String(hostComponent.getStyle('iconPlacement')) == 'left' ? 15 : null}">-->
+			<s:Line x="11" y="3" xTo="18" yFrom="18">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="0xFFFFFF" joints="round" miterLimit="4" weight="6" pixelHinting="true"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:Line x="3" y="9" xFrom="12" yFrom="12">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="0xFFFFFF" joints="miter" miterLimit="4" weight="6" pixelHinting="true"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:filters>
+				<s:DropShadowFilter alpha="0.8" angle="90" blurX="2" blurY="2" color="0x000000" distance="0"
+									hideObject="false" inner="false" knockout="false" quality="1" strength="1"/>
+			</s:filters>
+		</s:Group>
+		
+		<!-- Cross Icon -->
+		<s:Group id="cross" verticalCenter="0" right="15">
+<!--				 left="{String(hostComponent.getStyle('iconPlacement')) == 'left' ? 15 : null}"
+				 right="{String(hostComponent.getStyle('iconPlacement')) == 'left' ? null : 15}">-->
+			<s:Line x="3" y="3" xTo="18" yFrom="18">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#FFFFFF" joints="round" miterLimit="4" weight="6" pixelHinting="true"/>
+				</s:stroke>
+			</s:Line>
+			<s:Line x="3" y="3" xFrom="18" yFrom="18">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#FFFFFF" joints="miter" miterLimit="4" weight="6" pixelHinting="true"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:filters>
+				<s:DropShadowFilter alpha="0.8" angle="90" blurX="2" blurY="2" color="0x000000" distance="0"
+									hideObject="false" inner="false" knockout="false" quality="1" strength="1"/>
+			</s:filters>
+		</s:Group>
+		
+		
+		<s:filters>
+			<s:BevelFilter angle="-90" blurX="1" blurY="1" distance="1"
+						   knockout="false" quality="1" strength="1" type="inner"
+						   highlightAlpha="0.8" highlightColor="0xFFFFFF" shadowAlpha="0.4" shadowColor="0x000000"/>
+			
+			<s:DropShadowFilter angle="90" alpha="0.25" blurX="4" blurY="4" color="0x000000" distance="0" quality="1" strength="1" inner="true" />
+		</s:filters>
+	</s:Group>
+	
+	
+	<s:BitmapImage id="thumb" source="{Widget_Images.toggleSwitchClass}" width="62" height="62"/>
+	
+</s:Skin>

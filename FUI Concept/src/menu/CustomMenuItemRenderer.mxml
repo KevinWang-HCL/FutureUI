@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				autoDrawBackground="false" width="{CUSTOM_MENU_ITEM_WIDTH}">
+	
+	<fx:Script>
+		<![CDATA[
+			public static const CUSTOM_MENU_ITEM_WIDTH:uint = 100;
+		]]>
+	</fx:Script>
+	
+	<!-- states -->      
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="selected" />
+	</s:states>
+	
+	<!-- *** Defines a menu option button *** -->
+	
+	<!-- Button Area -->
+	<!--- @private -->
+	<s:Rect id="rectLabelArea" left="2" right="0" top="3" bottom="3" radiusX="3" height="58">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0xF0F0F0" color.selected="0x48C2F6" ratio="0"/>
+				<s:GradientEntry color="0xDDDDDD" color.selected="0x3EA5DD" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:BevelFilter excludeFrom="selected" angle="90" blurX="1" blurY="1" distance="1" highlightAlpha="0.8"
+						   highlightColor="0xFFFFFF" highlightColor.selected="0XD2F2FF" knockout="false" quality="1"
+						   shadowAlpha="0.4" shadowColor="0x000000" strength="1" type="inner"
+						   angle.selected="-90" distance.selected="0" 
+						   shadowAlpha.selected="0.3"/>
+			<s:DropShadowFilter angle="90" alpha="0.8" blurX="2" blurY="2"
+								color="0x000000" distance="1" distance.selected="0" quality="2" strength="1" />
+		</s:filters>
+	</s:Rect>
+	
+	<!-- Label -->
+	<!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay  -->
+	<s:Label id="labelDisplay" styleName="keypad" text="{data.@label}"
+			 maxDisplayedLines="1"
+			 horizontalCenter="0" verticalCenter="1"
+			 left="10" right="10" top="2" bottom="2"/>
+	
+</s:ItemRenderer>

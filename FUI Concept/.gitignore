@@ -1,0 +1,3 @@
+./bin-debug/Main-app.xml
+./bin-release-temp/*
+./bin-debug/*

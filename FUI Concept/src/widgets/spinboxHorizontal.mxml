@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:x="components.*" xmlns:widgets="widgets.*" >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.Sounds;
+			
+			private var _value:Number = 1;
+			
+			[Bindable]
+			public function get value():Number
+			{
+				return _value;
+			}
+			
+			public function set value(newValue:Number):void
+			{
+				_value = newValue;
+				this.dispatchEvent(new Event("valueChangedEvent"));
+			}
+			
+			
+			private var _minimum:Number = 1;
+			
+			[Bindable]
+			public function get minimum():Number
+			{
+				return _minimum;
+			}
+			
+			public function set minimum(value:Number):void
+			{
+				_minimum = value;
+			}			
+			
+			
+			private var _maximum:Number = 100;
+			
+			[Bindable]
+			public function get maximum():Number
+			{
+				return _maximum;
+			}
+			
+			public function set maximum(value:Number):void
+			{
+				_maximum = value;
+			}
+			
+			
+			private var _label:String;
+			
+			[Bindable]
+			public function get label():String
+			{
+				return _label;
+			}
+			
+			public function set label(value:String):void
+			{
+				_label = value;
+			}
+			
+			
+			/* 			protected function formatCopyCount (value:Number):String {
+			var strCopyCount:String = String(value);
+			
+			for(var n:Number = 0; strCopyCount.length < 4; n++ ){
+			strCopyCount = '0' + strCopyCount;
+			}
+			
+			return strCopyCount;
+			} */
+			
+			protected function btnValue_clickHandler(event:MouseEvent):void
+			{
+				this.dispatchEvent(new Event("valueSelectedEvent"));
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Metadata>
+		[Event(name="valueChangedEvent", type="flash.events.Event")]
+		[Event(name="valueSelectedEvent", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<s:Group left="0" right="0" top="0" bottom="0">
+		<s:layout>
+			<s:VerticalLayout gap="1" />
+		</s:layout>
+		
+		<widgets:wButton id="btnValue" left="0" right="0" top="0" width="100%" height="50%"
+						 skinClass="assets.skins.skinButton" topLeftRadius="3" topRightRadius="3"
+						 mouseDown="Sounds.soundClick();" click="btnValue_clickHandler(event);"
+						 label="{spinValue.value + ' ' + label}" styleName="value"/>
+		
+		<s:Spinner id="spinValue" left="0" right="0" bottom="0" width="100%" height="50%"
+				   skinClass="assets.skins.skinSpin"
+				   value="@{this.value}" minimum="{this.minimum}" maximum="{this.maximum}" stepSize="1"/>
+	</s:Group>
+	
+</s:Group>

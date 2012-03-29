@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widgets:ScrollListItemBaseRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+									xmlns:s="library://ns.adobe.com/flex/spark"
+									xmlns:components="components.*"
+									currentState="normal" xmlns:widgets="widgets.*"
+									autoDrawBackground="false" creationComplete="init()" width="100%">
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.SendStore_Icons;
+			
+			// Details data to bind to
+			private var _strFullName:String = '';
+			
+			[Bindable]
+			public function get strFullName():String
+			{
+				return _strFullName;
+			}
+			
+			public function set strFullName(value:String):void
+			{
+				_strFullName = value;
+			}
+			
+			private var _strJobDetails:String = '';
+			
+			[Bindable]
+			public function get strJobDetails():String
+			{
+				return _strJobDetails;
+			}
+			
+			public function set strJobDetails(value:String):void
+			{
+				_strJobDetails = value;
+			}		
+			
+			// Construct XML data into combined strings
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				init();
+			}
+			
+			protected function init():void
+			{
+				// Set Full Name
+				strFullName = data.itemData.forename + ' ';
+				if (data.itemData.initials != null) strFullName += data.itemData.initials + ' ';
+				strFullName += data.itemData.surname;
+				
+				// Set Job Details
+				strJobDetails = '';
+				if (data.itemData.jobTitle != null) strJobDetails += data.itemData.jobTitle + '.  ';
+				if (data.itemData.department != null) strJobDetails += data.itemData.department + '.  ';
+				if (data.itemData.company != null) strJobDetails += data.itemData.company + '.';
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<widgets:states>
+		<s:State name="normal"/>
+		<s:State name="expanded"/>
+	</widgets:states>
+	
+	
+	
+	<!-- *** Always displayed list item *** -->
+	<s:Group top="0" height="58" left="0" width="100%" cacheAsBitmap="true">
+		
+		<s:Rect top="0" left="0" right="0" height="58" >
+			<s:fill>
+				<s:LinearGradient>
+					<s:GradientEntry color="0xEEEEEE" ratio="0"/>
+					<s:GradientEntry color="0xFFFFFF" ratio="1"/>							
+				</s:LinearGradient>							
+			</s:fill>
+		</s:Rect>		
+		
+		
+		<s:BitmapImage id="icon" top="0" width="{ITEM_HEIGHT}" left="0" height="{ITEM_HEIGHT}" 
+					   source="{data.userData}/{data.itemData.imageName}.jpg" smooth="true"/>
+		<s:Label id="labelDisplay" top="0" height="{ITEM_HEIGHT}" left="72" right="10"
+				 textAlign="left" verticalAlign="middle" backgroundAlpha="0"/>
+		
+		<!--Dividing lines to give effect of a button - low cost to performance --> 
+		<s:Rect top="0" left="0" right="0" height="1" >
+			<s:fill>
+				<s:SolidColor color="0xFFFFFF" />
+			</s:fill>
+		</s:Rect>
+		
+		<s:Rect bottom="0" left="0" right="0" height="1" >
+			<s:fill>
+				<s:SolidColor color="0x888888" />
+			</s:fill>
+		</s:Rect>	
+	</s:Group>
+	
+	
+	<!-- *** Only displayed in the expanded state *** -->
+	<s:Group id="expandedItem" top="{ITEM_HEIGHT}" left="0" right="0" includeIn="expanded" creationComplete="expandedItemCreateCompleted(event)">
+		<!-- Background -->
+		<s:Group  top="0" bottom="0" left="0" right="0">
+			<s:Rect id="rectButton" top="0" bottom="0" left="0" right="0">
+				<s:fill>
+					<s:SolidColor color="0xD6D9DC" />
+				</s:fill>
+			</s:Rect>
+			
+			<s:filters>
+				<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="0x000000" distance="0" inner="true" quality="2" strength="1"/>
+			</s:filters>
+		</s:Group>
+		
+		<s:VGroup top="10" bottom="10" left="20" right="20" gap="8">
+			<s:Label text="{strFullName}" includeInLayout="{strFullName != null}"  styleName="detailsHeader"/>
+			
+			<s:Label text="{strJobDetails}" includeInLayout="{strJobDetails != null}"  styleName="details" width="100%"/>	
+			
+			<s:HGroup width="100%" gap="5" verticalAlign="bottom">
+				<s:BitmapImage source="{SendStore_Icons.phoneClass}" includeInLayout="{data.itemData.phone != null}"/>
+				<s:Label text="{data.itemData.phone}" includeInLayout="{data.itemData.phone != null}"
+						 styleName="details" maxDisplayedLines="2"/>
+				<s:Spacer width="10"/>
+				<s:BitmapImage source="{SendStore_Icons.faxGrayClass}" includeInLayout="{data.itemData.fax != null}"/>
+				<s:Label text="{data.itemData.fax}"
+						 styleName="details"/>					
+			</s:HGroup>
+			
+			<s:HGroup  width="100%" gap="5" verticalAlign="bottom">
+				<s:BitmapImage source="{SendStore_Icons.emailGrayClass}" />
+				<s:Label text="{data.itemData.e_mail}"  includeInLayout="{data.itemData.e_mail != null}"
+						 styleName="details"/>				
+			</s:HGroup>
+		</s:VGroup>
+	</s:Group>
+	
+</widgets:ScrollListItemBaseRenderer>

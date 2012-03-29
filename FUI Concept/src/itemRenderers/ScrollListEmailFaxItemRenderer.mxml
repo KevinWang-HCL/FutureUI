@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widgets:ScrollListItemBaseRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+									xmlns:s="library://ns.adobe.com/flex/spark"
+									xmlns:w="widgets.*"
+									xmlns:components="components.*"
+									mouseChildren="true" 
+									currentState="normal" xmlns:widgets="widgets.*"
+									autoDrawBackground="false" width="100%">
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.SendStore_Icons;
+			
+			import mx.events.FlexEvent;
+			
+			import widgets.ScrollListItemBaseRenderer;
+			
+			private function checkBoxSelectionChanged(button:wToggleButton, selected:Boolean):void
+			{
+				button.selected = selected;
+				button.invalidateSkinState();
+			}
+			
+			protected function emailFaxchangeHandler(event:Event):void
+			{
+				if (event.target == email) 
+				{
+					data.email = email.selected;
+					emailFieldLabel.visible = email.selected;
+					if (!email.selected && !fax.selected) 
+					{
+						callLater(checkBoxSelectionChanged, [fax, true]);
+					}
+				} else {
+					data.fax = fax.selected;
+					if (!fax.selected && !email.selected) 
+					{
+						callLater(checkBoxSelectionChanged, [email, true]);
+						emailFieldLabel.visible = true;
+					}
+				} 
+			}
+			
+			protected function emailRecipientFieldBar_selectedIndexChangedEventHandler(event:Event):void
+			{
+				data.emailSendType = emailRecipientFieldBar.buttonAt(emailRecipientFieldBar.selectedIndex).label;
+				//emailFieldLabel.text = emailRecipientFieldBar.buttonAt(emailRecipientFieldBar.selectedIndex).label;
+			} 
+			
+			protected function emailRecipientFieldBar_creationCompleteHandler(event:FlexEvent):void
+			{
+				if(emailRecipientFieldBar)
+				{
+					emailRecipientFieldBar.selectedIndex = (data.emailSendType == "To") ? 0 : ((data.emailSendType == "Cc") ? 1 : 2);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<widgets:states>
+		<s:State name="normal"/>
+		<s:State name="expanded"/>
+	</widgets:states>
+	
+	
+	<!-- *** Always displayed list item *** -->
+	<s:Group top="0" height="58" left="0" right="0" cacheAsBitmap="true">
+		
+		<s:Rect top="0" left="0" right="0" height="58" >
+			<s:fill>
+				<s:LinearGradient>
+					<s:GradientEntry color="0xEEEEEE" ratio="0"/>
+					<s:GradientEntry color="0xFFFFFF" ratio="1"/>							
+				</s:LinearGradient>							
+			</s:fill>
+		</s:Rect>	
+		
+		<s:BitmapImage id="icon" top="0" height="58" width="58"
+					   source="{data.userData}/{data.itemData.imageName}.jpg"/>
+		<s:Label id="labelDisplay" top="0" height="58" left="72" right="10"
+				 textAlign="left" verticalAlign="middle" backgroundAlpha="0"/>
+		
+		<!--Dividing lines to give effect of a button - low cost to performance --> 
+		<s:Rect top="0" left="0" right="0" height="1" >
+			<s:fill>
+				<s:SolidColor color="0xFFFFFF" />
+			</s:fill>
+		</s:Rect>
+		
+		<s:Rect bottom="0" left="0" right="0" height="1" >
+			<s:fill>
+				<s:SolidColor color="0x888888" />
+			</s:fill>
+		</s:Rect>
+		
+		<s:HGroup bottom="1" right="10" gap="3" verticalAlign="bottom">
+			<s:Label id="emailFieldLabel" styleName="icon" bottom="0"
+					 includeInLayout="{Boolean(data.email)}" visible="{Boolean(data.email)}"
+					 text="{data.emailSendType}"/>
+			
+			<s:BitmapImage source="{SendStore_Icons.emailGrayClass}" width="34"
+						   includeInLayout="{Boolean(data.email)}" visible="{Boolean(data.email)}"/>
+			<s:Spacer width="10" includeInLayout="{Boolean(data.fax)}" visible="{Boolean(data.fax)}" />
+			<s:BitmapImage source="{SendStore_Icons.faxGrayClass}" width="33"
+						   includeInLayout="{Boolean(data.fax)}" visible="{Boolean(data.fax)}"/>
+		</s:HGroup>
+	</s:Group>
+	
+	
+	<!-- *** Only displayed in the expanded state *** -->
+	<s:Group id="expandedItem" top="58" height="140" left="0" right="0"
+			 includeIn="expanded" creationComplete="expandedItemCreateCompleted(event)"
+			 mouseChildren="true">
+		
+		<!-- Background -->
+		<s:Group  top="0" bottom="0" left="0" right="0">
+			<s:Rect id="rectButton" top="0" bottom="0" left="0" right="0">
+				<s:fill>
+					<s:SolidColor color="0xD6D9DC" />
+				</s:fill>
+			</s:Rect>
+			
+			<s:filters>
+				<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="0x000000" distance="0" inner="true" quality="2" strength="1"/>
+			</s:filters>
+		</s:Group>
+		
+		<s:HGroup top="10" bottom="10" left="10" right="10" gap="10" >
+			<s:Group width="50%" height="100%">				
+				<w:wToggleButtonBar id="emailRecipientFieldBar" height="63" width="100%" top="58" cornerRadius="3"
+									selectedIndexChangedEvent="emailRecipientFieldBar_selectedIndexChangedEventHandler(event)"
+									alpha="{Boolean(data.email) ? 1 : 0.5}" styleName="toggleButtonCenter"
+									initialize="emailRecipientFieldBar_creationCompleteHandler(event)">
+					<w:Buttons>
+						<fx:Object label="To"/>
+						<fx:Object label="Cc"/>
+						<fx:Object label="Bcc"/>
+					</w:Buttons>
+				</w:wToggleButtonBar>
+				
+				<w:wToggleButton id="email" height="58" width="100%" top="0"
+								 label="Email" selected="@{data.email}"
+								 icon="{SendStore_Icons.emailWhiteClass}" textAlignment="left"
+								 selectedChangedEvent="emailFaxchangeHandler(event)" mouseChildren="false"
+								 cornerRadius="0" topLeftRadius="3" topRightRadius="3"/>
+			</s:Group>
+			
+			<w:wToggleButton id="fax" height="58" width="50%" label="Fax" selected="@{data.fax}"
+							 selectedChangedEvent="emailFaxchangeHandler(event)" mouseChildren="false"
+							 icon="{SendStore_Icons.faxWhiteClass}" textAlignment="left"
+							 cornerRadius="3"/>				
+		</s:HGroup>
+	</s:Group>
+	
+</widgets:ScrollListItemBaseRenderer>

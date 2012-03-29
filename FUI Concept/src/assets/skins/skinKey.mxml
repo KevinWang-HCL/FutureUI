@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkButtonSkin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+				   minWidth="58" minHeight="58" 
+				   alpha.disabled="0.5"
+				   initialize="sparkbuttonskin1_initializeHandler(event)"
+				   stateChangeComplete="sparkbuttonskin1_stateChangeCompleteHandler(event)">
+	
+	<fx:Metadata> 
+		[HostComponent("spark.components.supportClasses.SkinnableComponent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import widgets.ButtonKeyboard;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			private var src:* = null;
+			[Bindable]
+			public function get source():*
+			{
+				return src;
+			}
+			
+			public function set source(value:*):void
+			{
+				src = value;
+			}
+			
+			private var _downFill:LinearGradient;
+			private var _normalFill:LinearGradient;
+			
+			private var _backgroundColour:ArrayCollection = new ArrayCollection([0xFFFFFF, 0xDDDDDD]);
+			[Bindable]
+			private var _backgroundColourDown:ArrayCollection = new ArrayCollection([0x3DA6EA, 0x3793D0]);
+			[Bindable]
+			public function get backgroundColour():ArrayCollection
+			{
+				return _backgroundColour;
+			}
+			
+			public function set backgroundColour(value:ArrayCollection):void
+			{
+				_backgroundColour = value;
+				_normalFill = createLinearGradientFill(value[0], value[1]);
+			}
+			
+			private var _enlargeOnClick:Boolean = true;
+			[Bindable]
+			public function get enlargeOnClick():Boolean
+			{
+				return _enlargeOnClick;
+			}
+			
+			public function set enlargeOnClick(value:Boolean):void
+			{
+				_enlargeOnClick = value;
+			}
+			
+			private var _leftPadding:int = 4;
+			[Bindable]
+			public function get leftPadding():int
+			{
+				return _leftPadding;
+			}
+
+			public function set leftPadding(value:int):void
+			{
+				_leftPadding = value;
+			}
+
+			private var _rightPadding:int = 4;
+			[Bindable]
+			public function get rightPadding():int
+			{
+				return _rightPadding;
+			}
+
+			public function set rightPadding(value:int):void
+			{
+				_rightPadding = value;
+			}
+			
+			private function createLinearGradientFill(topColour:uint, bottomColour:uint):LinearGradient
+			{
+				var grad:LinearGradient = new LinearGradient();
+				
+				var top:GradientEntry = new GradientEntry(topColour, 0.0);
+				var bottom:GradientEntry = new GradientEntry(bottomColour, 1.0);
+				grad.entries = [top, bottom];
+				grad.rotation = 90;
+				return grad;
+			}
+			
+			protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				var host:ButtonKeyboard = hostComponent as ButtonKeyboard;
+				if( host.keyIcon )
+					source = host.keyIcon;
+				
+				enlargeOnClick = host.enlarge;
+				backgroundColour = new ArrayCollection(host.background);
+				leftPadding = host.leftPadding;
+				
+				if(this.currentState.search("selected") != -1 || this.currentState.search("down") != -1)
+				{
+					rectLabelArea.fill = _downFill;
+				}
+				else
+				{
+					rectLabelArea.fill = _normalFill;
+				}
+				
+				if(leftPadding == 0)
+				{
+					rectLabelArea.bottomLeftRadiusX = 0;
+					rectLabelArea.topLeftRadiusX = 0;
+				}
+				
+				rightPadding = host.rightPadding;
+				
+				if(rightPadding == 0)
+				{
+					rectLabelArea.bottomRightRadiusX = 0;
+					rectLabelArea.topRightRadiusX = 0;
+				}
+				
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			protected function sparkbuttonskin1_initializeHandler(event:FlexEvent):void
+			{
+				_downFill = createLinearGradientFill(0x3DA6EA, 0x3793D0);
+			}
+			
+			protected function sparkbuttonskin1_stateChangeCompleteHandler(event:FlexEvent):void
+			{
+				this.invalidateDisplayList();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<!-- states -->
+	<s:states>
+		<s:State name="upnormal" stateGroups="normal, up"/>
+		<s:State name="overnormal" stateGroups="normal, over"/>
+		<s:State name="downnormal" stateGroups="normal, down"/>
+		<s:State name="overdownnormal" stateGroups="normal, down, over"/>
+		<s:State name="disablednormal" stateGroups="normal, disabled"/>
+		<s:State name="upselected" stateGroups="selected, up"/>
+		<s:State name="overselected" stateGroups="selected, over"/>
+		<s:State name="downselected" stateGroups="selected, down"/>
+		<s:State name="disabledselected" stateGroups="selected, disabled"/>
+	</s:states>
+	
+	<!-- Button Area -->
+	<!--- @private -->
+	<s:Rect id="rectLabelArea" 
+			left="{leftPadding}" right="{rightPadding}" 
+			top="3" top.down="{ enlargeOnClick ? -50 : 3}" 
+			bottom="3" 
+			topLeftRadiusX="3" topRightRadiusX="3"
+			bottomLeftRadiusX="3" bottomRightRadiusX="3">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="{backgroundColour.getItemAt(0) as uint}" color.overnormal="0x48C2F6" color.downnormal="{_backgroundColourDown.getItemAt(0)}" ratio="0"/>
+				<s:GradientEntry color="{backgroundColour.getItemAt(1) as uint}" color.overnormal="0x3EA5DD" color.downnormal="{_backgroundColourDown.getItemAt(1)}" ratio="1"/>
+				<!--<s:GradientEntry color="0xF0F0F0" color.overnormal="0x48C2F6" color.downnormal="0x3DA6EA" color.selected="0x3DA6EA" ratio="0"/>
+				<s:GradientEntry color="0xDDDDDD" color.overnormal="0x3EA5DD" color.downnormal="0x3793D0" color.selected="0x3793D0" ratio="1"/>-->
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:BevelFilter excludeFrom="downnormal" angle="90" blurX="1" blurY="1" distance="1" highlightAlpha="0.8"
+						   highlightColor="0xFFFFFF" highlightColor.overnormal="0XD2F2FF" knockout="false" quality="1"
+						   shadowAlpha="0.4" shadowColor="0x000000" strength="1" type="inner"
+						   angle.downnormal="-90" distance.downnormal="0" highlightColor.downnormal="0x97DEFF" shadowAlpha.downnormal="0.3"/>
+			<s:DropShadowFilter angle="90" alpha="0.8" blurX="2" blurY="2"
+								color="0x000000" distance="1" distance.downnormal="0" quality="2" strength="1" />
+		</s:filters>
+	</s:Rect>
+	
+	<s:BitmapImage source="{source}" horizontalCenter="0" verticalCenter="0"/>
+	<!--<s:BitmapImage id="iconDisplay" horizontalCenter="0" verticalCenter="0"/>-->
+	
+	<!-- Label -->
+	<!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay  -->
+	<s:Label id="labelDisplay" styleName="keyboard"
+			 maxDisplayedLines="1" color.down="0x000000"
+			 horizontalCenter="0" verticalCenter.down="{ enlargeOnClick ? -50 : 3}" verticalCenter="1"
+			 left="10" right="10" top="2" bottom="2">
+	</s:Label>
+	
+	<s:Rect top="0" bottom="0" left="0" right="0" alpha="0">
+		<s:fill>
+			<s:SolidColor color="0x000000" />
+		</s:fill>
+	</s:Rect>
+	
+</s:SparkButtonSkin>

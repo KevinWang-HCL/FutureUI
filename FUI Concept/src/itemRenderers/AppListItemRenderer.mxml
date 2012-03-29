@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widgets:ScrollListItemBaseRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:components="components.*"
+					xmlns:widgets="widgets.*">
+	
+	<fx:Script>
+		<![CDATA[
+		]]>
+	</fx:Script>
+	<widgets:states>
+		<s:State name="normal"/>
+		<s:State name="expanded"/>
+	</widgets:states>
+	
+	<!-- *** Always displayed list item *** -->
+	<s:Group top="0" height="58" left="0" width="100%" cacheAsBitmap="true">
+		<s:Rect top="0" left="0" right="0" height="58" >
+			<s:fill>
+				<s:LinearGradient>
+					<s:GradientEntry color="0xEEEEEE" ratio="0"/>
+					<s:GradientEntry color="0xFFFFFF" ratio="1"/>							
+				</s:LinearGradient>							
+			</s:fill>
+		</s:Rect>	
+		
+		<s:BitmapImage id="icon" top="0" width="58" left="0" height="58" 
+					   source="{data.itemData.image}"/>
+		<s:Label id="labelDisplay" top="0" height="58" left="72" right="10"
+				 textAlign="left" verticalAlign="middle" backgroundAlpha="0"/>
+		
+		<!--Dividing lines to give effect of a button - low cost to performance --> 
+		<s:Rect top="0" left="0" right="0" height="1" >
+			<s:fill>
+				<s:SolidColor color="0xFFFFFF" />
+			</s:fill>
+		</s:Rect>
+		
+		<s:Rect bottom="0" left="0" right="0" height="1" >
+			<s:fill>
+				<s:SolidColor color="0x888888" />
+			</s:fill>
+		</s:Rect>	
+	</s:Group>
+		
+</widgets:ScrollListItemBaseRenderer>

@@ -1,0 +1,92 @@
+<?xml version="1.0" ?>
+<rows>
+	<setting keyEnlargeHeight="111" keyboardPaddingTop="5" />
+
+	<row indent="2" height="64">
+		<key label="1" style="Char" width="78" icon="" action="Key" />
+		<key label="2" style="Char" width="78" icon="" action="Key" />
+		<key label="3" style="Char" width="78" icon="" action="Key" />
+		<key label="4" style="Char" width="78" icon="" action="Key" />
+		<key label="5" style="Char" width="78" icon="" action="Key" />
+		<key label="6" style="Char" width="78" icon="" action="Key" />
+		<key label="7" style="Char" width="78" icon="" action="Key" />
+		<key label="8" style="Char" width="78" icon="" action="Key" />
+		<key label="9" style="Char" width="78" icon="" action="Key" />
+		<key label="0" style="Char" width="78" icon="" action="Key" />
+		<key label="-" style="Char" width="78" icon="" action="Key" />
+		<key label="=" style="Char" width="78" icon="" action="Key" />
+		<key label="" style="Icon" width="84" icon="Delete" action="Delete"
+			background="0xD5D5D5,0xB5B5B5" enlarge="false" />
+	</row>
+	<row indent="42" height="64">
+		<key label="q" style="Char" width="78" icon="" action="Key" />
+		<key label="w" style="Char" width="78" icon="" action="Key" />
+		<key label="e" style="Char" width="78" icon="" action="Key" />
+		<key label="r" style="Char" width="78" icon="" action="Key" />
+		<key label="t" style="Char" width="78" icon="" action="Key" />
+		<key label="y" style="Char" width="78" icon="" action="Key" />
+		<key label="u" style="Char" width="78" icon="" action="Key" />
+		<key label="i" style="Char" width="78" icon="" action="Key" />
+		<key label="o" style="Char" width="78" icon="" action="Key" />
+		<key label="p" style="Char" width="78" icon="" action="Key" />
+		<key label="[" style="Char" width="78" icon="" action="Key" />
+		<key label="]" style="Char" width="78" icon="" action="Key" />
+	</row>
+	<row indent="2" height="64">
+		<key label="" style="IconToggle" width="84" icon="CapsLock"
+			action="CapsLock" background="0xD5D5D5,0xB5B5B5" enlarge="false" />
+		<key label="a" style="Char" width="78" icon="" action="Key" />
+		<key label="s" style="Char" width="78" icon="" action="Key" />
+		<key label="d" style="Char" width="78" icon="" action="Key" />
+		<key label="f" style="Char" width="78" icon="" action="Key" />
+		<key label="g" style="Char" width="78" icon="" action="Key" />
+		<key label="h" style="Char" width="78" icon="" action="Key" />
+		<key label="j" style="Char" width="78" icon="" action="Key" />
+		<key label="k" style="Char" width="78" icon="" action="Key" />
+		<key label="l" style="Char" width="78" icon="" action="Key" />
+		<key label=";" style="Char" width="78" icon="" action="Key" />
+		<key label="@" style="Char" width="78" icon="" action="Key" />
+		<key label="#" style="Char" width="78" icon="" action="Key" />
+	</row>
+	<row indent="2" height="64">
+		<key label="" style="IconToggle" width="118" icon="Shift" action="Shift"
+			background="0xD5D5D5,0xB5B5B5" enlarge="false" />
+		<key label="z" style="Char" width="78" icon="" action="Key" />
+		<key label="x" style="Char" width="78" icon="" action="Key" />
+		<key label="c" style="Char" width="78" icon="" action="Key" />
+		<key label="v" style="Char" width="78" icon="" action="Key" />
+		<key label="b" style="Char" width="78" icon="" action="Key" />
+		<key label="n" style="Char" width="78" icon="" action="Key" />
+		<key label="m" style="Char" width="78" icon="" action="Key" />
+		<key label="," style="Char" width="78" icon="" action="Key" />
+		<key label="." style="Char" width="78" icon="" action="Key" />
+		<key label="?" style="Char" width="78" icon="" action="Key" />
+		<key label="" style="CombiLeft" width="61" icon="Left" action="MoveLeft"
+			rightPadding="0" enlarge="false" />
+		<key label="" style="CombiRight" width="61" icon="Right" action="MoveRight"
+			leftPadding="0" enlarge="false" />
+	</row>
+	<row indent="2" height="64">
+		<key label="" style="Icon" width="100" icon="Lang-ENG" action="Lang-ENG"
+			background="0xD5D5D5,0xB5B5B5" enlarge="false" />
+		<key label="" style="Icon" width="78" icon="Symbols" action="Symbols"
+			background="0xD5D5D5,0xB5B5B5" enlarge="false" />
+		<key label="\" style="Char" width="78" icon="" action="Key" />
+		<key label="/" style="Char" width="78" icon="" action="Key" />
+		<key label=" " style="NoEnlarge" width="296" icon="" action="Key"
+			enlarge="false" />
+		<key label="xerox" style="CombiLeft" width="160" icon="" action="SubDomain"
+			rightPadding="0" enlarge="false" />
+		<key label=".com" style="CombiRight" width="100" icon="" action="Key"
+			leftPadding="0" enlarge="false">
+			<menu>
+				<menuitem label=".com" default="yes" />
+				<menuitem label=".net" />
+				<menuitem label=".org" />
+				<menuitem label=".co.uk" />
+			</menu>
+		</key>
+		<key label="Enter" style="Enter" width="130" icon="" action="Enter"
+			background="0xD5D5D5,0xB5B5B5" enlarge="false" />
+	</row>
+</rows>

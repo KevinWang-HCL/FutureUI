@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark">
+	<!-- host component -->
+	<fx:Metadata>
+		<![CDATA[
+		[HostComponent("spark.components.SkinnableContainer")]
+		]]>
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			private const cornerRadius:Number = 3;
+			private const bowAmount:Number = 4;
+			
+			import spark.filters.*;
+			
+			[Bindable]
+			private var dsfWheel:DropShadowFilter = new spark.filters.DropShadowFilter(1, 90, 0, 0.2, 8, 1, 1, 1, false);
+		]]>
+	</fx:Script>
+	
+	<!-- states -->
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	
+	<!--- Defines the appearance of the SkinnableContainer class's background. -->
+	
+	<!--	*** Create a bowed border to make the wheel look more 3D ***
+	
+	/-  -\
+	|    |
+	\    /
+	/    \
+	|    |
+	\-  -/
+	
+	
+	Segment Types
+	
+	Close path
+	Z/z
+	n/a
+	Z
+	
+	Closes off the path.
+	
+	Cubic Bezier
+	C/c
+	c1X c1Y c2X c2Y x y
+	C 45 50 20 30 10 20
+	
+	Curve to (10, 20), with the first control point at (45, 50) and the second control point at (20, 30).
+	
+	Cubic Bezier (without control points)
+	S/s
+	c2X c2Y x y
+	S 20 30 10 20
+	
+	Curve to (10, 20), with the second control point at (20, 30). The first control point is assumed to be the reflection of the second control point on the previous command relative to the current point.
+	
+	Horizontal line
+	H/h
+	x
+	H 100
+	
+	Horizontal line to 100.
+	
+	Line
+	L/l
+	x y
+	L 50 30
+	
+	Line to (50, 30).
+	
+	Move 
+	M/m
+	x y
+	M 10 20
+	
+	Move pen position to (10, 20).
+	
+	Quadratic Bezier
+	Q/q
+	cX cY x y
+	Q 110 45 90 30
+	
+	Curve to (90, 30) with the control point at (110, 45).
+	
+	Quadratic Bezier (without control points)
+	T/t
+	x y
+	T 90 30
+	
+	Curve to (90, 30). The control point is the reflection of the control point on the previous command relative to the current point.
+	
+	Vertical line
+	V/v
+	y
+	V 100
+	
+	Vertical line to 100.
+	-->
+	
+	<s:Path id="background" filters="{dsfWheel}" 
+			data="	M0 {cornerRadius}
+			S0 0  {cornerRadius} 0
+			L{(this.width-cornerRadius)} 0   
+			S{this.width} 0  {this.width} {cornerRadius}
+			Q{(this.width-bowAmount)} {(int(this.height/2))}  {this.width} {(this.height-cornerRadius)}
+			S{this.width} {this.height}  {(this.width-cornerRadius)} {this.height}  
+			L{cornerRadius} {this.height}
+			S0 {(this.height-cornerRadius)}  0 {this.height}
+			Q{bowAmount} {(int(this.height/2))}  0 {cornerRadius}Z">			
+		<s:fill>
+			<s:SolidColor color="0x303030"/>
+		</s:fill>
+	</s:Path>
+	
+	<s:Group id="contentGroup" left="2" right="2" top="2" bottom="1"/>
+	
+</s:Skin>

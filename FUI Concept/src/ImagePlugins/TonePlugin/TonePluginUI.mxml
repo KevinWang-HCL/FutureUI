@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MimicPlugin:ImageEditModuleUI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							   xmlns:s="library://ns.adobe.com/flex/spark" xmlns:MimicPlugin="MimicPlugin.*" width="400" height="300" xmlns:widgets="widgets.*">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			
+			override public function get requiredHeight():Number
+			{
+				return 78;
+			}
+			
+			protected function toneButtonBar_selectedIndexChangedEventHandler(event:Event):void
+			{
+				(imageEditModule as ToneModule).setToneEffect(toneButtonBar.selectedIndex);
+			}
+			
+			public override function reset():void
+			{
+				toneButtonBar.selectedIndex = 0;
+			}
+		]]>
+	</fx:Script>
+	
+	<widgets:wToggleButtonBar id="toneButtonBar"
+							  top="10" left="10"
+							  height="58"
+							  cornerRadius="3"
+							  selectedIndexChangedEvent="toneButtonBar_selectedIndexChangedEventHandler(event)">
+		<widgets:Buttons>
+			<fx:Object label="Original"/>
+			<fx:Object label="Sepia"/>
+			<fx:Object label="Grayscale"/>
+		</widgets:Buttons>
+	</widgets:wToggleButtonBar>
+</MimicPlugin:ImageEditModuleUI>

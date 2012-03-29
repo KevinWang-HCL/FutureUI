@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:xw="widgets.*"
+		 top="0" left="0" right="0">
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.embedded.General_Icons;
+			import assets.embedded.Sounds;
+			
+			protected function btnHome_clickHandler(event:MouseEvent):void
+			{
+				this.dispatchEvent(new Event("homePressEvent"));
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Metadata>
+		[Event(name="homePressEvent", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<!--*** Navigation Bar ***-->
+	<!--	<s:Button id="btnNav2" label="3rd Level" height="58" top="0" left="{btnHome.width + btnNav1.width}"
+	skinClass="assets.skins.skinButtonNav"
+	mouseDown="Sounds.soundClick();"/>-->
+	
+	<s:Button id="btnNav1" label="Scan Document" height="58" x="{btnHome.width}"
+			  skinClass="assets.skins.skinButtonNav"
+			  mouseDown="Sounds.soundClick();"/>
+	<s:Button id="btnHome" label="" icon="{General_Icons.homeClass}" height="58" top="0" left="0"
+			  skinClass="assets.skins.skinButtonNav"
+			  mouseDown="Sounds.soundClick();"
+			  click="btnHome_clickHandler(event)"/>
+</s:Group>

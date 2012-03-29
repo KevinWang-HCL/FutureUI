@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:x="components.*"
+		 xmlns:w="widgets.*"
+		 width="100%" height="100%"
+		 initialize="group1_initializeHandler(event)">
+	
+	<fx:Metadata>
+		[Event(name="optionChangedEvent", bubbles=true, type="flash.events.Event")]
+		[Event(name="backBtnClicked", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			public static const EMAIL_OPTION:String = "email";
+			public static const FAX_OPTION:String = "fax";
+			
+			protected function group1_initializeHandler(event:FlexEvent):void
+			{
+				this.addEventListener("optionChangedEvent", onOptionChangedEventHandler);
+			}
+			
+			protected function onOptionChangedEventHandler(event:Event):void
+			{
+				var newOption:String = (leftView.activeView as optionNavView).selectedOption;
+				(rightView.activeView as contentNavView).currentState = (newOption == EMAIL_OPTION) ? "emailState" : "faxState";
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<fx:Component className="optionNavView">
+			<s:View width="100%" height="100%"
+					actionBarVisible="false"
+					backgroundColor="0xB1BAC0">
+				
+				<fx:Script>
+					<![CDATA[
+						import assets.embedded.SendStore_Icons;
+						import assets.embedded.Sounds;
+						
+						import flash.events.Event;
+						
+						import mx.core.FlexGlobals;
+						import mx.events.FlexEvent;
+						[Bindable]
+						public var selectedOption:String = "a";
+						
+						protected function optionSelectionBar_selectedIndexChangedEventHandler(event:Event):void
+						{
+							if(optionSelectionBar.selectedIndex == 0)
+								selectedOption = panelSendOptions.EMAIL_OPTION;
+							else
+								selectedOption = panelSendOptions.FAX_OPTION;
+							this.dispatchEvent(new Event('optionChangedEvent', true));
+						}
+						
+					]]>
+				</fx:Script>
+				
+				<s:layout>
+					<s:VerticalLayout gap="1"/>
+				</s:layout>
+				
+				<w:wButton id="btnBack" label="Back"
+						   width="100%" height="58"
+						   mouseDown="Sounds.soundClick();" 
+						   click="this.dispatchEvent(new Event('backBtnClicked', true));"
+						   skinClass="assets.skins.skinButton" styleName="green"/>
+				<!--<w:wButton id="a" 
+						   label="Email"
+						   width="100%" height="58"
+						   click="selectedOption = FUIEmailOptionsNew.EMAIL_OPTION; this.dispatchEvent(new Event('optionChangedEvent', true));"/>
+				<w:wButton id="b"
+						   label="Fax"
+						   width="100%" height="58"
+						   click="selectedOption = FUIEmailOptionsNew.FAX_OPTION; this.dispatchEvent(new Event('optionChangedEvent', true));"/>-->
+				<w:wToggleButtonBar id="optionSelectionBar"
+									orientation="{wToggleButtonBar.VERTICAL_ORIENTATION}"
+									width="100%" height="116"
+									selectedIndex="0"
+									selectedIndexChangedEvent="optionSelectionBar_selectedIndexChangedEventHandler(event)">
+					<w:Buttons>
+						<fx:Object label="Email" icon="{SendStore_Icons.emailWhiteClass}"/>
+						<fx:Object label="Fax" icon="{SendStore_Icons.faxWhiteClass}"/> 
+					</w:Buttons>
+				</w:wToggleButtonBar>
+			</s:View>
+		</fx:Component>
+		
+		<fx:Component className="contentNavView">
+			<s:View width="100%" height="100%"
+					actionBarVisible="false"
+					backgroundColor="0xD6D9DC">
+				<fx:Script>
+					<![CDATA[
+						import mx.core.FlexGlobals;
+						
+						protected function cbCopyFromEmail_clickHandler(event:MouseEvent):void
+						{
+							if(cbCopyFromEmail.selected)
+							{
+								faxSendSubject.text = emailSendSubject.text;
+								faxSendMessage.text = emailSendMessage.text;
+							}
+							else
+							{
+								faxSendSubject.text = "";
+								faxSendMessage.text = "";
+							}
+						}
+						
+						protected function cbCopyFromEmail_changeHandler(event:Event):void
+						{
+							if(cbCopyFromEmail.selected)
+							{
+								faxSendSubject.text = emailSendSubject.text;
+								faxSendMessage.text = emailSendMessage.text;
+							}
+							else
+							{
+								faxSendSubject.text = "";
+								faxSendMessage.text = "";
+							}
+						}
+						
+					]]>
+				</fx:Script>
+				
+				<s:states>
+					<s:State name="emailState"/>
+					<s:State name="faxState"/>
+				</s:states>
+				
+				<s:Group includeIn="emailState"
+						 top="30" bottom="30"
+						 left="30" right="30">
+					
+					<s:layout>
+						<s:VerticalLayout gap="20"/>
+					</s:layout>
+					
+					<s:Group id="emailSubjectRow" width="100%">
+						<s:layout>
+							<s:HorizontalLayout gap="10"/>
+						</s:layout>
+						<s:Label id="emailSubjectLabel"
+								 text="Subject"
+								 width="15%" top="30"
+								 textAlign="right"/>
+						<s:TextInput id="emailSendSubject" 
+									 prompt=" "
+									 top="0" left="0" 
+									 width="85%" height="58"
+									 skinClass="assets.skins.skinTextInput"
+									 focusAlpha="0"
+									 creationComplete="FlexGlobals.topLevelApplication.softKeyboard.addHostTextComponent(emailSendSubject)"/>
+						
+					</s:Group>
+					
+					<s:Group id="emailMessageRow" width="100%">
+						<s:layout>
+							<s:HorizontalLayout gap="10"/>
+						</s:layout>
+						
+						<s:Label id="emailMessageLabel"
+								 text="Message"
+								 width="15%" top="30"
+								 textAlign="right"/>
+						
+						<s:TextArea id="emailSendMessage" 
+									top="0" left="0" 
+									width="85%" height="232" 
+									skinClass="assets.skins.skinTextInput"
+									prompt=" "
+									focusAlpha="0"
+									creationComplete="FlexGlobals.topLevelApplication.softKeyboard.addHostTextComponent(emailSendMessage)"/>
+					</s:Group>
+				</s:Group>
+					
+				<s:Group includeIn="faxState"
+						 top="30" bottom="30"
+						 left="30" right="30">
+					
+					<s:layout>
+						<s:VerticalLayout gap="20"/>
+					</s:layout>
+					
+					<s:Group id="faxSubjectRow" width="100%">
+						<s:layout>
+							<s:HorizontalLayout gap="10"/>
+						</s:layout>
+						<s:Label id="faxSubjectLabel"
+								 text="Subject"
+								 width="15%" height="58"
+								 textAlign="right"/>
+						<s:TextInput id="faxSendSubject" 
+									 prompt=" "
+									 top="0" left="0" 
+									 width="85%" height="58"
+									 skinClass="assets.skins.skinTextInput"
+									 focusAlpha="0"
+									 creationComplete="FlexGlobals.topLevelApplication.softKeyboard.addHostTextComponent(faxSendSubject)"/>
+					</s:Group>
+					
+					<s:Group id="faxMessageRow" width="100%">
+						<s:layout>
+							<s:HorizontalLayout gap="10"/>
+						</s:layout>
+						
+						<s:Label id="faxMessageLabel"
+								 text="Message"
+								 width="15%" height="58"
+								 textAlign="right"/>
+						
+						<s:TextArea id="faxSendMessage" 
+									top="0" left="0" 
+									width="85%" height="232" 
+									skinClass="assets.skins.skinTextInput"
+									prompt=" "
+									focusAlpha="0"
+									creationComplete="FlexGlobals.topLevelApplication.softKeyboard.addHostTextComponent(faxSendMessage)"/>
+					</s:Group>
+					
+					<s:Group id="faxCopyEmailRow" width="100%">
+						<s:layout>
+							<s:HorizontalLayout gap="10"/>
+						</s:layout>
+						
+						<s:Label id="faxCopyEmailLabel"
+								 text="Same as Email"
+								 width="15%" height="58"
+								 textAlign="right"/>
+						<!--<s:CheckBox id="cbCopyFromEmail" 
+									label="" 
+									click="cbCopyFromEmail_clickHandler(event)"/>-->
+						<s:ToggleSwitch id="cbCopyFromEmail"
+										label=""
+										change="cbCopyFromEmail_changeHandler(event)"
+										skinClass="assets.skins.skinToggleSwitch"/>
+					</s:Group>
+				</s:Group>
+					
+					<!--<s:Form top="0" left="0" 
+							width="100%" height="100%"
+							backgroundAlpha="0.0">
+						<s:FormItem top="0" left="0" 
+									label="Subject"
+									width="100%" height="81"
+									backgroundColor="0xCCCCCC">
+							<s:TextInput id="formEmailSendSubject" 
+										 prompt=" "
+										 top="0" left="0" 
+										 width="100%" height="58"
+										 skinClass="assets.skins.skinTextInput"
+										 focusAlpha="0"
+										 creationComplete="FlexGlobals.topLevelApplication.softKeyboard.addHostTextComponent(formEmailSendSubject)"/>
+						</s:FormItem>
+						<s:FormItem top="0" left="0" 
+									label="Message"
+									color="#FFFFFF"
+									textAlign="center"
+									filters="{dsfLabel}"
+									width="100%" height="253"
+									backgroundColor="0xCCCCCC">
+							<s:TextArea id="formEmailSendMessage" 
+										top="0" left="0" 
+										width="100%" height="232" 
+										skinClass="assets.skins.skinTextInput"
+										prompt=" "
+										focusAlpha="0"
+										creationComplete="FlexGlobals.topLevelApplication.softKeyboard.addHostTextComponent(formEmailSendMessage)"/>
+						</s:FormItem>
+					</s:Form>-->
+				
+				<!--<s:Group width="90%" height="100%" 
+						 includeIn="faxState"
+						 horizontalCenter="0">
+					<s:Form top="0" left="0" 
+							width="100%" height="596"
+							backgroundColor="0xCCCCCC">
+						<s:FormItem top="0" left="0" 
+									label="Subject" 
+									width="100%" height="81"
+									backgroundColor="0xCCCCCC">
+							<s:TextInput id="formFaxSendSubject"  
+										 top="0" left="0" 
+										 width="100%" height="58" 
+										 skinClass="assets.skins.skinTextInput"
+										 prompt=" "
+										 focusAlpha="0"
+										 creationComplete="FlexGlobals.topLevelApplication.softKeyboard.addHostTextComponent(formFaxSendSubject)"/>
+						</s:FormItem>
+						<s:FormItem top="0" left="0" 
+									label="Message" 
+									width="100%" height="253"
+									backgroundColor="0xCCCCCC">
+							<s:TextArea id="formFaxSendMessage" 
+										top="0" left="0" 
+										width="100%" height="232"
+										skinClass="assets.skins.skinTextInput"
+										prompt=" "
+										focusAlpha="0"
+										creationComplete="FlexGlobals.topLevelApplication.softKeyboard.addHostTextComponent(formFaxSendMessage)"/>
+						</s:FormItem>
+						<s:FormItem width="346"
+									backgroundColor="0xCCCCCC">
+							<s:CheckBox id="cbCopyFromEmail" 
+										label="Same as Email" 
+										click=""/>
+						</s:FormItem>
+					</s:Form>
+				</s:Group>-->
+			</s:View>
+		</fx:Component>
+	</fx:Declarations>
+	
+	<s:SplitViewNavigator id="splitView" width="100%" height="100%">
+		<s:layout>
+			<s:HorizontalLayout gap="1"/>
+		</s:layout>
+		
+		<s:ViewNavigator id="leftView" width="25%" height="100%" firstView="components.optionNavView"/>
+		<s:ViewNavigator id="rightView" width="75%" height="100%" firstView="components.contentNavView"/>
+	</s:SplitViewNavigator>
+	
+</s:Group>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:xw="widgets.*"
+		 xmlns:mimicViewComponent="mimicViewComponent.*"
+		 stateChangeComplete="group1_stateChangeCompleteHandler(event)"
+		 resize="group1_resizeHandler(event)"
+		 addedToStage="group1_addedToStageHandler(event)">
+	
+	<s:states>
+		<s:State name="viewMimic"/>
+		<s:State name="viewEditImage"/>
+	</s:states>
+	
+	<fx:Metadata>
+		[Event(name="mimicStateChanged", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import MimicPlugin.ImageEditModule;
+			import MimicPlugin.ImageEditPlugin;
+			import MimicPlugin.ImageEditSettings;
+			
+			import assets.embedded.Side_Icons;
+			
+			import integration.CopySettings;
+			import integration.SettingsMap;
+			
+			import mimicViewComponent.FinishingView;
+			import mimicViewComponent.MimicViewer;
+			
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			
+			
+			public static const MIMIC_VIEW_STATE:String = "viewMimic";
+			public static const EDIT_VIEW_STATE:String = "viewEditImage";
+			
+			protected function mimicView_mimicViewValidatedEventHandler(event:Event):void
+			{
+			}
+			
+			public function get mimicViewComponent():MimicViewer
+			{
+				return mimicView;
+			}
+			
+			protected function group1_stateChangeCompleteHandler(event:FlexEvent):void
+			{
+				if(this.currentState == MIMIC_VIEW_STATE)
+				{
+					if(mimicView.currentState = MimicViewer.EDIT_STATE)
+						applyEditStateSettings();
+					mimicView.currentState = MimicViewer.MIMIC_STATE;
+				}
+				else
+					mimicView.currentState = MimicViewer.EDIT_STATE;
+				
+				this.dispatchEvent(new Event("mimicStateChanged"));
+			}
+			
+			private function applyEditStateSettings():void
+			{
+				var editSettings:SettingsMap = ImageEditSettings.createAndInitialiseSettingsMap();
+				
+				for(var i:int = 0; i < mimicView.pluginList.numPlugins; i++)
+				{
+					var currModule:ImageEditModule = mimicView.pluginList.getPluginAt(i).getEditModule();
+					currModule.applyOutputSettings(editSettings);
+				}
+				var edgeErase:Array = editSettings.get(ImageEditSettings.SETTING_EDGE_CROP);
+				trace(edgeErase[0]*25.4 + ", " + edgeErase[1]*25.4 + ", " + 
+					edgeErase[2]*25.4 + ", " + edgeErase[3]*25.4);
+				CopySettings.get().set(CopySettings.EDGE_ERASE, [edgeErase[0]*25.4, edgeErase[1]*25.4,
+																 edgeErase[2]*25.4, edgeErase[3]*25.4]);
+			}
+			
+			protected function group1_resizeHandler(event:ResizeEvent):void
+			{
+				mimicView.height = this.height;
+			}
+			
+			protected function bbScanSides_selectedIndexChangedEventHandler(event:Event):void
+			{
+				if(bbScanSides.selectedIndex == 0)
+					CopySettings.get().set(CopySettings.INPUT_SIDES, 1);
+				else
+					CopySettings.get().set(CopySettings.INPUT_SIDES, 2);
+			}
+			
+			protected function group1_addedToStageHandler(event:Event):void
+			{
+				stage.addEventListener(FinishingView.MIMIC_CLICK_EVENT, onMimicClick);
+			}
+			
+			protected function onMimicClick(event:Event):void
+			{
+				if(mimicView.currentState == MimicViewer.MIMIC_STATE)
+				{
+					this.currentState = EDIT_VIEW_STATE;
+					mimicView.imageEditView.image.restoreImagePositionAndScale();
+				}
+				else
+				{
+					mimicView.invalidateMimicTexture();
+					mimicView.invalidateMimicView();
+					this.currentState = panelSource.MIMIC_VIEW_STATE;
+					//this.height = 542 - panelOutputSettings.height;
+				}
+			}
+			
+		]]>
+	</fx:Script>	
+	
+	<mimicViewComponent:MimicViewer id="mimicView"
+									top="0" left="0" right="0"
+									mimicViewValidatedEvent="mimicView_mimicViewValidatedEventHandler(event)"/>
+	<!--click="mimicView_clickHandler(event)"-->
+	
+	<s:VGroup verticalCenter="0" left="20">
+		<s:Label id="lblScanSides" text="Original Sides" top="50" left="25" textAlign="left" fontSize="22" includeIn="viewMimic"/>
+		<xw:wToggleButtonBar id="bbScanSides" left="20" top="75"
+							 width="150" height="58"
+							 selectedIndex="1" cornerRadius="3"
+							 includeIn="viewMimic"
+							 selectedIndexChangedEvent="bbScanSides_selectedIndexChangedEventHandler(event)"
+							 addedToStage="bbScanSides.selectedIndex = CopySettings.get().get(CopySettings.INPUT_SIDES) - 1;">
+			<xw:Buttons>
+				<fx:Object index="0" label="" icon="{Side_Icons.oneSidedClass}" />
+				<fx:Object index="1" label="" icon="{Side_Icons.twoSidedClass}" />
+			</xw:Buttons>
+		</xw:wToggleButtonBar>
+	</s:VGroup>
+	
+	<!--<s:VGroup verticalCenter="0" right="20" horizontalAlign="right">
+		<s:Label id="lblScanOrientation" text="Original Orientation" top="50" right="25" textAlign="left" fontSize="22" includeIn="viewMimic"/>
+		<xw:wToggleButtonBar id="bbScanOrientation" right="20" top="75"
+							 width="150" height="58"
+							 selectedIndex="0" cornerRadius="3"
+							 includeIn="viewMimic">
+			<xw:Buttons>
+				<fx:Object index="0" label="" icon="{Orientation_Icons.landscapeClass}" />
+				<fx:Object index="1" label="" icon="{Orientation_Icons.portraitClass}" />		
+			</xw:Buttons>
+		</xw:wToggleButtonBar>
+	</s:VGroup>-->
+	
+</s:Group>

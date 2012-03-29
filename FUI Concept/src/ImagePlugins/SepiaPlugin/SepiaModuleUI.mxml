@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MimicPlugin:ImageEditModuleUI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							   xmlns:s="library://ns.adobe.com/flex/spark" 
+							   xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:MimicPlugin="MimicPlugin.*" width="100%" height="100%">
+	
+	<fx:Script>
+		<![CDATA[
+			import MimicPlugin.ImageEffect;
+			private var effect:ImageEffect;
+			
+			protected function applyEffectBtn_clickHandler(event:MouseEvent):void
+			{
+				trace(applyEffectBtn.selected);
+				if(applyEffectBtn.selected)
+				{
+					effect = imageEditModule.createImageEffect();
+					imageEditHost.applyImageEffect(effect);
+				}
+				else
+					imageEditHost.removeImageEffect(effect);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:ToggleButton id="applyEffectBtn"
+					x="20" y="20"
+					width="200" height="100"
+					label="Apply"
+					click="applyEffectBtn_clickHandler(event)"/>
+	
+</MimicPlugin:ImageEditModuleUI>

@@ -1,0 +1,29 @@
+<AddressBook>
+  <imagePath>assets/images/addressbook</imagePath>
+  <contact>
+    <forename>Abhinav</forename>
+    <initials/>
+    <surname>Sharma</surname>
+    <display>Sharma, Abhinav</display>
+    <imageName>Abhinav_Sharma</imageName>
+    <jobTitle/>
+    <company>HCL</company>
+    <department>Software Systems</department>
+    <e_mail>abhinav.sharma@hcl.com</e_mail>
+    <phone>+44 170 735 3152</phone>
+    <fax>+44 170 735 3424</fax>
+  </contact>
+  <contact>
+    <forename>Alistair</forename>
+    <initials/>
+    <surname>McFarlane</surname>
+    <display>McFarlane, Alistair</display>
+    <imageName>Alistair_McFarlane</imageName>
+    <jobTitle/>
+    <company>HCL</company>
+    <department>Office Products Delivery Unit</department>
+    <e_mail>alistair.mcfarlane@hcl.com</e_mail>
+    <phone>+44 1707 352601</phone>
+    <fax>+44 170 735 3424</fax>
+  </contact>
+</AddressBook>
